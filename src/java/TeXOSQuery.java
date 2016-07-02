@@ -259,7 +259,7 @@ public class TeXOSQuery
          {
             i++;
 
-            if (i < args.length)
+            if (i >= args.length)
             {
                System.err.println(
                  String.format("filename expected after %s", args[i-1]));
@@ -272,7 +272,7 @@ public class TeXOSQuery
          {
             i++;
 
-            if (i < args.length)
+            if (i >= args.length)
             {
                System.err.println(
                  String.format("filename expected after %s", args[i-1]));
