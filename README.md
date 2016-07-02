@@ -19,11 +19,14 @@ Test document.
 
 \input{|"texosquery --pdfdate \jobname.tex"}
 
+\input{|"texosquery --cwd"}
+
+\input{|"texosquery --filesize \jobname.tex"}
 
 \end{document}
 ```
 
-The bash script in bin/texosquery just provides a convenient way
+The bash script in `bin/texosquery` just provides a convenient way
 of calling `java -jar texosquery.jar`. The jar file (and the bash
 script, if required) should be placed on the system's path.
 
