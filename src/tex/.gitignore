@@ -4,3 +4,7 @@
 *.sty
 *.tex
 *.pdf
+*.glo
+*.gls
+*.idx
+*.out

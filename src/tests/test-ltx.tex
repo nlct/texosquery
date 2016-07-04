@@ -5,6 +5,7 @@
 \usepackage{etoolbox}
 
 \begin{document}
+
 \section{Locale}
 
 \TeXOSQueryLocale{\result}
@@ -40,17 +41,24 @@ version: \result.
 
 \section{File List}
 
-All files in current directory.
+All files in given directory.
 
 \renewcommand{\do}[1]{\texttt{#1}.\par}
 \TeXOSQueryFileList{\result}{,}{..}
 
 \expandafter\docsvlist\expandafter{\result}
 
-\section{Filtered File List}
+\section{Filtered File List (files extensions)}
 
 Filtered file list.
 \TeXOSQueryFilterFileList{\result}{,}{.+\string\..*}{.}
+
+\expandafter\docsvlist\expandafter{\result}
+
+\section{Filtered File List (no hidden files)}
+
+Filtered file list.
+\TeXOSQueryFilterFileList{\result}{,}{[^.].*}{..}
 
 \expandafter\docsvlist\expandafter{\result}
 

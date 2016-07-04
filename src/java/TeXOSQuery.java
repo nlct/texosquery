@@ -334,32 +334,69 @@ public class TeXOSQuery
       return builder.toString();
    }
 
+   public static String fileURI(File file)
+   {
+      if (!file.exists())
+      {
+         return "";
+      }
+
+      try
+      {
+         return file.toURI().toString();
+      }
+      catch (SecurityException e)
+      {
+      }
+
+      return "";
+   }
+
    public static void syntax()
    {
-      System.out.println("Useage: texosquery [option]...");
+      System.out.println("Useage: texosquery <option>...");
 
       System.out.println();
       System.out.println("Cross-platform OS query application");
       System.out.println("for use with TeX's shell escape.");
-      System.out.println("Paths should use / for the directory divider.");
+      System.out.println();
+      System.out.println("Each query displays the result in a single line.");
       System.out.println("A blank line is printed if the requested");
       System.out.println("information is unavailable.");
 
       System.out.println();
-      System.out.println("-l or --locale\tDisplay locale information");
-      System.out.println("-c or --cwd\tDisplay current working directory");
-      System.out.println("-m or --userhome\tDisplay user's home directory");
-      System.out.println("-t or --tmpdir\tDisplay temporary directory");
-      System.out.println("-o or --osname\tDisplay OS name");
-      System.out.println("-r or --osversion\tDisplay OS version");
-      System.out.println("-a or --osarch\tDisplay OS architecture");
-      System.out.println("-n or --pdfnow\tDisplay current date-time in PDF format");
-      System.out.println("-d <file> or --pdfdate <file>\tDisplay date stamp of <file> in PDF format");
-      System.out.println("-s <file> or --filesize <file>\tDisplay size of <file> in bytes");
-      System.out.println("-i <sep> <dir> or --list <sep> <dir>\tDisplay list of all files in <dir> separated by <sep>");
-      System.out.println("-f <sep> <regex> <dir> or --filterlist <sep> <regex> <dir>\tDisplay list of files in <dir> that match <regex> separated by <sep>");
       System.out.println("-h or --help\tDisplay this help message and exit");
       System.out.println("-v or --version\tDisplay version information and exit");
+      System.out.println();
+      System.out.println("General:");
+      System.out.println();
+      System.out.println("-l or --locale\t\tDisplay locale information");
+      System.out.println("-c or --cwd\t\tDisplay current working directory");
+      System.out.println("-m or --userhome\tDisplay user's home directory");
+      System.out.println("-t or --tmpdir\t\tDisplay temporary directory");
+      System.out.println("-o or --osname\t\tDisplay OS name");
+      System.out.println("-r or --osversion\tDisplay OS version");
+      System.out.println("-a or --osarch\t\tDisplay OS architecture");
+      System.out.println("-n or --pdfnow\t\tDisplay current date-time in PDF format");
+
+      System.out.println();
+      System.out.println("File Queries:");
+      System.out.println();
+      System.out.println("Paths should use / for the directory divider.");
+      System.out.println();
+      System.out.println("-d <file> or --pdfdate <file>");
+      System.out.println("  Display date stamp of <file> in PDF format");
+      System.out.println();
+      System.out.println("-s <file> or --filesize <file>");
+      System.out.println("  Display size of <file> in bytes");
+      System.out.println();
+      System.out.println("-i <sep> <dir> or --list <sep> <dir>");
+      System.out.println("  Display list of all files in <dir> separated by <sep>");
+      System.out.println();
+      System.out.println("-f <sep> <regex> <dir> or --filterlist <sep> <regex> <dir>");
+      System.out.println("  Display list of files in <dir> that match <regex> separated by <sep>");
+      System.out.println("-u <file> or --uri <file>");
+      System.out.println("  Display the URI of <file>");
 
    }
 
@@ -492,6 +529,19 @@ public class TeXOSQuery
 
             System.out.println(getFilterFileList(
              args[i-2], args[i-1], new File(fromTeXPath(args[i]))));
+         }
+         else if (args[i].equals("-u") || args[i].equals("--uri"))
+         {
+            i++;
+
+            if (i >= args.length)
+            {
+               System.err.println(
+                 String.format("filename expected after %s", args[i-1]));
+               System.exit(1);
+            }
+
+            System.out.println(fileURI(fileFromTeXPath(args[i])));
          }
          else if (args[i].equals("-h") || args[i].equals("--help"))
          {

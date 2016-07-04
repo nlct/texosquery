@@ -25,6 +25,8 @@
 %<*driver>
 \documentclass{ltxdoc}
 
+\usepackage[T1]{fontenc}
+\usepackage{tgtermes}
 \usepackage[colorlinks]{hyperref}
 
 \CheckSum{0}
@@ -32,6 +34,13 @@
 \RecordChanges
 \PageIndex
 \CodelineNumbered
+
+\newcommand*{\shortarg}[1]{\texttt{-#1}}
+\newcommand*{\longarg}[1]{\texttt{-{}-#1}}
+
+\newenvironment{important}
+ {\begin{quote}\textbf{Important Note:}}
+ {\end{quote}}
 
 \begin{document}
 \DocInput{texosquery.dtx}
@@ -84,9 +93,9 @@
 %correct path to the \texttt{jar} file.)
 %
 %Put the generic \TeX\ code \texttt{texosquery.tex} in
-%\meta{TEXMF}\slash tex\slash generic\slash texosquery/
+%\meta{TEXMF}\texttt{\slash tex\slash generic\slash texosquery/}
 %and put the \LaTeX\ package \texttt{texosquery.sty} in
-%\meta{TEXMF}\slash tex\slash latex\slash texosquery/
+%\meta{TEXMF}\texttt{\slash tex\slash latex\slash texosquery/}
 %where \meta{TEXMF} is the TEXMF directory.
 %
 %\section{texosquery.jar: the Java application}
@@ -119,11 +128,11 @@
 %
 %Command line invocation:
 %\begin{flushleft}\ttfamily
-%texosquery \oarg{options}
+%texosquery \meta{action} ...
 %\end{flushleft}
 %Available options:
 %\begin{description}
-%\item[\texttt{-l} or \texttt{--locale}] Display the locale
+%\item[\shortarg{l} or \longarg{locale}] Display the locale
 %information in the form
 %\begin{flushleft}\ttfamily
 %\meta{lang}-\meta{region}.\meta{codeset}@\meta{modifier}
@@ -134,43 +143,50 @@
 %\meta{codeset} is the default code set (e.g.\ \texttt{UTF-8})
 % and \meta{modifier} is the modifier. Elements may be omitted
 % if unavailable. For example, \texttt{en-GB.UTF-8} has the
-% \meta{modifier} omitted, and \texttt{en} as all but the language
+% \meta{modifier} omitted, and \texttt{en} has all but the language
 % omitted.
-%\item[\texttt{-c} or \texttt{--cwd}] Displays the current working
+%\item[\shortarg{c} or \longarg{cwd}] Displays the current working
 %directory.
-%\item[\texttt{-m} or \texttt{--userhome}] Displays the user's home
+%\item[\shortarg{m} or \longarg{userhome}] Displays the user's home
 %directory.
-%\item[\texttt{-t} or \texttt{--tmpdir}] Displays the temporary
+%\item[\shortarg{t} or \longarg{tmpdir}] Displays the temporary
 %directory.
-%\item[\texttt{-o} or \texttt{--osname}] Displays the operating
+%\item[\shortarg{o} or \longarg{osname}] Displays the operating
 %system name.
-%\item[\texttt{-r} or \texttt{--osversion}] Displays the operating
+%\item[\shortarg{r} or \longarg{osversion}] Displays the operating
 %system version.
-%\item[\texttt{-a} or \texttt{--osarch}] Displays the operating
+%\item[\shortarg{a} or \longarg{osarch}] Displays the operating
 %system architecture.
-%\item[\texttt{-n} or \texttt{--pdfnow}] Displays the current
+%\item[\shortarg{n} or \longarg{pdfnow}] Displays the current
 % date and time in PDF format (for example, 
 %\texttt{D:20160704131006+01'00'}).
-%\item[\texttt{-d} \meta{file} or \texttt{--pdfdate} \meta{file}]
+%\item[\shortarg{d} \meta{file} or \longarg{pdfdate} \meta{file}]
 % Displays the last modified time stamp of the given file in PDF format or a blank line
 % if the file doesn't exist or the file permissions prohibit this
 % action.
-%\item[\texttt{-s} \meta{file} or \texttt{--filesize} \meta{file}]
+%\item[\shortarg{s} \meta{file} or \longarg{filesize} \meta{file}]
 % Displays the size in bytes of the given file or a blank line
 % if the file doesn't exist or the file permissions prohibit this
 % action.
-%\item[\texttt{-i} \meta{sep} \meta{dir} or \texttt{--list}
+%\item[\shortarg{i} \meta{sep} \meta{dir} or \longarg{list}
 %\meta{sep} \meta{dir}]
 %List all files in the given directory with the output on a single
 %line using \meta{sep} as the separator between entries. Note that
 %the list doesn't include the full path, just the file names.
-%\item[\texttt{-f} \meta{sep} \meta{regex} \meta{dir} or
-%\texttt{--filterlist} \meta{sep} \meta{regex} \meta{dir}]
+%\item[\shortarg{f} \meta{sep} \meta{regex} \meta{dir} or
+%\longarg{filterlist} \meta{sep} \meta{regex} \meta{dir}]
 %Like the above but only lists those files whose name matches the
 %regular expression given in \meta{regex}.
-%\item[\texttt{-h} or \texttt{--help}] Displays help message and
+%\item[\shortarg{u} \meta{file} or \longarg{uri} \meta{file}]
+%Displays the URI of the given file or a blank line if the file
+%doesn't exist or the file permissions prohibit this action.
+%Note that this may include in a percent character in the result. The \TeX\ 
+%command \cs{TeXOSQuery} protects against this by changing the
+%category code, but if you explicitly call \texttt{texosquery}
+%using the shell escape, you'll need to be careful of this.
+%\item[\shortarg{h} or \longarg{help}] Displays help message and
 %exits.
-%\item[\texttt{-v} or \texttt{--version}] Displays version
+%\item[\shortarg{v} or \longarg{version}] Displays version
 %information and exits.
 %\end{description}
 %
@@ -201,8 +217,12 @@
 %\usepackage{texosquery}
 %\end{verbatim}
 %
+%\begin{important}
+%The commands described below are all fragile.
+%\end{important}
+%
 %The basic command to run \texttt{texosquery} and capture its output
-%in a control sequence is the command:
+%in a control sequence is:
 %\DescribeMacro\TeXOSQuery
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQuery}\marg{cs}\marg{args}
@@ -210,93 +230,126 @@
 %where \meta{cs} is the control sequence in which to store the
 %result and \meta{args} are the command line arguments to pass to 
 %\texttt{texosquery}. There are some short cut commands for
-%convenience.
+%convenience, described below.
 %
-%The locale (\texttt{-l} or \texttt{--locale}) information can be
+%If any of these commands cause an error message in the form:
+%\begin{verbatim}
+%I can't find file `|texosquery'.
+%\end{verbatim}
+%then check that you have the shell escape on. If the error persists
+%with the shell escape enabled, check that \texttt{texosquery} is on 
+%your system's path. To do this, open a command prompt or terminal and
+%type \texttt{texosquery}. If it's installed correctly it should display:
+%\begin{verbatim}
+%Missing argument. Try texosquery --help
+%\end{verbatim}
+%
+%Dry run mode is determined by the conditional
+%\DescribeMacro\ifTeXOSQueryDryRun
+%\begin{verbatim}
+%\ifTeXOSQueryDryRun
+%\end{verbatim}
+%If true, the shell escape won't be used and the requested command
+%invocation will be printed in the transcript file prefixed with
+%\begin{verbatim}
+%TeXOSQuery:
+%\end{verbatim}
+%(the control sequence \meta{cs} will be set to empty).
+%This conditional will automatically be switched on if
+%\cs{shellescape} or \cs{pdfshellescape} is 0.
+%
+%The locale (\shortarg{l} or \longarg{locale}) information can be
 %obtained using:
 %\DescribeMacro\TeXOSQueryLocale
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryLocale}\marg{cs}
 %\end{flushleft}
 %
-%The current working directory (\texttt{-c} or \texttt{--cwd}) can
+%The current working directory (\shortarg{c} or \longarg{cwd}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryCwd
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryCwd}\marg{cs}
 %\end{flushleft}
 %
-%The home directory (\texttt{-m} or \texttt{--userhome}) can
+%The home directory (\shortarg{m} or \longarg{userhome}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryHome
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryHome}\marg{cs}
 %\end{flushleft}
 %
-%The temporary directory (\texttt{-t} or \texttt{--tmpdir}) can
+%The temporary directory (\shortarg{t} or \longarg{tmpdir}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryTmpDir
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryTmpDir}\marg{cs}
 %\end{flushleft}
 %
-%The OS name (\texttt{-o} or \texttt{--osname}) can
+%The OS name (\shortarg{o} or \longarg{osname}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryName
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryName}\marg{cs}
 %\end{flushleft}
 %
-%The OS version (\texttt{-r} or \texttt{--osversion}) can
+%The OS version (\shortarg{r} or \longarg{osversion}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryVersion
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryVersion}\marg{cs}
 %\end{flushleft}
 %
-%The OS architecture (\texttt{-a} or \texttt{--osarch}) can
+%The OS architecture (\shortarg{a} or \longarg{osarch}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryArch
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryArch}\marg{cs}
 %\end{flushleft}
 %
-%The current date-time stamp in PDF format (\texttt{-n} or
-%\texttt{--pdfnow}) can be obtained using:
+%The current date-time stamp in PDF format (\shortarg{n} or
+%\longarg{pdfnow}) can be obtained using:
 %\DescribeMacro\TeXOSQueryNow
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryNow}\marg{cs}
 %\end{flushleft}
 %
+%\begin{important}
+%The remaining commands all require extra arguments after the
+%relevant switch. These are automatically enclosed in single-quotes
+%to protect any spaces. If the argument requires any single-quote
+%characters, make sure you use \verb|\string\'| to prevent
+%interference.
+%Since the file name may need to be obtained from \cs{jobname},
+%which sometimes includes double-quotes, the first double-quote pair
+%found is stripped in file name arguments. Any other double-quotes
+%will need to be protected in the same manner as single-quotes. Any paths must use a
+%forward slash.
+%\end{important}
+%
 %The modification date-time stamp in PDF format for a file
-%(\texttt{-d} or \texttt{--pdfdate}) can be obtained using:
+%(\shortarg{d} or \longarg{pdfdate}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFileDate
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryFileDate}\marg{cs}\marg{filename}
 %\end{flushleft}
-%where \meta{filename} is the name of the file (using forward slash
-%\texttt{/} as directory divider). Note that \meta{filename} is
-%automatically quoted using single quotes.
+%where \meta{filename} is the name of the file.
 %
 %The size in bytes a file
-%(\texttt{-s} or \texttt{--filesize}) can be obtained using:
+%(\shortarg{s} or \longarg{filesize}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFileSize
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryFileSize}\marg{cs}\marg{filename}
 %\end{flushleft}
-%where \meta{filename} is the name of the file (using forward slash
-%\texttt{/} as directory divider). Note that \meta{filename} is
-%automatically quoted using single quotes.
+%where \meta{filename} is the name of the file.
 %
 %The list of files in a given directory
-%(\texttt{-i} or \texttt{--list}) can be obtained using:
+%(\shortarg{i} or \longarg{list}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFileList
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryFileList}\marg{cs}\marg{sep}\marg{dir}
 %\end{flushleft}
 %where \meta{sep} is the separator and \meta{dir} is the directory name.
-%Note that both \meta{sep} and \meta{filename} are
-%automatically quoted using single quotes.
 %For example:
 %\begin{verbatim}
 %\TeXOSQueryFileList{\result}{,}{.}
@@ -305,28 +358,33 @@
 %current directory.
 %
 %A filtered list of files in a given directory
-%(\texttt{-f} or \texttt{--filterlist}) can be obtained using:
+%(\shortarg{f} or \longarg{filterlist}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFilterFileList
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryFilterFileList}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{flushleft}
 %where \meta{regex} is a regular expression. \emph{Take care of any backslashes
 %in the regular expression!}
-%Note that both \meta{sep}, \meta{regex} and \meta{filename} are
-%automatically quoted using single quotes.
-%For example, to list only those files that contain a dot but don't
-%start with a dot:
+%For example, to list only those files that have an extension:
 %\begin{verbatim}
 %\TeXOSQueryFilterFileList{\result}{,}{.+\string\..*}{.}
 %\end{verbatim}
 %Note the use of \verb|\string\.| to ensure that \cs{.} isn't
 %interpreted as a command.
 %
+%The URI of a file
+%(\shortarg{u} or \longarg{uri}) can be obtained using:
+%\DescribeMacro\TeXOSQueryFileURI
+%\begin{flushleft}\ttfamily
+%\cs{TeXOSQueryFileURI}\marg{cs}\marg{filename}
+%\end{flushleft}
+%where \meta{filename} is the name of the file.
+%
 %\phantomsection
 %\addcontentsline{toc}{section}{Change History}%
 %\PrintChanges
 %\addcontentsline{toc}{section}{\indexname}%
-%\PrintIndex}
+%\PrintIndex
 %
 %\section{The Code}
 %\changes{1.0}{2016-07-04}{Initial release}
@@ -361,6 +419,7 @@
 \def\TeXOSInvokerName{texosquery}
 %    \end{macrocode}
 %\end{macro}
+%
 %\begin{macro}{\TeXOSQueryInvoker}
 %If we're using \LaTeX, we'll need to use \cs{@@input} rather
 %than \cs{input}.
@@ -373,41 +432,74 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\ifTeXOSQueryDryRun}
+%Provide a dry-run mode.
+%    \begin{macrocode}
+\newif\ifTeXOSQueryDryRun
+\TeXOSQueryDryRunfalse
+%    \end{macrocode}
+%\end{macro}
+%
+%If shell escape is disabled, automatically switch on dry-run mode.
+%    \begin{macrocode}
+\ifx\shellescape\undefined
+  \ifx\pdfshellescape\undefined
+  \else
+    \ifnum\pdfshellescape=0\relax
+      \TeXOSQueryDryRuntrue
+    \fi
+  \fi
+\else
+  \ifnum\shellescape=0\relax
+    \TeXOSQueryDryRuntrue
+  \fi
+\fi
+%    \end{macrocode}
+%
 %\begin{macro}{\TeXOSQuery}
 %Use \texttt{texosquery} with the option given in the second
 %argument and store the result in control sequence given in the
 %first argument.
 %    \begin{macrocode}
 \def\TeXOSQuery#1#2{%
-  \begingroup
-  \endlinechar=-1\relax
+  \ifTeXOSQueryDryRun
+    \begingroup
+      \newlinechar=`\^^J
+      \message{^^JTeXOSQuery: \TeXOSInvokerName\space#2^^J}%
+    \endgroup
+    \def#1{}%
+  \else
+    \begingroup
+    \endlinechar=-1\relax
 %    \end{macrocode}
 %Just in case the result contains any awkward characters that have
 %some special meaning to \TeX. (Can't really protect against hash,
 %backslash or curly braces, but they're unlikely to occur unless
 %the user has a very wacky and inappropriate file naming scheme.)
 %    \begin{macrocode}
-  \catcode`\-=12\relax
-  \catcode`\_=12\relax
-  \catcode`\^=12\relax
-  \catcode`\~=12\relax
-  \catcode`\$=12\relax
-  \catcode`\&=12\relax
-  \catcode`\"=12\relax
-  \catcode`\'=12\relax
-  \catcode`\.=12\relax
-  \catcode`\/=12\relax
-  \catcode`\:=12\relax
-  \catcode`\;=12\relax
-  \catcode`\%=12\relax
-  \everyeof{\noexpand}\relax
-  \edef\x{\endgroup\def\noexpand#1{\TeXOSQueryInvoker{#2}}}\x
+    \catcode`\-=12\relax
+    \catcode`\_=12\relax
+    \catcode`\^=12\relax
+    \catcode`\~=12\relax
+    \catcode`\$=12\relax
+    \catcode`\&=12\relax
+    \catcode`\"=12\relax
+    \catcode`\'=12\relax
+    \catcode`\.=12\relax
+    \catcode`\/=12\relax
+    \catcode`\:=12\relax
+    \catcode`\;=12\relax
+    \catcode`\%=12\relax
+    \everyeof{\noexpand}\relax
+    \edef\x{\endgroup\def\noexpand#1{\TeXOSQueryInvoker{#2}}}\x
+  \fi
 }
 %    \end{macrocode}
 %\end{macro}
 %
 %Now for some convenient shortcuts so the user doesn't have to
-%remember the comand line options.
+%remember the command line options. \cs{string} is used in
+%case the hyphen character has been made active.
 %\begin{macro}{\TeXOSQueryLocale}
 %Query the locale and store the result in the control sequence
 %provided in the argument.
@@ -465,17 +557,36 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%If the file name is supplied using \cs{jobname} it may have
+%double-quotes which will interfere with things.
+%\begin{macro}{\texosquerystripfilequotes}
+%    \begin{macrocode}
+\def\texosquerystripfilequotes#1{%
+  \@texosquery@stripfilequotes\empty#1\@mid@texosquery@stripfilequotes
+    "\relax"\relax\@end@texosquery@stripfilequotes
+}
+\def\@texosquery@stripfilequotes#1"#2"{%
+  \@@texosquery@stripfilequotes#1#2%
+}
+\def\@@texosquery@stripfilequotes#1\@mid@texosquery@stripfilequotes#2\@end@texosquery@stripfilequotes{%
+  #1%
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\TeXOSQueryFileDate}
 %Query the time stamp of the file given in the second argument.
 %    \begin{macrocode}
-\def\TeXOSQueryFileDate#1#2{\TeXOSQuery{#1}{\string-d \string'#2\string'}}
+\def\TeXOSQueryFileDate#1#2{\TeXOSQuery{#1}{\string-d 
+  \string'\texosquerystripfilequotes{#2}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileSize}
 %Query the size of the file given in the second argument.
 %    \begin{macrocode}
-\def\TeXOSQueryFileSize#1#2{\TeXOSQuery{#1}{\string-s \string'#2\string'}}
+\def\TeXOSQueryFileSize#1#2{\TeXOSQuery{#1}{\string-s 
+ \string'\texosquerystripfilequotes{#2}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -484,7 +595,8 @@
 %separated by the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileList#1#2#3{\TeXOSQuery{#1}{%
- \string-i \string'#2\string' \string'#3\string'}}
+ \string-i \string'#2\string' 
+ \string'\texosquerystripfilequotes{#3}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -495,7 +607,16 @@
 %in the regular expression!}
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileList#1#2#3#4{\TeXOSQuery{#1}{%
- \string-f \string'#2\string' \string'#3\string' \string'#4\string'}}
+ \string-f \string'#2\string' \string'#3\string' 
+ \string'\texosquerystripfilequotes{#4}\string'}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryFileURI}
+%Get the URI of the file given in the second argument.
+%    \begin{macrocode}
+\def\TeXOSQueryFileURI#1#2{\TeXOSQuery{#1}{\string-u 
+ \string'\texosquerystripfilequotes{#2}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
