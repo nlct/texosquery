@@ -1,0 +1,20 @@
+% arara: pdftex: {shell: on}
+\input texosquery
+
+\tt
+\TeXOSQueryLocale{\result}
+locale: \result.
+
+\TeXOSQueryCwd{\result}
+cwd: \result.
+
+\TeXOSQueryNow{\result}
+now: \result.
+
+\TeXOSQueryFileDate{\result}{\jobname.tex}
+file date: \result.
+
+\TeXOSQueryFileSize{\result}{\jobname.tex}
+file size: \result.
+
+\bye

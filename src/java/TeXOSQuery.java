@@ -230,7 +230,7 @@ public class TeXOSQuery
       System.out.println(String.format("texosquery %s %s", versionNum,
        versionDate));
       System.out.println("Copyright 2016 Nicola Talbot");
-      System.out.println("License GPL v3.0+");
+      System.out.println("License LPPL 1.3+ (http://ctan.org/license/lppl1.3)");
    }
 
    public static void main(String[] args)

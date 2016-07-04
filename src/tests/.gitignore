@@ -1,3 +1,6 @@
+.*.swp
+texosquery.sty
+texosquery.tex
 *.aux
 *.log
 *.pdf

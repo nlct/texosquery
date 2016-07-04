@@ -1,0 +1,314 @@
+%\iffalse
+%<*package>
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%</package>
+%\fi
+% \iffalse
+% Doc-Source file
+% Copyright (C) 2016 Nicola Talbot, all rights reserved.
+% \fi
+% \iffalse
+%<*driver>
+\documentclass{ltxdoc}
+
+\usepackage[colorlinks]{hyperref}
+
+\CheckSum{0}
+
+\RecordChanges
+\PageIndex
+\CodelineNumbered
+
+\begin{document}
+\DocInput{texosquery.dtx}
+\end{document}
+%</driver>
+%\fi
+%
+%\DeleteShortVerb{|}
+%
+%\title{texosquery: query OS information from \TeX}
+%\author{Nicola L. C. Talbot}
+%\date{2016-07-04 (v1.0)}
+%\maketitle
+%
+%\begin{abstract}
+%\texttt{texosquery.jar} is a cross-platform Java application
+%to query certain OS information designed for use in \TeX's
+%shell escape mechanism.
+%The accompanying \TeX\ code provides a simple interface to the
+%\texttt{texosquery} Java application, which may be skipped
+%if you want to explicity use \cs{write18} or \cs{input}.
+%\end{abstract}
+%
+%\begin{important}
+%You will need \TeX's shell escape enabled,
+%and you will also need the Java Runtime Environment (JRE) 
+%installed to use \texttt{texosquery}.
+%\end{important}
+%
+%\section{Installation}
+%This package consists of:
+%\begin{description}
+%\item[\texttt{texosquery.tex}] generic \TeX\ code;
+%\item[\texttt{texosquery.sty}] a small \LaTeX\ package wrapper
+%\item[\texttt{texosquery.jar}] the Java application. 
+%\end{description}
+%There is also a bash script called \texttt{texosquery} which 
+%can be used as a convenient way of invoking 
+%\texttt{texosquery.jar}. Windows users may prefer to
+%create a DOS batch file that performs a similar function: use the
+%text editor of your choice to create a file called
+%\texttt{texosquery.bat} that contains:
+%\begin{verbatim}
+%@start javaw -jar "%~dp0\texosquery.jar" %*
+%\end{verbatim}
+%
+%Put both the \texttt{.jar} file and the bash script\slash batch file
+%on your system's path. (You may put the \texttt{.jar} file in a
+%different location, but you will need to edit the script with the
+%correct path to the \texttt{jar} file.)
+%
+%Put the generic \TeX\ code \texttt{texosquery.tex} in
+%\meta{TEXMF}\slash tex\slash generic\slash texosquery/
+%and put the \LaTeX\ package \texttt{texosquery.sty} in
+%\meta{TEXMF}\slash tex\slash latex\slash texosquery/
+%where \meta{TEXMF} is the TEXMF directory.
+%
+%\section{texosquery.jar: the Java application}
+%The \texttt{texosquery} Java application is a command line
+%application that looks up certain system information that
+%may be of use in \TeX\ documents. All this information can
+%easily be obtained using native commands, but the Java application
+%allows an OS-independent approach.
+%
+%\begin{important}
+%Note that \texttt{texosquery}
+%provides read-only actions, and I don't intend adding any
+%actions that modify settings or files.
+%\end{important}
+%
+%Since the application is designed to work with \TeX, each
+%function will display the result on a single line without
+%formatting. A blank line will be displayed if the information
+%isn't available. A forward slash is always used as a
+%directory divider, regardless of the operating system, so
+%the result can be used, for example, in \cs{input} or
+%\cs{includegraphics}.
+%
+%Command line invocation:
+%\begin{flushleft}\ttfamily
+%texosquery \oarg{options}
+%\end{flushleft}
+%Available options:
+%\begin{description}
+%\item[\texttt{-l} or \texttt{--locale}] Display the locale
+%information in the form
+%\begin{flushleft}\ttfamily
+%\meta{lang}-\meta{region}.\meta{codeset}@\meta{modifier}
+%\end{flushleft}
+%where \meta{lang} is the ISO code for the language (e.g.\ 
+%\texttt{en}),
+%\meta{region} is the ISO code for the region (e.g.\ \texttt{GB}),
+%\meta{codeset} is the default code set (e.g.\ \texttt{UTF-8})
+% and \meta{modifier} is the modifier. Elements may be omitted
+% if unavailable. For example, \texttt{en-GB.UTF-8} has the
+% \meta{modifier} omitted, and \texttt{en} as all but the language
+% omitted.
+%\item[\texttt{-c} or \texttt{--cwd}] Displays the current working
+%directory.
+%\item[\texttt{-n} or \texttt{--pdfnow}] Displays the current
+% date and time in PDF format (for example, 
+%\texttt{D:20160704131006+01'00'}).
+%\item[\texttt{-d} \meta{file} or \texttt{--pdfdate} \meta{file}]
+% Displays the current time stamp of the given file in PDF format or a blank line
+% if the file doesn't exist or the file permissions prohibit this
+% action.
+%The file name should use a forward slash as the directory
+%divider.
+%\item[\texttt{-s} \meta{file} or \texttt{--filesize} \meta{file}]
+% Displays the size in bytes of the given file or a blank line
+% if the file doesn't exist or the file permissions prohibit this
+% action.
+%The file name should use a forward slash as the directory
+%divider.
+%\item[\texttt{-h} or \texttt{--help}] Displays help message and
+%exits.
+%\item[\texttt{-v} or \texttt{--version}] Displays version
+%information and exits.
+%\end{description}
+%
+%If multiple options are given, they will be processed in the
+%order specified in the command line invocation. Each result will
+% be displayed on a separate line.
+%
+%\phantomsection
+%\addcontentsline{toc}{section}{Change History}%
+%\PrintChanges
+%\addcontentsline{toc}{section}{\indexname}%
+%\PrintIndex}
+%
+%\section{The Code}
+%\changes{1.0}{2016-07-04}{Initial release}
+%\subsection{Generic \TeX\ Code}
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery.tex>
+%    \end{macrocode}
+%\fi
+%Change category code of \texttt{@} if necessary.
+%    \begin{macrocode}
+\ifnum\catcode`\@=11\relax
+  \def\@texosquery@restore@at{}%
+\else
+  \expandafter\edef\csname @texosquery@restore@at\endcsname{%
+    \noexpand\catcode`\noexpand\@=\number\catcode`\@\relax
+  }%
+ \catcode`\@=11\relax
+\fi
+%    \end{macrocode}
+% Check if already loaded.
+%    \begin{macrocode}
+\ifx\TeXOSQuery\undefined
+\else
+  \@texosquery@restore@at
+  \expandafter\endinput
+\fi
+%    \end{macrocode}
+%\begin{macro}{\TeXOSQueryInvoker}
+%If we're using \LaTeX, we'll need to use \cs{@@input} rather
+%than \cs{input}.
+%    \begin{macrocode}
+\ifx\@@input\undefined
+  \def\TeXOSQueryInvoker#1{\input|"texosquery #1" }
+\else
+  \def\TeXOSQueryInvoker#1{\@@input|"texosquery #1" }
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQuery}
+%Use \texttt{texosquery} with the option given in the second
+%argument and store the result in control sequence given in the
+%first argument.
+%    \begin{macrocode}
+\def\TeXOSQuery#1#2{%
+  \begingroup
+  \endlinechar=-1\relax
+%    \end{macrocode}
+%Just in case the result contains any awkward characters that have
+%some special meaning to \TeX. (Can't really protect against hash,
+%backslash or curly braces, but they're unlikely to occur unless
+%the user has a very wacky and inappropriate file naming scheme.)
+%    \begin{macrocode}
+  \catcode`\-=12\relax
+  \catcode`\_=12\relax
+  \catcode`\^=12\relax
+  \catcode`\~=12\relax
+  \catcode`\$=12\relax
+  \catcode`\&=12\relax
+  \catcode`\"=12\relax
+  \catcode`\'=12\relax
+  \catcode`\.=12\relax
+  \catcode`\/=12\relax
+  \catcode`\:=12\relax
+  \catcode`\;=12\relax
+  \catcode`\%=12\relax
+  \everyeof{\noexpand}\relax
+  \edef\x{\endgroup\def\noexpand#1{\TeXOSQueryInvoker{#2}}}\x
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%Now for some convenient shortcuts so the user doesn't have to
+%remember the comand line options.
+%\begin{macro}{\TeXOSQueryLocale}
+%Query the locale and store the result in the control sequence
+%provided in the argument.
+%    \begin{macrocode}
+\def\TeXOSQueryLocale#1{\TeXOSQuery{#1}{\string-l}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryCwd}
+%Query the current working directory.
+%    \begin{macrocode}
+\def\TeXOSQueryCwd#1{\TeXOSQuery{#1}{\string-c}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryNow}
+%Query the current time stamp.
+%    \begin{macrocode}
+\def\TeXOSQueryNow#1{\TeXOSQuery{#1}{\string-n}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryFileDate}
+%Query the time stamp of the file given in the second argument.
+%    \begin{macrocode}
+\def\TeXOSQueryFileDate#1#2{\TeXOSQuery{#1}{\string-d \string'#2\string'}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryFileSize}
+%Query the size of the file given in the second argument.
+%    \begin{macrocode}
+\def\TeXOSQueryFileSize#1#2{\TeXOSQuery{#1}{\string-s \string'#2\string'}}
+%    \end{macrocode}
+%\end{macro}
+%Restore the category code of \texttt{@}:
+%    \begin{macrocode}
+\@texosquery@restore@at
+\endinput
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery.tex>
+%    \end{macrocode}
+%\fi
+%
+%\subsection{\LaTeX\ Code}
+%This is just a simple wrapper for \texttt{texosquery.tex}
+%so that it can be loaded using \LaTeX's standard \cs{usepackage}
+%method.
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery.sty>
+%    \end{macrocode}
+%\fi
+%Identify package:
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{texosquery}[2016/07/04 v1.0 (NLCT)]
+%    \end{macrocode}
+%Load \texttt{texosquery.tex}:
+%    \begin{macrocode}
+\input{texosquery}
+%    \end{macrocode}
+%That's it!
+%    \begin{macrocode}
+\endinput
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery.sty>
+%    \end{macrocode}
+%\fi
+%
+%\Finale
+\endinput

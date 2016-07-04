@@ -1,7 +1,7 @@
 APP_VERSION:=$(shell grep "public static final String versionNum" java/TeXOSQuery.java | sed "s/public\sstatic\sfinal\sString\sversionNum=//" | tr -d "\"\; ")
 
-test	: bin/texosquery.jar tests/test.tex
-	cd tests; arara test
+test	: bin/texosquery.jar tex/texosquery.* tests/*.tex
+	make -C tests
 
 bin/texosquery.jar	: java/Manifest.txt \
 			classes/com/dickimawbooks/texosquery/TeXOSQuery.class
