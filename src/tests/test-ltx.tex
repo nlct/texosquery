@@ -1,0 +1,57 @@
+% arara: pdflatex: {shell: on}
+\documentclass{article}
+
+\usepackage{texosquery}
+\usepackage{etoolbox}
+
+\begin{document}
+\section{Locale}
+
+\TeXOSQueryLocale{\result}
+Locale: \texttt{\result}.
+
+\section{Current Working Directory}
+
+\TeXOSQueryCwd{\result}
+cwd: \texttt{\result}.
+
+\section{PDF Date-Time}
+\TeXOSQueryNow{\result}
+Now: \texttt{\result}.
+
+\TeXOSQueryFileDate{\result}{\jobname.tex}
+File date: \texttt{\result}.
+
+\section{File Sisze}
+
+\TeXOSQueryFileSize{\result}{\jobname.tex}
+file size: \result bytes.
+
+\section{OS Information}
+
+\TeXOSQueryName{\result}
+name: \result.
+
+\TeXOSQueryArch{\result}
+arch: \result.
+
+\TeXOSQueryVersion{\result}
+version: \result.
+
+\section{File List}
+
+All files in current directory.
+
+\renewcommand{\do}[1]{\texttt{#1}.\par}
+\TeXOSQueryFileList{\result}{,}{..}
+
+\expandafter\docsvlist\expandafter{\result}
+
+\section{Filtered File List}
+
+Filtered file list.
+\TeXOSQueryFilterFileList{\result}{,}{.+\string\..*}{.}
+
+\expandafter\docsvlist\expandafter{\result}
+
+\end{document}

@@ -154,7 +154,7 @@ public class TeXOSQuery
 
                   if (line != null && !line.isEmpty())
                   {
-                     file = new File(line);
+                     file = new File(fromTeXPath(line));
                   }
                }
             }
@@ -248,6 +248,92 @@ public class TeXOSQuery
       return "";
    }
 
+   public static String getFileList(String sep, File dir)
+   {
+      if (!dir.isDirectory())
+      {
+         return "";
+      }
+
+      StringBuilder builder = new StringBuilder();
+
+      try
+      {
+         String[] list = dir.list();
+
+         if (list == null)
+         {
+            return "";
+         }
+
+         for (int i = 0; i < list.length; i++)
+         {
+            if (i > 0)
+            {
+               builder.append(sep);
+            }
+
+            // no need to worry about directory divider
+            // File.list() just returns the name not the path
+            builder.append(list[i]);
+         }
+      }
+      catch (SecurityException e)
+      {
+      }
+
+      return builder.toString();
+   }
+
+   public static String getFilterFileList(String sep, 
+     final String regex, File dir)
+   {
+      if (!dir.isDirectory())
+      {
+         return "";
+      }
+
+      if (regex == null || regex.isEmpty())
+      {
+         return getFileList(sep, dir);
+      }
+
+      StringBuilder builder = new StringBuilder();
+
+      try
+      {
+         String[] list = dir.list(new FilenameFilter()
+         {
+            public boolean accept(File dir, String name)
+            {
+               return name.matches(regex);
+            }
+         });
+
+         if (list == null)
+         {
+            return "";
+         }
+
+         for (int i = 0; i < list.length; i++)
+         {
+            if (i > 0)
+            {
+               builder.append(sep);
+            }
+
+            // no need to worry about directory divider
+            // File.list() just returns the name not the path
+            builder.append(list[i]);
+         }
+      }
+      catch (SecurityException e)
+      {
+      }
+
+      return builder.toString();
+   }
+
    public static void syntax()
    {
       System.out.println("Useage: texosquery [option]...");
@@ -262,9 +348,16 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("-l or --locale\tDisplay locale information");
       System.out.println("-c or --cwd\tDisplay current working directory");
+      System.out.println("-m or --userhome\tDisplay user's home directory");
+      System.out.println("-t or --tmpdir\tDisplay temporary directory");
+      System.out.println("-o or --osname\tDisplay OS name");
+      System.out.println("-r or --osversion\tDisplay OS version");
+      System.out.println("-a or --osarch\tDisplay OS architecture");
       System.out.println("-n or --pdfnow\tDisplay current date-time in PDF format");
       System.out.println("-d <file> or --pdfdate <file>\tDisplay date stamp of <file> in PDF format");
       System.out.println("-s <file> or --filesize <file>\tDisplay size of <file> in bytes");
+      System.out.println("-i <sep> <dir> or --list <sep> <dir>\tDisplay list of all files in <dir> separated by <sep>");
+      System.out.println("-f <sep> <regex> <dir> or --filterlist <sep> <regex> <dir>\tDisplay list of files in <dir> that match <regex> separated by <sep>");
       System.out.println("-h or --help\tDisplay this help message and exit");
       System.out.println("-v or --version\tDisplay version information and exit");
 
@@ -296,6 +389,26 @@ public class TeXOSQuery
          {
             System.out.println(getCwd());
          }
+         else if (args[i].equals("-m") || args[i].equals("--userhome"))
+         {
+            System.out.println(getUserHome());
+         }
+         else if (args[i].equals("-t") || args[i].equals("--tmpdir"))
+         {
+            System.out.println(getTmpDir());
+         }
+         else if (args[i].equals("-r") || args[i].equals("--osversion"))
+         {
+            System.out.println(getOSversion());
+         }
+         else if (args[i].equals("-a") || args[i].equals("--osarch"))
+         {
+            System.out.println(getOSarch());
+         }
+         else if (args[i].equals("-o") || args[i].equals("--osname"))
+         {
+            System.out.println(getOSname());
+         }
          else if (args[i].equals("-n") || args[i].equals("--pdfnow"))
          {
             System.out.println(pdfnow());
@@ -325,6 +438,60 @@ public class TeXOSQuery
             }
 
             System.out.println(getFileLength(fileFromTeXPath(args[i])));
+         }
+         else if (args[i].equals("-i") || args[i].equals("--list"))
+         {
+            i++;
+
+            if (i >= args.length)
+            {
+               System.err.println(
+                 String.format("separator and directory name expected after %s", args[i-1]));
+               System.exit(1);
+            }
+
+            i++;
+
+            if (i >= args.length)
+            {
+               System.err.println(
+                 String.format("directory name expected after %s %s", args[i-2], args[i-1]));
+               System.exit(1);
+            }
+
+            System.out.println(getFileList(args[i-1], new File(fromTeXPath(args[i]))));
+         }
+         else if (args[i].equals("-f") || args[i].equals("--filterlist"))
+         {
+            i++;
+
+            if (i >= args.length)
+            {
+               System.err.println(
+                 String.format("separator, regex and directory name expected after %s", args[i-1]));
+               System.exit(1);
+            }
+
+            i++;
+
+            if (i >= args.length)
+            {
+               System.err.println(
+                 String.format("regex and directory name expected after %s %s", args[i-2], args[i-1]));
+               System.exit(1);
+            }
+
+            i++;
+
+            if (i >= args.length)
+            {
+               System.err.println(
+                 String.format("directory name expected after %s %s", args[i-3], args[i-2], args[i-1]));
+               System.exit(1);
+            }
+
+            System.out.println(getFilterFileList(
+             args[i-2], args[i-1], new File(fromTeXPath(args[i]))));
          }
          else if (args[i].equals("-h") || args[i].equals("--help"))
          {

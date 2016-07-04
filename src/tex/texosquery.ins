@@ -25,10 +25,20 @@
 
 \askforoverwritefalse
 
-\generate{\file{texosquery.sty}{\usepreamble\defaultpreamble
-\usepostamble\defaultpostamble\from{texosquery.dtx}{texosquery.sty,package}}
-\file{texosquery.tex}{\usepreamble\defaultpreamble
-\usepostamble\defaultpostamble\from{texosquery.dtx}{texosquery.tex,package}}
+\generate
+{%
+  \file{texosquery.sty}%
+  {%
+    \usepreamble\defaultpreamble
+    \usepostamble\defaultpostamble
+    \from{texosquery.dtx}{texosquery.sty,package}%
+  }
+  \file{texosquery.tex}%
+  {%
+    \usepreamble\defaultpreamble
+    \usepostamble\defaultpostamble
+    \from{texosquery.dtx}{texosquery.tex,package}%
+  }
 }
 
 \endbatchfile
