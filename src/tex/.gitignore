@@ -8,3 +8,7 @@
 *.gls
 *.idx
 *.out
+*.glg
+*.ilg
+*.ind
+*.toc

@@ -27,16 +27,25 @@
 
 \usepackage[T1]{fontenc}
 \usepackage{tgtermes}
-\usepackage[colorlinks]{hyperref}
+\usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{0}
+\CheckSum{228}
 
 \RecordChanges
 \PageIndex
 \CodelineNumbered
+\IndexPrologue{}
 
-\newcommand*{\shortarg}[1]{\texttt{-#1}}
-\newcommand*{\longarg}[1]{\texttt{-{}-#1}}
+\renewcommand*{\usage}[1]{\hyperpage{#1}}
+\renewcommand*{\main}[1]{\hyperpage{#1}}
+
+\newcommand*{\shortargfmt}[1]{\texttt{-#1}}
+\newcommand*{\longargfmt}[1]{\texttt{-{}-#1}}
+
+\newcommand*{\shortarg}[1]{\shortargfmt{#1}%
+ \index{texosquery options=\texttt{texosquery} options>#1=\protect\shortargfmt{-#1}|hyperpage}}
+\newcommand*{\longarg}[1]{\longargfmt{#1}%
+ \index{texosquery options=\texttt{texosquery} options>#1=\protect\longargfmt{#1}|hyperpage}}
 
 \newenvironment{important}
  {\begin{quote}\textbf{Important Note:}}
@@ -69,6 +78,8 @@
 %and you will also need the Java Runtime Environment (JRE) 
 %installed to use \texttt{texosquery}.
 %\end{important}
+%
+%\tableofcontents
 %
 %\section{Installation}
 %This package consists of:
@@ -120,7 +131,7 @@
 %\cs{includegraphics}.
 %
 %If an input file name is required (for example, with the
-%\texttt{pdfdate} argument described below), then the file may be in
+%\longargfmt{pdfdate} argument described below) then the file may be in
 %the current working directory, relative to the current directory
 %(with forward slash \texttt{/} as the directory divider), an absolute path 
 %(again with forward slash) or on \TeX's path (in
@@ -130,7 +141,7 @@
 %\begin{flushleft}\ttfamily
 %texosquery \meta{action} ...
 %\end{flushleft}
-%Available options:
+%Available actions (at least one required):
 %\begin{description}
 %\item[\shortarg{l} or \longarg{locale}] Display the locale
 %information in the form
@@ -158,8 +169,10 @@
 %\item[\shortarg{a} or \longarg{osarch}] Displays the operating
 %system architecture.
 %\item[\shortarg{n} or \longarg{pdfnow}] Displays the current
-% date and time in PDF format (for example, 
-%\texttt{D:20160704131006+01'00'}).
+% date and time in PDF format. For example 
+%\begin{verbatim}
+%D:20160704131006+01'00'
+%\end{verbatim}
 %\item[\shortarg{d} \meta{file} or \longarg{pdfdate} \meta{file}]
 % Displays the last modified time stamp of the given file in PDF format or a blank line
 % if the file doesn't exist or the file permissions prohibit this
@@ -236,7 +249,8 @@
 %\begin{verbatim}
 %I can't find file `|texosquery'.
 %\end{verbatim}
-%then check that you have the shell escape on. If the error persists
+%then check that you have the shell escape on (and it isn't
+%restricted). If the error persists
 %with the shell escape enabled, check that \texttt{texosquery} is on 
 %your system's path. To do this, open a command prompt or terminal and
 %type \texttt{texosquery}. If it's installed correctly it should display:
@@ -317,13 +331,17 @@
 %\begin{important}
 %The remaining commands all require extra arguments after the
 %relevant switch. These are automatically enclosed in single-quotes
-%to protect any spaces. If the argument requires any single-quote
+%to protect any spaces. If the argument actually contains any single-quote
 %characters, make sure you use \verb|\string\'| to prevent
-%interference.
+%interference. \emph{However, in general it's a very bad idea to use
+%quotes as part of a file name (rather than using them as
+%delimiters).}
 %Since the file name may need to be obtained from \cs{jobname},
 %which sometimes includes double-quotes, the first double-quote pair
 %found is stripped in file name arguments. Any other double-quotes
-%will need to be protected in the same manner as single-quotes. Any paths must use a
+%will need to be protected in the same manner as single-quotes
+%(but, again, this shouldn't be an issue if you use a safe
+%file naming scheme). Any paths must use a
 %forward slash.
 %\end{important}
 %
@@ -335,7 +353,7 @@
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
 %
-%The size in bytes a file
+%The size in bytes of a file
 %(\shortarg{s} or \longarg{filesize}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFileSize
 %\begin{flushleft}\ttfamily
@@ -380,11 +398,12 @@
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
 %
-%\phantomsection
+%\StopEventually{\phantomsection
 %\addcontentsline{toc}{section}{Change History}%
 %\PrintChanges
 %\addcontentsline{toc}{section}{\indexname}%
 %\PrintIndex
+%}
 %
 %\section{The Code}
 %\changes{1.0}{2016-07-04}{Initial release}
@@ -559,16 +578,16 @@
 %
 %If the file name is supplied using \cs{jobname} it may have
 %double-quotes which will interfere with things.
-%\begin{macro}{\texosquerystripfilequotes}
+%\begin{macro}{\texosquerystripquotes}
 %    \begin{macrocode}
-\def\texosquerystripfilequotes#1{%
-  \@texosquery@stripfilequotes\empty#1\@mid@texosquery@stripfilequotes
-    "\relax"\relax\@end@texosquery@stripfilequotes
+\def\texosquerystripquotes#1{%
+  \@texosquery@stripquotes#1\@mid@texosquery@stripquotes
+    "\relax"\relax\@end@texosquery@stripquotes
 }
-\def\@texosquery@stripfilequotes#1"#2"{%
-  \@@texosquery@stripfilequotes#1#2%
+\def\@texosquery@stripquotes#1"#2"{%
+  \@@texosquery@stripquotes#1#2%
 }
-\def\@@texosquery@stripfilequotes#1\@mid@texosquery@stripfilequotes#2\@end@texosquery@stripfilequotes{%
+\def\@@texosquery@stripquotes#1\@mid@texosquery@stripquotes#2\@end@texosquery@stripquotes{%
   #1%
 }
 %    \end{macrocode}
@@ -578,7 +597,7 @@
 %Query the time stamp of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileDate#1#2{\TeXOSQuery{#1}{\string-d 
-  \string'\texosquerystripfilequotes{#2}\string'}}
+  \string'\texosquerystripquotes{#2}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -586,7 +605,7 @@
 %Query the size of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileSize#1#2{\TeXOSQuery{#1}{\string-s 
- \string'\texosquerystripfilequotes{#2}\string'}}
+ \string'\texosquerystripquotes{#2}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -596,7 +615,7 @@
 %    \begin{macrocode}
 \def\TeXOSQueryFileList#1#2#3{\TeXOSQuery{#1}{%
  \string-i \string'#2\string' 
- \string'\texosquerystripfilequotes{#3}\string'}}
+ \string'\texosquerystripquotes{#3}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -608,7 +627,7 @@
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileList#1#2#3#4{\TeXOSQuery{#1}{%
  \string-f \string'#2\string' \string'#3\string' 
- \string'\texosquerystripfilequotes{#4}\string'}}
+ \string'\texosquerystripquotes{#4}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -616,7 +635,7 @@
 %Get the URI of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileURI#1#2{\TeXOSQuery{#1}{\string-u 
- \string'\texosquerystripfilequotes{#2}\string'}}
+ \string'\texosquerystripquotes{#2}\string'}}
 %    \end{macrocode}
 %\end{macro}
 %
