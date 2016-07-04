@@ -2,7 +2,7 @@ package com.dickimawbooks.texosquery;
 
 import java.util.Locale;
 import java.util.Calendar;
-import java.io.File;
+import java.io.*;
 
 public class TeXOSQuery
 {
@@ -123,6 +123,51 @@ public class TeXOSQuery
       }
 
       return filename;
+   }
+
+   public static File fileFromTeXPath(String filename)
+   {
+      filename = fromTeXPath(filename);
+
+      File file = new File(filename);
+
+      if (!file.exists())
+      {
+         // use kpsewhich to find it
+
+         try
+         {
+            Process p = new ProcessBuilder("kpsewhich", filename).start();
+
+            if (p.waitFor() == 0)
+            {
+               InputStream is = p.getInputStream();
+
+               if (is != null)
+               {
+                  BufferedReader in = new BufferedReader(
+                     new InputStreamReader(is));
+
+                  String line = in.readLine();
+
+                  in.close();
+
+                  if (line != null && !line.isEmpty())
+                  {
+                     file = new File(line);
+                  }
+               }
+            }
+         }
+         catch (IOException e)
+         {
+         }
+         catch (InterruptedException e)
+         {
+         }
+      }
+
+      return file;
    }
 
    public static String getCwd()
@@ -266,7 +311,7 @@ public class TeXOSQuery
                System.exit(1);
             }
 
-            System.out.println(pdfDate(new File(fromTeXPath(args[i]))));
+            System.out.println(pdfDate(fileFromTeXPath(args[i])));
          }
          else if (args[i].equals("-s") || args[i].equals("--filesize"))
          {
@@ -279,7 +324,7 @@ public class TeXOSQuery
                System.exit(1);
             }
 
-            System.out.println(getFileLength(new File(fromTeXPath(args[i]))));
+            System.out.println(getFileLength(fileFromTeXPath(args[i])));
          }
          else if (args[i].equals("-h") || args[i].equals("--help"))
          {
