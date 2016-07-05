@@ -6,7 +6,17 @@ import java.io.*;
 
 public class TeXOSQuery
 {
+   public static String escapeHash(String str)
+   {
+      return str.replaceAll("#", "\\#");
+   }
+
    public static String getLocale(Locale locale)
+   {
+      return getLocale(locale, false);
+   }
+
+   public static String getLocale(Locale locale, boolean convertCodeset)
    {
       String id = "";
 
@@ -37,6 +47,11 @@ public class TeXOSQuery
 
          if (codeset != null && !codeset.isEmpty())
          {
+            if (convertCodeset)
+            {
+               codeset = codeset.toLowerCase().replaceAll("-", "");
+            }
+
             id = id+"."+codeset;
          }
 
@@ -80,7 +95,7 @@ public class TeXOSQuery
    {
       try
       {
-         return System.getProperty("os.version", "");
+         return escapeHash(System.getProperty("os.version", ""));
       }
       catch (SecurityException e)
       {
@@ -370,7 +385,9 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("General:");
       System.out.println();
-      System.out.println("-l or --locale\t\tDisplay locale information");
+      System.out.println("-L or --locale\t\tDisplay locale information");
+      System.out.println("-l or --locale-lcs\tAs --locale but codeset ");
+      System.out.println("\t\t\tin lowercase with hyphens stripped");
       System.out.println("-c or --cwd\t\tDisplay current working directory");
       System.out.println("-m or --userhome\tDisplay user's home directory");
       System.out.println("-t or --tmpdir\t\tDisplay temporary directory");
@@ -419,9 +436,13 @@ public class TeXOSQuery
 
       for (int i = 0; i < args.length; i++)
       {
-         if (args[i].equals("-l") || args[i].equals("--locale"))
+         if (args[i].equals("-L") || args[i].equals("--locale"))
          {
             System.out.println(getLocale(Locale.getDefault()));
+         }
+         else if (args[i].equals("-l") || args[i].equals("--locale-lcs"))
+         {
+            System.out.println(getLocale(Locale.getDefault(), true));
          }
          else if (args[i].equals("-c") || args[i].equals("--cwd"))
          {

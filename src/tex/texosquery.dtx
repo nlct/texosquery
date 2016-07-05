@@ -144,7 +144,7 @@
 %\end{flushleft}
 %Available actions (at least one required):
 %\begin{description}
-%\item[\shortarg{l} or \longarg{locale}] Display the locale
+%\item[\shortarg{L} or \longarg{locale}] Display the locale
 %information in the form
 %\begin{flushleft}\ttfamily
 %\meta{lang}-\meta{region}.\meta{codeset}@\meta{modifier}
@@ -157,6 +157,11 @@
 % if unavailable. For example, \texttt{en-GB.UTF-8} has the
 % \meta{modifier} omitted, and \texttt{en} has all but the language
 % omitted.
+%\item[\shortarg{l} or \longarg{locale-lcs}] As the above but the
+%codeset (if present) is converted to lower case and any hyphens are
+%stripped. For example, if \longargfmt{locale} returns
+%\texttt{en-GB.UTF-8}, then \longargfmt{locale-lcs} would return
+%\texttt{en-GB.utf8}.
 %\item[\shortarg{c} or \longarg{cwd}] Displays the current working
 %directory.
 %\item[\shortarg{m} or \longarg{userhome}] Displays the user's home
@@ -243,8 +248,11 @@
 %\end{flushleft}
 %where \meta{cs} is the control sequence in which to store the
 %result and \meta{args} are the command line arguments to pass to 
-%\texttt{texosquery}. There are some short cut commands for
-%convenience, described below.
+%\texttt{texosquery}. This first locally changes the category code
+%of some problematic characters that may appear in the result.
+%The only special characters that aren't changed are the backslash
+%\verb|\|, curly braces \verb|{| and \verb|}|, and hash \verb|#|.
+%There are some short cut commands for convenience, described below.
 %
 %If any of these commands cause an error message in the form:
 %\begin{verbatim}
@@ -273,11 +281,17 @@
 %This conditional will automatically be switched on if
 %\cs{shellescape} or \cs{pdfshellescape} is 0.
 %
-%The locale (\shortarg{l} or \longarg{locale}) information can be
+%The locale (\shortarg{l} or \longarg{locale-lcs}) information can be
 %obtained using:
 %\DescribeMacro\TeXOSQueryLocale
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryLocale}\marg{cs}
+%\end{flushleft}
+%Note that this uses the lower case codeset form, which has a better
+%chance of matching the encoding names used by the \texttt{inputenc}
+%package. If you want the unprocessed codeset name, you can do:
+%\begin{flushleft}\ttfamily
+%\cs{TeXOSQuery}\marg{cs}\{\cs{string}-L\}
 %\end{flushleft}
 %
 %The current working directory (\shortarg{c} or \longarg{cwd}) can
