@@ -22,6 +22,25 @@ There are files provided for easy access in TeX documents:
  - texosquery.tex : generic TeX code
  - texosquery.sty : LaTeX package
 
+The application can query the following:
+
+ - locale and codeset
+ - current working directory
+ - user home directory
+ - temporary directory
+ - OS name, arch and version
+ - Current date and time in PDF format
+ - Date-time stamp of a file in PDF format
+ - Size of a file in bytes
+ - Contents of a directory
+ - Directory contents filtered by regular expression
+ - URI of a file
+ - Canonical path of a file
+
+All paths use a forward slash as directory divider.
+Interface commands in texosquery.tex change the category code
+of most special characters while reading the result.
+
 Example usage:
 
 Plain TeX:

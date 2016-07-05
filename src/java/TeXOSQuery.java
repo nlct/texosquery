@@ -8,7 +8,7 @@ public class TeXOSQuery
 {
    public static String escapeHash(String str)
    {
-      return str.replaceAll("#", "\\#");
+      return str.replaceAll("#", "\\\\#");
    }
 
    public static String getLocale(Locale locale)
@@ -59,7 +59,7 @@ public class TeXOSQuery
 
          if (script != null && !script.isEmpty())
          {
-            id = id+"@"+script;
+            id = id+"@"+escapeHash(script);
          }
 
       }
@@ -71,7 +71,7 @@ public class TeXOSQuery
    {
       try
       {
-         return System.getProperty("os.name", "");
+         return escapeHash(System.getProperty("os.name", ""));
       }
       catch (SecurityException e)
       {
@@ -83,7 +83,7 @@ public class TeXOSQuery
    {
       try
       {
-         return System.getProperty("os.arch", "");
+         return escapeHash(System.getProperty("os.arch", ""));
       }
       catch (SecurityException e)
       {
@@ -107,7 +107,7 @@ public class TeXOSQuery
    {
       try
       {
-         return System.getProperty("user.home", "");
+         return toTeXPath(System.getProperty("user.home", ""));
       }
       catch (SecurityException e)
       {
@@ -122,12 +122,17 @@ public class TeXOSQuery
 
    public static String toTeXPath(String filename)
    {
-      if (File.separatorChar == '\\')
+      if (filename == null)
       {
-         return filename.replaceAll("\\\\", "/");
+         return "";
       }
 
-      return filename;
+      if (File.separatorChar == '\\')
+      {
+         filename = filename.replaceAll("\\\\", "/");
+      }
+
+      return escapeHash(filename);
    }
 
    public static String fromTeXPath(String filename)
@@ -290,7 +295,7 @@ public class TeXOSQuery
 
             // no need to worry about directory divider
             // File.list() just returns the name not the path
-            builder.append(list[i]);
+            builder.append(escapeHash(list[i]));
          }
       }
       catch (SecurityException e)
@@ -339,7 +344,7 @@ public class TeXOSQuery
 
             // no need to worry about directory divider
             // File.list() just returns the name not the path
-            builder.append(list[i]);
+            builder.append(escapeHash(list[i]));
          }
       }
       catch (SecurityException e)
@@ -358,6 +363,8 @@ public class TeXOSQuery
 
       try
       {
+         // don't worry about '#' as it would've been converted to
+         // %23 (\TeXOSQuery changes the catcode of %)
          return file.toURI().toString();
       }
       catch (SecurityException e)
@@ -367,9 +374,30 @@ public class TeXOSQuery
       return "";
    }
 
+   public static String filePath(File file)
+   {
+      if (!file.exists())
+      {
+         return "";
+      }
+
+      try
+      {
+         return toTeXPath(file.getCanonicalPath());
+      }
+      catch (SecurityException e)
+      {
+      }
+      catch (IOException e)
+      {
+      }
+
+      return "";
+   }
+
    public static void syntax()
    {
-      System.out.println("Useage: texosquery <option>...");
+      System.out.println("Usage: texosquery <option>...");
 
       System.out.println();
       System.out.println("Cross-platform OS query application");
@@ -415,6 +443,9 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("-u <file> or --uri <file>");
       System.out.println("  Display the URI of <file>");
+      System.out.println();
+      System.out.println("-p <file> or --path <file>");
+      System.out.println("  Display the canonical path of <file>");
 
    }
 
@@ -605,6 +636,26 @@ public class TeXOSQuery
             else
             {
                System.out.println(fileURI(fileFromTeXPath(args[i])));
+            }
+         }
+         else if (args[i].equals("-p") || args[i].equals("--path"))
+         {
+            i++;
+
+            if (i >= args.length)
+            {
+               System.err.println(
+                 String.format("filename expected after %s", args[i-1]));
+               System.exit(1);
+            }
+
+            if (args[i].isEmpty())
+            {
+               System.out.println();
+            }
+            else
+            {
+               System.out.println(filePath(fileFromTeXPath(args[i])));
             }
          }
          else if (args[i].equals("-h") || args[i].equals("--help"))

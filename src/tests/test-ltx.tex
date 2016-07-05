@@ -23,10 +23,18 @@ Now: \texttt{\result}.
 \TeXOSQueryFileDate{\result}{\jobname.tex}
 File date: \texttt{\result}.
 
-\section{File Sisze}
+\section{File Size}
 
 \TeXOSQueryFileSize{\result}{\jobname.tex}
 file size: \result bytes.
+
+\section{File Path and URI}
+
+\TeXOSQueryFilePath{\result}{\jobname.tex}
+Path: \texttt{\result}.
+
+\TeXOSQueryFileURI{\result}{\jobname.tex}
+URI: \texttt{\result}.
 
 \section{OS Information}
 
@@ -48,7 +56,7 @@ All files in given directory.
 
 \expandafter\docsvlist\expandafter{\result}
 
-\section{Filtered File List (files extensions)}
+\section{Filtered File List (files with extensions)}
 
 Filtered file list.
 \TeXOSQueryFilterFileList{\result}{,}{.+\string\..*}{.}

@@ -29,7 +29,7 @@
 \usepackage{tgtermes}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{227}
+\CheckSum{234}
 
 \RecordChanges
 \PageIndex
@@ -60,7 +60,7 @@
 %\DeleteShortVerb{|}
 %
 %\title{texosquery: query OS information from \TeX}
-%\author{Nicola L. C. Talbot}
+%\author{Nicola L. C. Talbot\\\url{http://www.dickimaw-books.com/}}
 %\date{2016-07-05 (v1.0)}
 %\maketitle
 %
@@ -203,6 +203,10 @@
 %command \cs{TeXOSQuery} protects against this by changing the
 %category code, but if you explicitly call \texttt{texosquery}
 %using the shell escape, you'll need to be careful of this.
+%\item[\shortarg{p} \meta{file} or \longarg{path} \meta{file}]
+%Displays the canonical path of the given file or a blank line if
+%the file doesn't exists or the file permissions prohibit this
+%action.
 %\item[\shortarg{h} or \longarg{help}] Displays help message and
 %exits.
 %\item[\shortarg{v} or \longarg{version}] Displays version
@@ -252,6 +256,9 @@
 %of some problematic characters that may appear in the result.
 %The only special characters that aren't changed are the backslash
 %\verb|\|, curly braces \verb|{| and \verb|}|, and hash \verb|#|.
+%(\texttt{texosquery.jar} will replace \verb|#| with \verb|\#| in places
+%where it might possibly occur in the result, but in general it's
+%best to avoid these characters in file names.)
 %There are some short cut commands for convenience, described below.
 %
 %If any of these commands cause an error message in the form:
@@ -259,12 +266,17 @@
 %I can't find file `|texosquery'.
 %\end{verbatim}
 %then check that you have the shell escape on (and it isn't
-%restricted). If the error persists
-%with the shell escape enabled, check that \texttt{texosquery} is on 
+%restricted). If the error persists with the shell escape enabled
+%(and not restricted), check that \texttt{texosquery} is on 
 %your system's path. To do this, open a command prompt or terminal and
-%type \texttt{texosquery}. If it's installed correctly it should display:
+%type \texttt{texosquery}. If it isn't installed correctly, there will be a
+%message like:
 %\begin{verbatim}
-%Missing argument. Try texosquery --help
+%`texosquery' is not recognised
+%\end{verbatim}
+%or
+%\begin{verbatim}
+%texosquery: command not found
 %\end{verbatim}
 %
 %Dry run mode is determined by the conditional
@@ -291,7 +303,7 @@
 %chance of matching the encoding names used by the \texttt{inputenc}
 %package. If you want the unprocessed codeset name, you can do:
 %\begin{flushleft}\ttfamily
-%\cs{TeXOSQuery}\marg{cs}\{\cs{string}-L\}
+%\cs{TeXOSQuery}\marg{cs}\{\shortarg{L}\}
 %\end{flushleft}
 %
 %The current working directory (\shortarg{c} or \longarg{cwd}) can
@@ -410,6 +422,14 @@
 %\DescribeMacro\TeXOSQueryFileURI
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryFileURI}\marg{cs}\marg{filename}
+%\end{flushleft}
+%where \meta{filename} is the name of the file.
+%
+%The canonical path of a file
+%(\shortarg{p} or \longarg{path}) can be obtained using:
+%\DescribeMacro\TeXOSQueryFilePath
+%\begin{flushleft}\ttfamily
+%\cs{TeXOSQueryFilePath}\marg{cs}\marg{filename}
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
 %
@@ -650,6 +670,14 @@
 %Get the URI of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileURI#1#2{\TeXOSQuery{#1}{\string-u 
+ \string'\texosquerystripquotes{#2}\string'}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryFilePath}
+%Get the canonical path of the file given in the second argument.
+%    \begin{macrocode}
+\def\TeXOSQueryFilePath#1#2{\TeXOSQuery{#1}{\string-p 
  \string'\texosquerystripquotes{#2}\string'}}
 %    \end{macrocode}
 %\end{macro}
