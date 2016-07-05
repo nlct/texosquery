@@ -1,7 +1,7 @@
 # texosquery
 cross-platform Java application to query OS information designed for use in TeX's shell escape mechanism
 
-The actual Java application is in texosquery.jar.
+The actual Java application is in `texosquery.jar`.
 
 The bash script `texosquery` just provides a convenient way
 of calling `java -jar texosquery.jar`.
@@ -44,7 +44,7 @@ now: \result.
 file date: \result.
 
 \TeXOSQueryFileSize{\result}{\jobname.tex}
-file size: \result.
+file size: \result bytes.
 
 \bye
 ```
@@ -73,31 +73,14 @@ now: \result.
 file date: \result.
 
 \TeXOSQueryFileSize{\result}{\jobname.tex}
-file size: \result.
+file size: \result bytes.
 
 \end{document}
 ```
 
-Alternatively use the shell escape explicitly:
+For a full list of available commands, see the documentation.
 
-```latex
-% arara: pdflatex: {shell: on}
-\documentclass{article}
-
-\begin{document}
-Test document.
-
-\ttfamily
-
-\input{|"texosquery --locale"}
-
-\input{|"texosquery --pdfnow"}
-
-\input{|"texosquery --pdfdate \jobname.tex"}
-
-\input{|"texosquery --cwd"}
-
-\input{|"texosquery --filesize \jobname.tex"}
-
-\end{document}
-```
+You can omit texosquery.tex and directly use `texosquery`
+in TeX's shell escape, but take care of special characters
+occurring in the result or if double-quotes occur in
+`\jobname`.

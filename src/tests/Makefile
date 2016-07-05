@@ -6,13 +6,13 @@ texosquery.tex	: ../tex/texosquery.dtx ../tex/texosquery.ins
 texosquery.sty	: ../tex/texosquery.dtx ../tex/texosquery.ins
 		cd ../tex; latex texosquery.ins; mv texosquery.{tex,sty} ../tests
 
-test.pdf	: test.tex
+test.pdf	: test.tex ../bin/texosquery.jar
 		arara test
 
-test-plain.pdf	: texosquery.tex test-plain.tex
+test-plain.pdf	: texosquery.tex test-plain.tex ../bin/texosquery.jar
 		arara test-plain
 
-test-ltx.pdf	: texosquery.sty test-ltx.tex
+test-ltx.pdf	: texosquery.sty test-ltx.tex ../bin/texosquery.jar
 		arara test-ltx
 
 clean	:

@@ -29,7 +29,7 @@
 \usepackage{tgtermes}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{228}
+\CheckSum{227}
 
 \RecordChanges
 \PageIndex
@@ -61,7 +61,7 @@
 %
 %\title{texosquery: query OS information from \TeX}
 %\author{Nicola L. C. Talbot}
-%\date{2016-07-04 (v1.0)}
+%\date{2016-07-05 (v1.0)}
 %\maketitle
 %
 %\begin{abstract}
@@ -70,7 +70,8 @@
 %shell escape mechanism.
 %The accompanying \TeX\ code provides a simple interface to the
 %\texttt{texosquery} Java application, which may be skipped
-%if you want to explicity use \cs{write18} or \cs{input}.
+%if you want to explicitly use \cs{input} (but take
+%care of any special characters appearing in the result).
 %\end{abstract}
 %
 %\begin{important}
@@ -85,7 +86,7 @@
 %This package consists of:
 %\begin{description}
 %\item[\texttt{texosquery.tex}] generic \TeX\ code;
-%\item[\texttt{texosquery.sty}] a small \LaTeX\ package wrapper
+%\item[\texttt{texosquery.sty}] a small \LaTeX\ package wrapper;
 %\item[\texttt{texosquery.jar}] the Java application. 
 %\end{description}
 %There is also a bash script called \texttt{texosquery} which 
@@ -406,7 +407,7 @@
 %}
 %
 %\section{The Code}
-%\changes{1.0}{2016-07-04}{Initial release}
+%\changes{1.0}{2016-07-05}{Initial release}
 %\subsection{Generic \TeX\ Code}
 %\iffalse
 %    \begin{macrocode}
@@ -662,7 +663,7 @@
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2016/07/04 v1.0 (NLCT)]
+\ProvidesPackage{texosquery}[2016/07/05 v1.0 (NLCT)]
 %    \end{macrocode}
 %Load \texttt{texosquery.tex}:
 %    \begin{macrocode}
