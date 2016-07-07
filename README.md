@@ -38,7 +38,7 @@ changed to 12 while reading the result.
 ## Installation
 
 The actual Java application is in `texosquery.jar`.
-The `.tex` and `.sty` file can be extracted from `texosquery.dtx`
+The `.tex` and `.sty` files can be extracted from `texosquery.dtx`
 using `tex texosquery.ins`. In the following, replace TEXMF with the
 path to your TEXMF directory.
 
@@ -67,7 +67,6 @@ Plain TeX:
 % arara: pdftex: {shell: on}
 \input texosquery
 
-\tt
 \TeXOSQueryLocale{\result}
 locale: \result.
 
@@ -121,7 +120,8 @@ All jpg and png files in current directory:
 \end{document}
 ```
 
-For a full list of available commands, see the documentation.
+For a full list of available commands, see the documentation
+(`texosquery.pdf`).
 
 You can omit `texosquery.tex` and directly use `texosquery`
 in TeX's shell escape, but take care of special characters
@@ -134,7 +134,7 @@ The `.tex` and `.sty` files and documentation are contained in
 `texosquery.dtx`. To compile the documentation:
 ```bash
 pdflatex texosquery.dtx
-makeindex -s gglo.ist -t texosquery.glg -o
+makeindex -s gglo.ist -t texosquery.glg -o texosquery.gls texosquery.glo
 makeindex -s gind.ist texosquery.idx
 pdflatex texosquery.dtx
 pdflatex texosquery.dtx
@@ -157,5 +157,7 @@ jar cmf ../java/Manifest.txt ../texosquery.jar com/dickimawbooks/texosquery/*.cl
 ```
 
 Source on GitHub: https://github.com/nlct/texosquery
+
 Author Home Page: http://www.dickimaw-books.com/
+
 License: LPPL 1.3+
