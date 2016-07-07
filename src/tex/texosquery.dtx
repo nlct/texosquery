@@ -27,6 +27,7 @@
 
 \usepackage[T1]{fontenc}
 \usepackage{tgtermes}
+\usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
 \CheckSum{234}
@@ -61,7 +62,7 @@
 %
 %\title{texosquery: query OS information from \TeX}
 %\author{Nicola L. C. Talbot\\\url{http://www.dickimaw-books.com/}}
-%\date{2016-07-05 (v1.0)}
+%\date{2016-07-07 (v1.0)}
 %\maketitle
 %
 %\begin{abstract}
@@ -82,45 +83,18 @@
 %
 %\tableofcontents
 %
-%\section{Installation}
-%This package consists of:
-%\begin{description}
-%\item[\texttt{texosquery.tex}] generic \TeX\ code;
-%\item[\texttt{texosquery.sty}] a small \LaTeX\ package wrapper;
-%\item[\texttt{texosquery.jar}] the Java application. 
-%\end{description}
-%There is also a bash script called \texttt{texosquery} which 
-%can be used as a convenient way of invoking 
-%\texttt{texosquery.jar}. Windows users may prefer to
-%create a DOS batch file that performs a similar function: use the
-%text editor of your choice to create a file called
-%\texttt{texosquery.bat} that contains:
-%\begin{verbatim}
-%@start javaw -jar "%~dp0\texosquery.jar" %*
-%\end{verbatim}
-%
-%Put both the \texttt{.jar} file and the bash script\slash batch file
-%on your system's path. (You may put the \texttt{.jar} file in a
-%different location, but you will need to edit the script with the
-%correct path to the \texttt{jar} file.)
-%
-%Put the generic \TeX\ code \texttt{texosquery.tex} in
-%\meta{TEXMF}\texttt{\slash tex\slash generic\slash texosquery/}
-%and put the \LaTeX\ package \texttt{texosquery.sty} in
-%\meta{TEXMF}\texttt{\slash tex\slash latex\slash texosquery/}
-%where \meta{TEXMF} is the TEXMF directory.
-%
 %\section{texosquery.jar: the Java application}
-%The \texttt{texosquery} Java application is a command line
-%application that looks up certain system information that
-%may be of use in \TeX\ documents. All this information can
-%easily be obtained using native commands, but the Java application
-%allows an OS-independent approach.
+%The \texttt{texosquery} Java command line application looks up
+%certain system information that may be of use in \TeX\ 
+%documents. All this information can easily be obtained using 
+%native commands, but the Java application allows an 
+%OS-independent approach with results that can easily be
+%captured by \TeX's shell-escape without having to strip 
+%formatting information.
 %
 %\begin{important}
-%Note that \texttt{texosquery}
-%provides read-only actions, and I don't intend adding any
-%actions that modify settings or files.
+%\texttt{texosquery} provides read-only actions, and I don't 
+%intend adding any actions that modify system settings or files.
 %\end{important}
 %
 %Since the application is designed to work with \TeX, each
@@ -179,14 +153,24 @@
 %\begin{verbatim}
 %D:20160704131006+01'00'
 %\end{verbatim}
+%Note that some, but not all, \TeX\ formats provide
+%\cs{pdfcreationdate}, which is more efficient than using the shell
+%escape, but this can be used
+%as a fallback method for those that don't (for example, \XeTeX).
 %\item[\shortarg{d} \meta{file} or \longarg{pdfdate} \meta{file}]
 % Displays the last modified time stamp of the given file in PDF format or a blank line
 % if the file doesn't exist or the file permissions prohibit this
 % action.
+%Again some, but not all, \TeX\ formats provide
+%\cs{pdffilemoddate}\marg{file}, which is more efficient than using
+%the shell escape.
 %\item[\shortarg{s} \meta{file} or \longarg{filesize} \meta{file}]
 % Displays the size in bytes of the given file or a blank line
 % if the file doesn't exist or the file permissions prohibit this
 % action.
+%Some, but not all, \TeX\ formats provide
+%\cs{pdffilesize}\marg{file}, which is more efficient than using
+%the shell escape.
 %\item[\shortarg{i} \meta{sep} \meta{dir} or \longarg{list}
 %\meta{sep} \meta{dir}]
 %List all files in the given directory with the output on a single
@@ -195,7 +179,11 @@
 %\item[\shortarg{f} \meta{sep} \meta{regex} \meta{dir} or
 %\longarg{filterlist} \meta{sep} \meta{regex} \meta{dir}]
 %Like the above but only lists those files whose name matches the
-%regular expression given in \meta{regex}.
+%regular expression given in \meta{regex}. Note that this tests for a
+%complete match on the file name (not including path). For example,
+%if \meta{regexp} is \texttt{foo.*}, it will only match files whose
+%name starts with \texttt{foo} (for example, \texttt{foobar} will
+%match but \texttt{barfoo} won't).
 %\item[\shortarg{u} \meta{file} or \longarg{uri} \meta{file}]
 %Displays the URI of the given file or a blank line if the file
 %doesn't exist or the file permissions prohibit this action.
@@ -215,7 +203,7 @@
 %
 %If multiple options are given, they will be processed in the
 %order specified in the command line invocation. Each result will
-% be displayed on a separate line.
+%be displayed on a separate line.
 %
 %\section{texosquery.tex: generic \TeX\ code}
 %You can run \texttt{texosquery} directly from \TeX's shell escape.
@@ -265,8 +253,8 @@
 %\begin{verbatim}
 %I can't find file `|texosquery'.
 %\end{verbatim}
-%then check that you have the shell escape on (and it isn't
-%restricted). If the error persists with the shell escape enabled
+%then check that you have the shell escape on. If the error 
+%persists with the shell escape enabled
 %(and not restricted), check that \texttt{texosquery} is on 
 %your system's path. To do this, open a command prompt or terminal and
 %type \texttt{texosquery}. If it isn't installed correctly, there will be a
@@ -278,6 +266,8 @@
 %\begin{verbatim}
 %texosquery: command not found
 %\end{verbatim}
+%If this happens, check the installation. (Instructions are
+%in the accompanying \texttt{README.md} file.)
 %
 %Dry run mode is determined by the conditional
 %\DescribeMacro\ifTeXOSQueryDryRun
@@ -354,6 +344,9 @@
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryNow}\marg{cs}
 %\end{flushleft}
+%This is provided for the benefit of users who don't have
+%\cs{pdfcreationdate} defined by their \TeX\ format (for example,
+%\XeTeX).
 %
 %\begin{important}
 %The remaining commands all require extra arguments after the
@@ -368,8 +361,8 @@
 %found is stripped in file name arguments. Any other double-quotes
 %will need to be protected in the same manner as single-quotes
 %(but, again, this shouldn't be an issue if you use a safe
-%file naming scheme). Any paths must use a
-%forward slash.
+%file naming scheme). Any paths should use a
+%forward slash for the directory divider.
 %\end{important}
 %
 %The modification date-time stamp in PDF format for a file
@@ -379,6 +372,8 @@
 %\cs{TeXOSQueryFileDate}\marg{cs}\marg{filename}
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
+%This is provided for the benefit of users who don't have
+%\cs{pdffilemoddate} defined by their \TeX\ format.
 %
 %The size in bytes of a file
 %(\shortarg{s} or \longarg{filesize}) can be obtained using:
@@ -387,6 +382,8 @@
 %\cs{TeXOSQueryFileSize}\marg{cs}\marg{filename}
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
+%This is provided for the benefit of users who don't have
+%\cs{pdffilesize} defined by their \TeX\ format.
 %
 %The list of files in a given directory
 %(\shortarg{i} or \longarg{list}) can be obtained using:
@@ -400,7 +397,7 @@
 %\TeXOSQueryFileList{\result}{,}{.}
 %\end{verbatim}
 %will store a comma-separated list of all the files contained in the
-%current directory.
+%current directory in the control sequence \cs{result}.
 %
 %A filtered list of files in a given directory
 %(\shortarg{f} or \longarg{filterlist}) can be obtained using:
@@ -415,7 +412,11 @@
 %\TeXOSQueryFilterFileList{\result}{,}{.+\string\..*}{.}
 %\end{verbatim}
 %Note the use of \verb|\string\.| to ensure that \cs{.} isn't
-%interpreted as a command.
+%interpreted as a command. Another example, list only \texttt{.png}
+%and \texttt{.jpg} files in the directory called \texttt{images}:
+%\begin{verbatim}
+%\TeXOSQueryFilterFileList{\result}{,}{.+\string\.(jpg|png)}{images}
+%\end{verbatim}
 %
 %The URI of a file
 %(\shortarg{u} or \longarg{uri}) can be obtained using:
@@ -424,6 +425,8 @@
 %\cs{TeXOSQueryFileURI}\marg{cs}\marg{filename}
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
+%(Any percent symbols \verb|%| contained in the URI will have
+%their category code set to 12.)
 %
 %The canonical path of a file
 %(\shortarg{p} or \longarg{path}) can be obtained using:
@@ -705,7 +708,7 @@
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2016/07/05 v1.0 (NLCT)]
+\ProvidesPackage{texosquery}[2016/07/07 v1.0 (NLCT)]
 %    \end{macrocode}
 %Load \texttt{texosquery.tex}:
 %    \begin{macrocode}
