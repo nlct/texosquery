@@ -156,6 +156,8 @@ cd ../classes
 jar cmf ../java/Manifest.txt ../texosquery.jar com/dickimawbooks/texosquery/*.class
 ```
 
+---
+
 Source on GitHub: https://github.com/nlct/texosquery
 
 Author Home Page: http://www.dickimaw-books.com/
