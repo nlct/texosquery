@@ -677,5 +677,5 @@ public class TeXOSQuery
    }
 
    public static final String versionNum = "1.0";
-   public static final String versionDate = "2016-07-07";
+   public static final String versionDate = "2016-07-08";
 }

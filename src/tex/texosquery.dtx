@@ -62,7 +62,7 @@
 %
 %\title{texosquery: query OS information from \TeX}
 %\author{Nicola L. C. Talbot\\\url{http://www.dickimaw-books.com/}}
-%\date{2016-07-07 (v1.0)}
+%\date{2016-07-08 (v1.0)}
 %\maketitle
 %
 %\begin{abstract}
@@ -209,7 +209,7 @@
 %You can run \texttt{texosquery} directly from \TeX's shell escape.
 %For example:
 %\begin{verbatim}
-%\input{|"texosquery --locale"}
+%\input|"texosquery --locale"
 %\end{verbatim}
 %However, \texttt{texosquery.tex} provides generic \TeX\ code to do
 %this for you and store the result in a control sequence.
@@ -444,7 +444,7 @@
 %}
 %
 %\section{The Code}
-%\changes{1.0}{2016-07-05}{Initial release}
+%\changes{1.0}{2016-07-08}{Initial release}
 %\subsection{Generic \TeX\ Code}
 %\iffalse
 %    \begin{macrocode}
@@ -708,7 +708,7 @@
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2016/07/07 v1.0 (NLCT)]
+\ProvidesPackage{texosquery}[2016/07/08 v1.0 (NLCT)]
 %    \end{macrocode}
 %Load \texttt{texosquery.tex}:
 %    \begin{macrocode}
