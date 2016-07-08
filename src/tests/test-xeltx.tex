@@ -1,0 +1,73 @@
+% arara: xelatex: {shell: on}
+\documentclass{article}
+
+\usepackage{texosquery}
+\usepackage{etoolbox}
+
+\begin{document}
+
+\section{Locale}
+
+\TeXOSQueryLocale{\result}
+Locale: \texttt{\result}.
+
+\section{Current Working Directory}
+
+\TeXOSQueryCwd{\result}
+cwd: \texttt{\result}.
+
+\section{PDF Date-Time}
+\TeXOSQueryNow{\result}
+Now: \texttt{\result}.
+
+\TeXOSQueryFileDate{\result}{\jobname.tex}
+File date: \texttt{\result}.
+
+\section{File Size}
+
+\TeXOSQueryFileSize{\result}{\jobname.tex}
+file size: \result bytes.
+
+\section{File Path and URI}
+
+\TeXOSQueryFilePath{\result}{\jobname.tex}
+Path: \texttt{\result}.
+
+\TeXOSQueryFileURI{\result}{\jobname.tex}
+URI: \texttt{\result}.
+
+\section{OS Information}
+
+\TeXOSQueryName{\result}
+name: \result.
+
+\TeXOSQueryArch{\result}
+arch: \result.
+
+\TeXOSQueryVersion{\result}
+version: \texttt{\result}.
+
+\section{File List}
+
+All files in given directory.
+
+\renewcommand{\do}[1]{\texttt{#1}.\par}
+\TeXOSQueryFileList{\result}{,}{..}
+
+\expandafter\docsvlist\expandafter{\result}
+
+\section{Filtered File List (files with extensions)}
+
+Filtered file list.
+\TeXOSQueryFilterFileList{\result}{,}{.+\string\..*}{.}
+
+\expandafter\docsvlist\expandafter{\result}
+
+\section{Filtered File List (no hidden files)}
+
+Filtered file list.
+\TeXOSQueryFilterFileList{\result}{,}{[^.].*}{..}
+
+\expandafter\docsvlist\expandafter{\result}
+
+\end{document}

@@ -50,7 +50,9 @@ path to your TEXMF directory.
 Unix-like users: move the bash script `texosquery` to somewhere on
 your path.
 
-Windows users: (untested) create a file called `texosquery.bat` that contains:
+Windows users: TeX Live's generic wrapper should be able to locate
+the `texosquery.jar` file, but if not or you're not using TL,
+then (untested) create a file called `texosquery.bat` that contains:
 ```dos
 @ECHO OFF
 FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar') DO SET JARPATH=%%I
