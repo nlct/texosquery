@@ -31,7 +31,7 @@ public class TeXOSQuery
 
          String country = locale.getCountry();
          
-         if (country != null && !country.isEmpty())
+         if (country != null && !"".equals(country))
          {
             if (id.isEmpty())
             {
@@ -45,7 +45,7 @@ public class TeXOSQuery
 
          String codeset = System.getProperty("file.encoding");
 
-         if (codeset != null && !codeset.isEmpty())
+         if (codeset != null && !"".equals(codeset))
          {
             if (convertCodeset)
             {
@@ -57,7 +57,7 @@ public class TeXOSQuery
 
          String script = locale.getScript();
 
-         if (script != null && !script.isEmpty())
+         if (script != null && !"".equals(script))
          {
             id = id+"@"+escapeHash(script);
          }
@@ -172,7 +172,7 @@ public class TeXOSQuery
 
                   in.close();
 
-                  if (line != null && !line.isEmpty())
+                  if (line != null && !"".equals(line))
                   {
                      file = new File(fromTeXPath(line));
                   }
@@ -313,7 +313,7 @@ public class TeXOSQuery
          return "";
       }
 
-      if (regex == null || regex.isEmpty())
+      if (regex == null || "".equals(regex))
       {
          return getFileList(sep, dir);
       }
@@ -514,7 +514,7 @@ public class TeXOSQuery
                System.exit(1);
             }
 
-            if (args[i].isEmpty())
+            if ("".equals(args[i]))
             {
                System.out.println();
             }
@@ -534,7 +534,7 @@ public class TeXOSQuery
                System.exit(1);
             }
 
-            if (args[i].isEmpty())
+            if ("".equals(args[i]))
             {
                System.out.println();
             }
@@ -565,7 +565,7 @@ public class TeXOSQuery
                System.exit(1);
             }
 
-            if (args[i].isEmpty())
+            if ("".equals(args[i]))
             {
                System.out.println();
             }
@@ -608,7 +608,7 @@ public class TeXOSQuery
                System.exit(1);
             }
 
-            if (args[i].isEmpty())
+            if ("".equals(args[i]))
             {
                System.out.println();
             }
@@ -629,7 +629,7 @@ public class TeXOSQuery
                System.exit(1);
             }
 
-            if (args[i].isEmpty())
+            if ("".equals(args[i]))
             {
                System.out.println();
             }
@@ -649,7 +649,7 @@ public class TeXOSQuery
                System.exit(1);
             }
 
-            if (args[i].isEmpty())
+            if ("".equals(args[i]))
             {
                System.out.println();
             }
