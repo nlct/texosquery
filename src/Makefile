@@ -10,8 +10,8 @@ bin/texosquery.jar	: java/Manifest.txt \
 classes/com/dickimawbooks/texosquery/TeXOSQuery.class	: classes/com/dickimawbooks/texosquery \
 	java/*.java
 	cd java; \
-	javac -d ../classes \
-	-Xlint:unchecked -Xlint:deprecation \
+	javac -source 1.5 -target 1.5 -d ../classes \
+	-Xlint:unchecked -Xlint:deprecation -Xlint:-options \
 	*.java
 
 classes/com/dickimawbooks/texosquery	:
