@@ -8,11 +8,15 @@ locale: \result.
 \TeXOSQueryCwd{\result}
 cwd: \result.
 
+{\catcode`\D=12\relax
+ \gdef\parsepdfdate D:#1\endparsepdfdate{#1}%
+}
+
 \TeXOSQueryNow{\result}
-now: \result.
+now: \result. (\expandafter\parsepdfdate\result\endparsepdfdate.)
 
 \TeXOSQueryFileDate{\result}{\jobname.tex}
-file date: \result.
+file date: \result. (\expandafter\parsepdfdate\result\endparsepdfdate.)
 
 \TeXOSQueryFileSize{\result}{\jobname.tex}
 file size: \result.

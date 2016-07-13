@@ -30,7 +30,7 @@
 \usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{234}
+\CheckSum{262}
 
 \RecordChanges
 \PageIndex
@@ -62,7 +62,7 @@
 %
 %\title{texosquery: query OS information from \TeX}
 %\author{Nicola L. C. Talbot\\\url{http://www.dickimaw-books.com/}}
-%\date{2016-07-08 (v1.0)}
+%\date{2016-07-13 (v1.1)}
 %\maketitle
 %
 %\begin{abstract}
@@ -80,6 +80,9 @@
 %and you will also need the Java Runtime Environment (JRE) 
 %installed to use \texttt{texosquery}.
 %\end{important}
+%
+%Instructions for compiling the source code (including the code for
+%this document) are in the accompanying \texttt{README.md} file.
 %
 %\tableofcontents
 %
@@ -346,7 +349,9 @@
 %\end{flushleft}
 %This is provided for the benefit of users who don't have
 %\cs{pdfcreationdate} defined by their \TeX\ format (for example,
-%\XeTeX).
+%\XeTeX). As from v1.1, this ensures that the initial \texttt{D} has
+%category code 12 (which won't happen if \cs{TeXOSQuery} is used
+%explicitly).
 %
 %\begin{important}
 %The remaining commands all require extra arguments after the
@@ -373,7 +378,9 @@
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
 %This is provided for the benefit of users who don't have
-%\cs{pdffilemoddate} defined by their \TeX\ format.
+%\cs{pdffilemoddate} defined by their \TeX\ format. As from v1.1,
+%this ensures that the initial \texttt{D} has category code 12 (which 
+%won't happen if \cs{TeXOSQuery} is used explicitly).
 %
 %The size in bytes of a file
 %(\shortarg{s} or \longarg{filesize}) can be obtained using:
@@ -608,9 +615,24 @@
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryNow}
+%\changes{1.1}{2016-07-13}{changed catcode of D to 12}
 %Query the current time stamp.
 %    \begin{macrocode}
-\def\TeXOSQueryNow#1{\TeXOSQuery{#1}{\string-n}}
+\def\TeXOSQueryNow#1{%
+%    \end{macrocode}
+% The \texttt{D} needs category code 12. (Don't need to worry about
+% \texttt{Z} as \texttt{texosquery.jar} uses \texttt{+00'00'} for
+% UTC+0.) This change can't be done with the other catcode changes
+% in \cs{TeXOSQuery}, as this is only appropriate for the PDF dates.
+% Save and restore the catcode rather than fiddle around with
+% scoping.
+%    \begin{macrocode}
+  \edef\@texosquery@restore@D{%
+    \noexpand\catcode`\noexpand\D=\the\catcode`\D\relax}%
+  \catcode`\D=12\relax
+  \TeXOSQuery{#1}{\string-n}%
+  \@texosquery@restore@D
+}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -632,10 +654,16 @@
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileDate}
+%\changes{1.1}{2016-07-13}{changed catcode of D to 12}
 %Query the time stamp of the file given in the second argument.
 %    \begin{macrocode}
-\def\TeXOSQueryFileDate#1#2{\TeXOSQuery{#1}{\string-d 
-  \string'\texosquerystripquotes{#2}\string'}}
+\def\TeXOSQueryFileDate#1#2{%
+  \edef\@texosquery@restore@D{%
+    \noexpand\catcode`\noexpand\D=\the\catcode`\D\relax}%
+  \catcode`\D=12\relax
+  \TeXOSQuery{#1}{\string-d \string'\texosquerystripquotes{#2}\string'}%
+  \@texosquery@restore@D
+}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -708,7 +736,7 @@
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2016/07/08 v1.0 (NLCT)]
+\ProvidesPackage{texosquery}[2016/07/13 v1.1 (NLCT)]
 %    \end{macrocode}
 %Load \texttt{texosquery.tex}:
 %    \begin{macrocode}
