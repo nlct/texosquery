@@ -17,8 +17,8 @@ import java.io.InputStreamReader;
  */
 public class TeXOSQuery {
 
-    private static final String VERSION_NUMBER = "1.0";
-    private static final String VERSION_DATE = "2016-07-08";
+    private static final String VERSION_NUMBER = "1.1";
+    private static final String VERSION_DATE = "2016-07-14";
     private static final char BACKSLASH = '\\';
     private static final char FORWARDSLASH = '/';
     private static final long ZERO = 0L;
@@ -426,6 +426,28 @@ public class TeXOSQuery {
     }
 
     /**
+     * Gets the path for the file's parent.
+     * @param file The file.
+     * @return The path.
+     */
+    private static String parentPath(File file) {
+        
+        String path = "";
+        
+        if (file.exists()) {
+            try {
+                path = toTeXPath(file.getCanonicalFile().getParent());
+            } catch (SecurityException exception1) {
+                // quack quack
+            } catch (IOException exception2) {
+                // quack quack
+            }
+        }
+
+        return path;
+    }
+
+    /**
      * Prints the syntax usage.
      */
     private static void syntax() {
@@ -478,6 +500,9 @@ public class TeXOSQuery {
         System.out.println();
         System.out.println("-p <file> or --path <file>");
         System.out.println("  Display the canonical path of <file>");
+        System.out.println();
+        System.out.println("-e <file> or --dirname <file>");
+        System.out.println("  Display the parent of <file>");
     }
 
     /**
@@ -668,7 +693,9 @@ public class TeXOSQuery {
                 } else {
                     print(group, fileURI(fileFromTeXPath(args[i])));
                 }
-            } else if (args[i].equals("-p") || args[i].equals("--path")) {
+            }
+            else if (args[i].equals("-p") || args[i].equals("--path"))
+            {
                 i++;
 
                 if (i >= args.length) {
@@ -684,7 +711,27 @@ public class TeXOSQuery {
                 } else {
                     print(group, filePath(fileFromTeXPath(args[i])));
                 }
-            } else if (args[i].equals("-h") || args[i].equals("--help")) {
+            }
+            else if (args[i].equals("-e") || args[i].equals("--dirname"))
+            {
+                i++;
+
+                if (i >= args.length) {
+                    System.err.println(
+                            String.format("filename expected after %s", args[i - 1]));
+                    System.exit(1);
+                }
+
+                if (i < n) group = true;
+
+                if ("".equals(args[i])) {
+                    print(group, "");
+                } else {
+                    print(group, 
+                     parentPath(fileFromTeXPath(args[i])));
+                }
+            }
+            else if (args[i].equals("-h") || args[i].equals("--help")) {
                 syntax();
                 System.exit(0);
             } else if (args[i].equals("-v") || args[i].equals("--version")) {

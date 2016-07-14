@@ -1,0 +1,21 @@
+1.1 :
+
+ * texosquery.jar:
+
+   - Added --dirname (-e)
+
+   - Multiline results add braces to each line
+     (to make it easier to parse the results in TeX).
+
+   - Code refactored.
+
+ * texosquery.tex:
+
+   - \TeXOSQueryNow and \TeXOSQueryFileDate set the category
+     code of D to 12 (for compatibility with \pdfcreationdate).
+
+   - new command \TeXOSQueryDirName
+
+1.0 (2016-07-08):
+
+ * Initial release

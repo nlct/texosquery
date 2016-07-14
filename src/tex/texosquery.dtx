@@ -30,7 +30,7 @@
 \usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{262}
+\CheckSum{269}
 
 \RecordChanges
 \PageIndex
@@ -197,8 +197,16 @@
 %using the shell escape, you'll need to be careful of this.
 %\item[\shortarg{p} \meta{file} or \longarg{path} \meta{file}]
 %Displays the canonical path of the given file or a blank line if
-%the file doesn't exists or the file permissions prohibit this
+%the file doesn't exist or the file permissions prohibit this
 %action.
+%\item[\shortarg{e} \meta{file} or \longarg{dirname} \meta{file}]
+%(New to v1.1.)
+%Displays the canonical path of the given file's parent (that is, the
+%directory containing \meta{file}) or a blank line if
+%the file doesn't exist or the file permissions prohibit this
+%action. Note that this is different to the Unix-like 
+%\texttt{dirname} command, which will return a relative path if
+%\meta{file} isn't an absolute path.
 %\item[\shortarg{h} or \longarg{help}] Displays help message and
 %exits.
 %\item[\shortarg{v} or \longarg{version}] Displays version
@@ -462,6 +470,14 @@
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
 %
+%The canonical path of a file's parent
+%(\shortarg{e} or \longarg{dirname}) can be obtained using:
+%\DescribeMacro\TeXOSQueryDirName
+%\begin{flushleft}\ttfamily
+%\cs{TeXOSQueryDirName}\marg{cs}\marg{filename}
+%\end{flushleft}
+%where \meta{filename} is the name of the file.
+%
 %\StopEventually{\phantomsection
 %\addcontentsline{toc}{section}{Change History}%
 %\PrintChanges
@@ -634,7 +650,7 @@
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryNow}
-%\changes{1.1}{2016-07-13}{changed catcode of D to 12}
+%\changes{1.1}{2016-07-14}{changed catcode of D to 12}
 %Query the current time stamp.
 %    \begin{macrocode}
 \def\TeXOSQueryNow#1{%
@@ -673,7 +689,7 @@
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileDate}
-%\changes{1.1}{2016-07-13}{changed catcode of D to 12}
+%\changes{1.1}{2016-07-14}{changed catcode of D to 12}
 %Query the time stamp of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileDate#1#2{%
@@ -732,6 +748,16 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\TeXOSQueryDirName}
+%\changes{1.1}{2016-07-14}{new}
+%Get the canonical path of the directory containing the file given 
+%in the second argument.
+%    \begin{macrocode}
+\def\TeXOSQueryDirName#1#2{\TeXOSQuery{#1}{\string-e 
+ \string'\texosquerystripquotes{#2}\string'}}
+%    \end{macrocode}
+%\end{macro}
+%
 %All done.
 %Restore the category code of \texttt{@}:
 %    \begin{macrocode}
@@ -755,7 +781,7 @@
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2016/07/13 v1.1 (NLCT)]
+\ProvidesPackage{texosquery}[2016/07/14 v1.1 (NLCT)]
 %    \end{macrocode}
 %Load \texttt{texosquery.tex}:
 %    \begin{macrocode}

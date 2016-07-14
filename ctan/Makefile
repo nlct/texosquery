@@ -10,6 +10,7 @@ dist	:
 	cp ../src/java/TeXOSQuery.java texosquery
 	cp ../src/java/Manifest.txt texosquery
 	cp ../README.md texosquery
+	cp CHANGES texosquery
 	zip --exclude="*.swp" -r texosquery.zip texosquery
 
 clean	:
