@@ -593,9 +593,9 @@ public class TeXOSQuery {
                 if (i < n) group = true;
 
                 if ("".equals(args[i])) {
-                    System.out.println();
+                    print(group, "");
                 } else {
-                    System.out.println(pdfDate(fileFromTeXPath(args[i])));
+                    print(group, pdfDate(fileFromTeXPath(args[i])));
                 }
             } else if (args[i].equals("-s") || args[i].equals("--filesize")) {
                 i++;
