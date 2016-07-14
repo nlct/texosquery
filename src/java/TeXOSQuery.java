@@ -65,7 +65,7 @@ public class TeXOSQuery {
             if ((country != null) &&
                     (!"".equals(country))) {
                 
-                if (identifier.isEmpty()) {
+                if ("".equals(identifier)) {
                     identifier = country;
                 } else {
                     identifier = identifier.concat("-").concat(country);
@@ -658,7 +658,7 @@ public class TeXOSQuery {
         String value = "";
         
         try {
-            value = System.getProperty(value, "");
+            value = System.getProperty(key, "");
         }
         catch (SecurityException exception) {
             // quack quack
