@@ -15,7 +15,7 @@
  * texosquery.tex:
 
    - \TeXOSQueryNow and \TeXOSQueryFileDate set the category
-     code of D to 12 (for compatibility with \pdfcreationdate).
+     code of D to 12 (to match \pdfcreationdate).
 
    - new command \TeXOSQueryDirName
 
