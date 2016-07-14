@@ -502,7 +502,7 @@ public class TeXOSQuery {
         System.out.println("  Display the canonical path of <file>");
         System.out.println();
         System.out.println("-e <file> or --dirname <file>");
-        System.out.println("  Display the parent of <file>");
+        System.out.println("  Display the canonical path of the parent of <file>");
     }
 
     /**

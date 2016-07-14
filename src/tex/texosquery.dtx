@@ -277,6 +277,7 @@
 %(\texttt{texosquery.jar} will replace \verb|#| with \verb|\#| in places
 %where it might possibly occur in the result, but in general it's
 %best to avoid these characters in file names.)
+%
 %There are some short cut commands for convenience, described below.
 %
 %If any of these commands cause an error message in the form:
@@ -310,8 +311,27 @@
 %TeXOSQuery:
 %\end{verbatim}
 %(the control sequence \meta{cs} will be set to empty).
-%This conditional will automatically be switched on if
-%\cs{shellescape} or \cs{pdfshellescape} is 0.
+%This conditional will automatically be switched on unless
+%\cs{shellescape} or \cs{pdfshellescape} is 1. (If
+%\texttt{texosquery.jar} is later allowed on the restricted list,
+%newer versions may change this default.)
+%
+%If multiple queries are required, it's more efficient to
+%perform them all in one go. For example:
+%\begin{verbatim}
+%\TeXOSQuery{\result}{-l -n -o}
+%
+%\def\parseresult#1#2#3{%
+%  Locale: #1. Now: #2. OS: #3.%
+%}
+%
+%\ifx\result\empty
+%  Query failed.
+%\else
+%  \expandafter\parseresult\result
+%\fi
+%\end{verbatim}
+%(Make sure you have at least v1.1 for this to work correctly.)
 %
 %The locale (\shortarg{l} or \longarg{locale-lcs}) information can be
 %obtained using:
@@ -533,24 +553,26 @@
 %
 %\begin{macro}{\ifTeXOSQueryDryRun}
 %Provide a dry-run mode.
+%\changes{1.1}{2016-07-14}{dry run mode only false by default if with
+%unrestricted mode}
 %    \begin{macrocode}
 \newif\ifTeXOSQueryDryRun
-\TeXOSQueryDryRunfalse
+\TeXOSQueryDryRuntrue
 %    \end{macrocode}
 %\end{macro}
 %
-%If shell escape is disabled, automatically switch on dry-run mode.
+%If shell escape is unrestricted, automatically switch off dry-run mode.
 %    \begin{macrocode}
 \ifx\shellescape\undefined
   \ifx\pdfshellescape\undefined
   \else
-    \ifnum\pdfshellescape=0\relax
-      \TeXOSQueryDryRuntrue
+    \ifnum\pdfshellescape=1\relax
+      \TeXOSQueryDryRunfalse
     \fi
   \fi
 \else
-  \ifnum\shellescape=0\relax
-    \TeXOSQueryDryRuntrue
+  \ifnum\shellescape=1\relax
+    \TeXOSQueryDryRunfalse
   \fi
 \fi
 %    \end{macrocode}

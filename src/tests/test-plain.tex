@@ -1,22 +1,29 @@
 % arara: pdftex: {shell: on}
 \input texosquery
 
-\tt
 \TeXOSQueryLocale{\result}
 locale: \result.
 
 \TeXOSQueryCwd{\result}
-cwd: \result.
+cwd: {\tt\result}.
 
 {\catcode`\D=12\relax
  \gdef\parsepdfdate D:#1\endparsepdfdate{#1}%
 }
 
 \TeXOSQueryNow{\result}
-now: \result. (\expandafter\parsepdfdate\result\endparsepdfdate.)
+now: {\tt\result}. 
+\ifx\result\empty
+\else
+  (\expandafter\parsepdfdate\result\endparsepdfdate.)
+\fi
 
 \TeXOSQueryFileDate{\result}{\jobname.tex}
-file date: \result. (\expandafter\parsepdfdate\result\endparsepdfdate.)
+file date: {\tt\result}.
+\ifx\result\empty
+\else
+  (\expandafter\parsepdfdate\result\endparsepdfdate.)
+\fi
 
 \TeXOSQueryFileSize{\result}{\jobname.tex}
 file size: \result.
@@ -26,5 +33,18 @@ file path: {\tt\result}.
 
 \TeXOSQueryDirName{\result}{\jobname.tex}
 parent path: {\tt\result}.
+
+Multiple query.
+\TeXOSQuery{\result}{-l -n -o}
+
+\def\parseresult#1#2#3{%
+  Locale: #1. Now: #2. OS: #3.%
+}
+
+\ifx\result\empty
+  Query failed.
+\else
+  \expandafter\parseresult\result
+\fi
 
 \bye

@@ -16,6 +16,9 @@
 
    - new command \TeXOSQueryDirName
 
+   - dry run mode is now by default on unless shell escape=1
+     (unrestricted mode)
+
 1.0 (2016-07-08):
 
  * Initial release
