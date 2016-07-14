@@ -1,4 +1,4 @@
-1.1 :
+1.1 (2016-07-14):
 
  * texosquery.jar:
 
@@ -8,6 +8,9 @@
      (to make it easier to parse the results in TeX).
 
    - Code refactored.
+
+   - Code now compiled for Java 5 to support users with 
+     old versions of the JRE.
 
  * texosquery.tex:
 

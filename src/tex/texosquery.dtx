@@ -61,7 +61,8 @@
 %\DeleteShortVerb{|}
 %
 %\title{texosquery: query OS information from \TeX}
-%\author{Nicola L. C. Talbot\\\url{http://www.dickimaw-books.com/}
+%\author{Nicola L. C. Talbot\\
+%\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
 %\date{2016-07-14 (v1.1)}
 %\maketitle
@@ -82,8 +83,9 @@
 %installed to use \texttt{texosquery}.
 %\end{important}
 %
-%Instructions for compiling the source code (including the code for
-%this document) are in the accompanying \texttt{README.md} file.
+%If you want to rebuild the application, instructions for
+%compiling the source code (including the code for this document)
+%are in the accompanying \texttt{README.md} file.
 %
 %\tableofcontents
 %
@@ -103,10 +105,11 @@
 %
 %Since the application is designed to work with \TeX, each
 %function will display the result on a single line without
-%formatting. A blank line will be displayed if the information
-%isn't available. A forward slash is always used as a
-%directory divider, regardless of the operating system, so
-%the result can be used, for example, in \cs{input} or
+%formatting. (For multiple results, each line is grouped 
+%from v1.1.) A blank line (or empty group) will be displayed
+%if the information isn't available. A forward slash is always 
+%used as a directory divider, regardless of the operating 
+%system, so the result can be used, for example, in \cs{input} or
 %\cs{includegraphics}.
 %
 %If an input file name is required (for example, with the
@@ -234,6 +237,22 @@
 %{en-GB.utf8}
 %{D:20160714112732+01'00'}
 %\end{verbatim}
+%Note that unavailable information will produce an empty group.
+%For example (assuming \texttt{nofile} doesn't exist):
+%\begin{verbatim}
+%texosquery -l -d nofile -n
+%\end{verbatim}
+%produces:
+%\begin{verbatim}
+%{en-GB.utf8}
+%{}
+%{D:20160714112732+01'00'}
+%\end{verbatim}
+%whereas 
+%\begin{verbatim}
+%texosquery -d nofile
+%\end{verbatim}
+%just displays an empty line.
 %
 %\section{texosquery.tex: generic \TeX\ code}
 %You can run \texttt{texosquery} directly from \TeX's shell escape.
@@ -279,7 +298,6 @@
 %best to avoid these characters in file names.)
 %
 %There are some short cut commands for convenience, described below.
-%
 %If any of these commands cause an error message in the form:
 %\begin{verbatim}
 %I can't find file `|texosquery'.
