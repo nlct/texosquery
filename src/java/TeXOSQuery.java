@@ -491,6 +491,23 @@ public class TeXOSQuery {
     }
 
     /**
+     * Prints the information with optional grouping.
+     * @param group Determines whether to add grouping
+     * @param info Information to print
+     */ 
+   private static void print(boolean group, String info)
+   {
+      if (group)
+      {
+         System.out.println(String.format("{%s}", info));
+      }
+      else
+      {
+         System.out.println(info);
+      }
+   }
+
+    /**
      * Main method.
      * @param args Command line arguments.
      */
@@ -500,25 +517,45 @@ public class TeXOSQuery {
             System.exit(1);
         }
 
-        for (int i = 0; i < args.length; i++) {
+        boolean group = false;
+
+        for (int i = 0, n=args.length-1; i < args.length; i++) {
             if (args[i].equals("-L") || args[i].equals("--locale")) {
-                System.out.println(getLocale(Locale.getDefault()));
+                if (i < n) group = true;
+
+                print(group, getLocale(Locale.getDefault()));
             } else if (args[i].equals("-l") || args[i].equals("--locale-lcs")) {
-                System.out.println(getLocale(Locale.getDefault(), true));
+                if (i < n) group = true;
+
+                print(group, getLocale(Locale.getDefault(), true));
             } else if (args[i].equals("-c") || args[i].equals("--cwd")) {
-                System.out.println(getCwd());
+                if (i < n) group = true;
+
+                print(group, getCwd());
             } else if (args[i].equals("-m") || args[i].equals("--userhome")) {
-                System.out.println(getUserHome());
+                if (i < n) group = true;
+
+                print(group, getUserHome());
             } else if (args[i].equals("-t") || args[i].equals("--tmpdir")) {
-                System.out.println(getTmpDir());
+                if (i < n) group = true;
+
+                print(group, getTmpDir());
             } else if (args[i].equals("-r") || args[i].equals("--osversion")) {
-                System.out.println(getOSversion());
+                if (i < n) group = true;
+
+                print(group, getOSversion());
             } else if (args[i].equals("-a") || args[i].equals("--osarch")) {
-                System.out.println(getOSarch());
+                if (i < n) group = true;
+
+                print(group, getOSarch());
             } else if (args[i].equals("-o") || args[i].equals("--osname")) {
-                System.out.println(getOSname());
+                if (i < n) group = true;
+
+                print(group, getOSname());
             } else if (args[i].equals("-n") || args[i].equals("--pdfnow")) {
-                System.out.println(pdfnow());
+                if (i < n) group = true;
+
+                print(group, pdfnow());
             } else if (args[i].equals("-d") || args[i].equals("--pdfdate")) {
                 i++;
 
@@ -527,6 +564,8 @@ public class TeXOSQuery {
                             String.format("filename expected after %s", args[i - 1]));
                     System.exit(1);
                 }
+
+                if (i < n) group = true;
 
                 if ("".equals(args[i])) {
                     System.out.println();
@@ -542,10 +581,12 @@ public class TeXOSQuery {
                     System.exit(1);
                 }
 
+                if (i < n) group = true;
+
                 if ("".equals(args[i])) {
-                    System.out.println();
+                    print(group, "");
                 } else {
-                    System.out.println(getFileLength(fileFromTeXPath(args[i])));
+                    print(group, getFileLength(fileFromTeXPath(args[i])));
                 }
             } else if (args[i].equals("-i") || args[i].equals("--list")) {
                 i++;
@@ -566,10 +607,12 @@ public class TeXOSQuery {
                     System.exit(1);
                 }
 
+                if (i < n) group = true;
+
                 if ("".equals(args[i])) {
-                    System.out.println();
+                    print(group, "");
                 } else {
-                    System.out.println(getFileList(args[i - 1],
+                    print(group, getFileList(args[i - 1],
                             new File(fromTeXPath(args[i]))));
                 }
             } else if (args[i].equals("-f") || args[i].equals("--filterlist")) {
@@ -601,10 +644,12 @@ public class TeXOSQuery {
                     System.exit(1);
                 }
 
+                if (i < n) group = true;
+
                 if ("".equals(args[i])) {
-                    System.out.println();
+                    print(group, "");
                 } else {
-                    System.out.println(getFilterFileList(
+                    print(group, getFilterFileList(
                             args[i - 2], args[i - 1], new File(fromTeXPath(args[i]))));
                 }
             } else if (args[i].equals("-u") || args[i].equals("--uri")) {
@@ -616,10 +661,12 @@ public class TeXOSQuery {
                     System.exit(1);
                 }
 
+                if (i < n) group = true;
+
                 if ("".equals(args[i])) {
-                    System.out.println();
+                    print(group, "");
                 } else {
-                    System.out.println(fileURI(fileFromTeXPath(args[i])));
+                    print(group, fileURI(fileFromTeXPath(args[i])));
                 }
             } else if (args[i].equals("-p") || args[i].equals("--path")) {
                 i++;
@@ -630,10 +677,12 @@ public class TeXOSQuery {
                     System.exit(1);
                 }
 
+                if (i < n) group = true;
+
                 if ("".equals(args[i])) {
-                    System.out.println();
+                    print(group, "");
                 } else {
-                    System.out.println(filePath(fileFromTeXPath(args[i])));
+                    print(group, filePath(fileFromTeXPath(args[i])));
                 }
             } else if (args[i].equals("-h") || args[i].equals("--help")) {
                 syntax();
