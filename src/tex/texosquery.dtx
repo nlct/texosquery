@@ -63,7 +63,7 @@
 %\title{texosquery: query OS information from \TeX}
 %\author{Nicola L. C. Talbot\\\url{http://www.dickimaw-books.com/}
 %\and Paulo Cereda}
-%\date{2016-07-13 (v1.1)}
+%\date{2016-07-14 (v1.1)}
 %\maketitle
 %
 %\begin{abstract}
@@ -207,7 +207,25 @@
 %
 %If multiple options are given, they will be processed in the
 %order specified in the command line invocation. Each result will
-%be displayed on a separate line.
+%be displayed on a separate line. As from v1.1, if there are
+%multiple actions, each result will be grouped. This makes it easier
+%to process the results in \TeX. For example:
+%\begin{verbatim}
+%texosquery -l
+%\end{verbatim}
+%This just produces (for me):
+%\begin{verbatim}
+%en-GB.utf8
+%\end{verbatim}
+%whereas
+%\begin{verbatim}
+%texosquery -l -n
+%\end{verbatim}
+%produces:
+%\begin{verbatim}
+%{en-GB.utf8}
+%{D:20160714112732+01'00'}
+%\end{verbatim}
 %
 %\section{texosquery.tex: generic \TeX\ code}
 %You can run \texttt{texosquery} directly from \TeX's shell escape.
