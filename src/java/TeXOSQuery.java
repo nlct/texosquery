@@ -553,7 +553,14 @@ public class TeXOSQuery {
                 if (i < n) group = true;
 
                 print(group, getLocale(Locale.getDefault(), true));
-            } else if (args[i].equals("-c") || args[i].equals("--cwd")) {
+            }
+            else if (args[i].equals("-b") || args[i].equals("--bcp47"))
+            {
+                if (i < n) group = true;
+
+                print(group, Locale.getDefault().toLanguageTag());
+            }
+            else if (args[i].equals("-c") || args[i].equals("--cwd")) {
                 if (i < n) group = true;
 
                 print(group, getCwd());

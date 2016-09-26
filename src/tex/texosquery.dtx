@@ -30,7 +30,7 @@
 \usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{269}
+\CheckSum{273}
 
 \RecordChanges
 \PageIndex
@@ -143,6 +143,9 @@
 %stripped. For example, if \longargfmt{locale} returns
 %\texttt{en-GB.UTF-8}, then \longargfmt{locale-lcs} would return
 %\texttt{en-GB.utf8}.
+%\item[\shortarg{b} or \longarg{bcp47}] (New to version 1.2.)
+%Displays the BCP~47 language tag.
+%
 %\item[\shortarg{c} or \longarg{cwd}] Displays the current working
 %directory.
 %\item[\shortarg{m} or \longarg{userhome}] Displays the user's home
@@ -362,6 +365,12 @@
 %package. If you want the unprocessed codeset name, you can do:
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQuery}\marg{cs}\{\shortarg{L}\}
+%\end{flushleft}
+%
+%The BCP 47 language tag (\shortarg{b} or \longarg{bcp47}) can be obtained using:
+%\DescribeMacro\TeXOSQueryLangTag
+%\begin{flushleft}\ttfamily
+%\cs{TeXOSQueryLangTag}\marg{cs}
 %\end{flushleft}
 %
 %The current working directory (\shortarg{c} or \longarg{cwd}) can
@@ -644,6 +653,15 @@
 %provided in the argument.
 %    \begin{macrocode}
 \def\TeXOSQueryLocale#1{\TeXOSQuery{#1}{\string-l}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryLangTag}
+%Query the language tag and store the result in the control sequence
+%provided in the argument.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\TeXOSQueryLangTag#1{\TeXOSQuery{#1}{\string-b}}
 %    \end{macrocode}
 %\end{macro}
 %
