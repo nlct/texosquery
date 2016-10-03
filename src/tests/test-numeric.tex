@@ -1,0 +1,51 @@
+% arara: xelatex: {shell: on}
+\documentclass{article}
+
+\usepackage{fontspec}
+\usepackage{texosquery}
+
+\newcommand*{\grpsep}{?}
+\newcommand*{\decsep}{?}
+\newcommand*{\expsep}{?}
+\newcommand*{\currcode}{?}
+\newcommand*{\currsym}{?}
+\newcommand*{\currsep}{?}
+
+\newcommand*{\setvalues}[6]{%
+  \renewcommand*{\grpsep}{#1}%
+  \renewcommand*{\decsep}{#2}%
+  \renewcommand*{\expsep}{#3}%
+  \renewcommand*{\currcode}{#4}%
+  \renewcommand*{\currsym}{#5}%
+  \renewcommand*{\currsep}{#6}%
+}
+
+\newcommand{\test}[1]{%
+ Locale: `#1'.\par
+ \TeXOSQueryNumeric{\result}{#1}%
+ \ifx\result\empty
+   Query failed.%
+ \else
+   \expandafter\setvalues\result
+   Decimal number: 10\grpsep 000\decsep 00\expsep+01.\par
+   Currency: \currcode\space\currsym 10\currsep 00.%
+ \fi
+ \par
+ \medskip
+}
+
+\begin{document}
+\test{}
+
+\test{en-GB}
+
+\test{pt-BR}
+
+\test{fr-BE}
+
+\test{en-CA}
+
+\test{fr-CA}
+
+\test{en-US}
+\end{document}
