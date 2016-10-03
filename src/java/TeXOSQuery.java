@@ -3,6 +3,7 @@ package com.dickimawbooks.texosquery;
 import java.io.BufferedReader;
 import java.util.Locale;
 import java.util.Calendar;
+import java.text.DecimalFormatSymbols;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -12,13 +13,13 @@ import java.io.InputStreamReader;
 /**
  * Main class.
  * @author Nicola Talbot
- * @version 1.1
+ * @version 1.2
  * @since 1.0
  */
 public class TeXOSQuery {
 
-    private static final String VERSION_NUMBER = "1.1";
-    private static final String VERSION_DATE = "2016-07-14";
+    private static final String VERSION_NUMBER = "1.2";
+    private static final String VERSION_DATE = "2016-10-03";
     private static final char BACKSLASH = '\\';
     private static final char FORWARDSLASH = '/';
     private static final long ZERO = 0L;
@@ -30,6 +31,15 @@ public class TeXOSQuery {
      */
     private static String escapeHash(String string) {
         return string.replaceAll("#", "\\\\#");
+    }
+
+    /**
+     * Escapes hash from input character.
+     * @param c Input character.
+     * @return String with hash escaped.
+     */
+    private static String escapeHash(char c) {
+      return String.format("%s", c == '#' ? "\\#" : c);
     }
 
     /**
@@ -477,6 +487,7 @@ public class TeXOSQuery {
         System.out.println("-r or --osversion\tDisplay OS version");
         System.out.println("-a or --osarch\t\tDisplay OS architecture");
         System.out.println("-n or --pdfnow\t\tDisplay current date-time in PDF format");
+        System.out.println("-N [locale] or --numeric [locale]\tDisplay locale numeric information");
 
         System.out.println();
         System.out.println("File Queries:");
@@ -559,6 +570,31 @@ public class TeXOSQuery {
                 if (i < n) group = true;
 
                 print(group, Locale.getDefault().toLanguageTag());
+            }
+            else if (args[i].equals("-N") || args[i].equals("--numeric"))
+            {
+                Locale locale;
+
+                if (i == n || args[i+1].startsWith("-"))
+                {
+                   locale = Locale.getDefault();
+                }
+                else
+                {
+                   locale = Locale.forLanguageTag(args[++i]);
+                }
+
+                if (i < n) group = true;
+
+                DecimalFormatSymbols fmtSyms = DecimalFormatSymbols.getInstance(locale);
+
+                print(group, String.format("{%s}{%s}{%s}{%s}{%s}{%s}",
+                  escapeHash(fmtSyms.getGroupingSeparator()),
+                  escapeHash(fmtSyms.getDecimalSeparator()),
+                  escapeHash(fmtSyms.getExponentSeparator()), 
+                  escapeHash(fmtSyms.getInternationalCurrencySymbol()),
+                  escapeHash(fmtSyms.getCurrencySymbol()),
+                  escapeHash(fmtSyms.getMonetaryDecimalSeparator())));
             }
             else if (args[i].equals("-c") || args[i].equals("--cwd")) {
                 if (i < n) group = true;

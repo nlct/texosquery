@@ -26,11 +26,12 @@
 \documentclass{ltxdoc}
 
 \usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage{tgtermes}
 \usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{273}
+\CheckSum{277}
 
 \RecordChanges
 \PageIndex
@@ -64,7 +65,7 @@
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2016-07-14 (v1.1)}
+%\date{2016-10-03 (v1.2)}
 %\maketitle
 %
 %\begin{abstract}
@@ -158,6 +159,26 @@
 %system version.
 %\item[\shortarg{a} or \longarg{osarch}] Displays the operating
 %system architecture.
+%\item[\shortarg{N} \oarg{locale} or \longarg{numeric} \oarg{locale}]
+%Displays \marg{grp sep}\marg{dec sep}\marg{exp
+%sep}\marg{cur code}\marg{cur sym}\marg{cur sep} for the locale
+%given by the optional argument \meta{locale}. If omitted, the
+%default locale is assumed. The returned values are:
+%\begin{itemize}
+%\item \meta{grp sep} the numeric group separator.
+%\item \meta{dec sep} the decimal separator.
+%\item \meta{exp sep} the exponent separator.
+%\item \meta{cur code} the currency code.
+%\item \meta{cur sym} the currency symbol.
+%\end{itemize}
+%(New to v1.2.) For example:
+%\begin{verbatim}
+%texosquery -N en-GB
+%\end{verbatim}
+%produces
+%\begin{verbatim}
+%{,}{.}{E}{GBP}{£}{.}
+%\end{verbatim}
 %\item[\shortarg{n} or \longarg{pdfnow}] Displays the current
 % date and time in PDF format. For example 
 %\begin{verbatim}
@@ -372,6 +393,15 @@
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQueryLangTag}\marg{cs}
 %\end{flushleft}
+%
+%The numeric separators and currency symbols (\shortarg{N} or
+%\longarg{numeric}) can be obtained using
+%\DescribeMacro\TeXOSQueryNumeric
+%\begin{flushleft}\ttfamily
+%\cs{TeXOSQueryNumeric}\marg{cs}\marg{locale}
+%\end{flushleft}
+%The \meta{locale} should be a valid language tag or may be empty
+%for the system's default locale.
 %
 %The current working directory (\shortarg{c} or \longarg{cwd}) can
 %be obtained using:
@@ -662,6 +692,17 @@
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
 \def\TeXOSQueryLangTag#1{\TeXOSQuery{#1}{\string-b}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryNumeric}
+%Query the numeric settings for the locale given in the second
+%argument and store the result in the control sequence
+%provided in the argument. Leave the second argument empty for the
+%default locale.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\TeXOSQueryNumeric#1#2{\TeXOSQuery{#1}{\string-N #2}}
 %    \end{macrocode}
 %\end{macro}
 %
