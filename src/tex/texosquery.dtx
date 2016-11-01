@@ -65,7 +65,7 @@
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2016-10-03 (v1.2)}
+%\date{2016-11-01 (v1.2)}
 %\maketitle
 %
 %\begin{abstract}
@@ -81,7 +81,7 @@
 %\begin{important}
 %You will need \TeX's shell escape enabled,
 %and you will also need the Java Runtime Environment (JRE) 
-%installed to use \texttt{texosquery}.
+%installed to use \texttt{texosquery}. (At least Java 1.7)
 %\end{important}
 %
 %If you want to rebuild the application, instructions for
@@ -238,6 +238,15 @@
 %exits.
 %\item[\shortarg{v} or \longarg{version}] Displays version
 %information and exits.
+%\item[\longarg{nodebug}] No debugging information. Only command
+%line syntax errors are written to STDERR. (Default.)
+%\item[\longarg{debug} \oarg{n}] Set the debugging level, where
+%\meta{n} is a non-negative integer.
+%If \meta{n} is omitted, 1 is assumed. If \meta{n} is 0, then
+%debugging information is suppressed (equivalent to
+%\longarg{nodebug}). If \meta{n} $\geq 1$, error messages are
+%written to STDERR. If \meta{n} $\geq 2$, any exceptions encountered
+%will additionally write the stack trace to STDERR.
 %\end{description}
 %
 %If multiple options are given, they will be processed in the
