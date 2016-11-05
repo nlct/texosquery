@@ -34,7 +34,6 @@ public class TeXOSQueryJRE7 extends TeXOSQuery
       return locale.getScript();
    }
 
-
    /**
     * Gets the locale from the given language tag.
     * @param languageTag The language tag
@@ -45,6 +44,23 @@ public class TeXOSQueryJRE7 extends TeXOSQuery
    {
       return Locale.forLanguageTag(languageTag);
    }
+
+   /**
+    * Gets the language tag for the given locale.
+    * @param locale The locale or null for the default locale
+    * @return The language tag
+    */
+   @Override
+   public String getLanguageTag(Locale locale)
+   {
+      if (locale == null)
+      {
+         locale = Locale.getDefault();
+      }
+
+      return locale.toLanguageTag();
+   }
+
 
    /**
     * Main method.

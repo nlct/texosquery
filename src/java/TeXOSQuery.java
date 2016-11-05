@@ -3,9 +3,11 @@ package com.dickimawbooks.texosquery;
 import java.io.BufferedReader;
 import java.util.Locale;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.DecimalFormatSymbols;
+import java.text.DateFormat;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -412,124 +414,6 @@ public class TeXOSQuery
    }
 
     /**
-     * Gets the script for the given locale. Java only introduced
-     * support for language scripts in version 1.7, so this returns
-     * null here. The JRE7 support needs to override this method.
-     * @param locale The locale
-     * @return The language script associated with the given locale or null if not available
-     */ 
-   public String getScript(Locale locale)
-   {
-      return null;
-   }
-
-    /**
-     * Gets a string representation of the provided locale.
-     * @param locale The provided locale.
-     * @return String representation.
-     */
-   public String getLocale(Locale locale)
-   {
-      return getLocale(locale, false);
-   }
-
-    /**
-     * Gets a POSIX representation of the provided locale, converting the code
-     * set if possible. If the boolean argument is true, this
-     * attempts to convert the code set to a identifier that stands
-     * a better chance of being recognised by inputenc.sty. For
-     * example, UTF-8 will be converted to utf8. None of TeX's
-     * special characters should occur in any of the locale
-     * information.
-     * @param locale The provided locale.
-     * @param convertCodeset Boolean value to convert the code set.
-     * @return String representation.
-     */
-   public String getLocale(Locale locale, boolean convertCodeset)
-   {
-      String identifier = "";
-
-      if (locale == null)
-      {
-         // No locale provided, return empty string
-         debug("null locale");
-         return "";
-      }
-
-      String language = locale.getLanguage();
-
-      if (language == null)
-      {
-          // No language provided for the locale. The language
-          // part will be omitted from the returned string.
-         debug("locale has no language", 3);
-      }
-      else
-      {
-         identifier = language;
-      }
-
-      String country = locale.getCountry();
-
-      if (country == null || "".equals(country))
-      {
-         // No country is associated with the locale. The
-         // country part will be omitted from the returned
-         // string.
-         debug("locale has no region", 3);
-      }
-      else
-      {
-         if ("".equals(identifier))
-         {
-            // The identifier hasn't been set (no language
-            // provided), so just set it to the country code.
-            identifier = country;
-         }
-         else
-         {
-            // Append the country code to the identifier.
-            identifier = identifier.concat("-").concat(country);
-         }
-      }
-
-      // Get the OS default file encoding or "UTF-8" if not set.
-
-      String codeset = getSystemProperty("file.encoding", "UTF-8");
-
-      // The codeset should not be null here as a default has
-      // been provided if the property is missing.
-
-      if (convertCodeset)
-      {
-         // If conversion is required, change to lower case
-         // and remove any hyphens.
-         codeset = codeset.toLowerCase().replaceAll("-", "");
-      }
-
-      identifier = identifier.concat(".").concat(codeset);
-
-      // Find the script if available. This is used as the modifier part. Is
-      // there a standard for POSIX locale modifiers?
-
-      String script = getScript(locale);
-
-      if (script == null || "".equals(script))
-      {
-         // Script information is missing. Ignore it.
-         debug("no script available for locale", 3);
-      }
-      else
-      {
-         // Append the script. This will be a four letter string 
-         // (if it's not empty).
-         identifier = identifier.concat("@").concat(script);
-      }
-
-      return identifier;
-   }
-
-    /**
      * Gets the OS name. As far as I can tell, the "os.name"
      * property should return a string that just contains Basic
      * Latin upper or lower case letters, so we don't need to worry
@@ -745,7 +629,10 @@ public class TeXOSQuery
      */
    public String pdfnow()
    {
-      return pdfDate(Calendar.getInstance());
+      Calendar cal = Calendar.getInstance();
+      cal.setTimeInMillis(now.getTime());
+
+      return pdfDate(cal);
    }
 
     /**
@@ -1194,6 +1081,155 @@ public class TeXOSQuery
       return "";
    }
 
+    /**
+     * Gets the script for the given locale. Java only introduced
+     * support for language scripts in version 1.7, so this returns
+     * null here. The JRE7 support needs to override this method.
+     * @param locale The locale
+     * @return The language script associated with the given locale or null if not available
+     */ 
+   public String getScript(Locale locale)
+   {
+      return null;
+   }
+
+   /**
+    * Gets the language tag for the given locale.
+    * @param locale The locale or null for the default locale
+    * @return The language tag
+    */ 
+   public String getLanguageTag(Locale locale)
+   {
+      if (locale == null)
+      {
+         locale = Locale.getDefault();
+      }
+
+      String tag = locale.getLanguage();
+
+      String country = locale.getCountry();
+
+      if (country != null)
+      {
+         tag = String.format("%s-%s", tag, country);
+      }
+
+      String variant = locale.getVariant();
+
+      if (variant != null)
+      {
+         tag = String.format("%s-%s", tag, variant);
+      }
+
+      return tag;
+   }
+
+    /**
+     * Gets a string representation of the provided locale.
+     * @param locale The provided locale.
+     * @return String representation.
+     */
+   public String getLocale(Locale locale)
+   {
+      return getLocale(locale, false);
+   }
+
+    /**
+     * Gets a POSIX representation of the provided locale, converting the code
+     * set if possible. If the boolean argument is true, this
+     * attempts to convert the code set to a identifier that stands
+     * a better chance of being recognised by inputenc.sty. For
+     * example, UTF-8 will be converted to utf8. None of TeX's
+     * special characters should occur in any of the locale
+     * information.
+     * @param locale The provided locale.
+     * @param convertCodeset Boolean value to convert the code set.
+     * @return String representation.
+     */
+   public String getLocale(Locale locale, boolean convertCodeset)
+   {
+      String identifier = "";
+
+      if (locale == null)
+      {
+         // No locale provided, return empty string
+         debug("null locale");
+         return "";
+      }
+
+      String language = locale.getLanguage();
+
+      if (language == null)
+      {
+          // No language provided for the locale. The language
+          // part will be omitted from the returned string.
+         debug("locale has no language", 3);
+      }
+      else
+      {
+         identifier = language;
+      }
+
+      String country = locale.getCountry();
+
+      if (country == null || "".equals(country))
+      {
+         // No country is associated with the locale. The
+         // country part will be omitted from the returned
+         // string.
+         debug("locale has no region", 3);
+      }
+      else
+      {
+         if ("".equals(identifier))
+         {
+            // The identifier hasn't been set (no language
+            // provided), so just set it to the country code.
+            identifier = country;
+         }
+         else
+         {
+            // Append the country code to the identifier.
+            identifier = identifier.concat("-").concat(country);
+         }
+      }
+
+      // Get the OS default file encoding or "UTF-8" if not set.
+
+      String codeset = getSystemProperty("file.encoding", "UTF-8");
+
+      // The codeset should not be null here as a default has
+      // been provided if the property is missing.
+
+      if (convertCodeset)
+      {
+         // If conversion is required, change to lower case
+         // and remove any hyphens.
+         codeset = codeset.toLowerCase().replaceAll("-", "");
+      }
+
+      identifier = identifier.concat(".").concat(codeset);
+
+      // Find the script if available. This is used as the modifier part. Is
+      // there a standard for POSIX locale modifiers?
+
+      String script = getScript(locale);
+
+      if (script == null || "".equals(script))
+      {
+         // Script information is missing. Ignore it.
+         debug("no script available for locale", 3);
+      }
+      else
+      {
+         // Append the script. This will be a four letter string 
+         // (if it's not empty).
+         identifier = identifier.concat("@").concat(script);
+      }
+
+      return identifier;
+   }
+
    /**
     * Gets the locale from the given language tag. Since Java didn't
     * support BCP47 language tags until v1.7, we have can't use
@@ -1288,6 +1324,132 @@ public class TeXOSQuery
              escapeHash(fmtSyms.getMonetaryDecimalSeparator()));
    }
 
+   /**
+    * Gets all available for the given locale. If the
+    * given locale tag is null, the default locale is used. The
+    * information is returned with grouping to make it
+    * easier to parse in TeX. Since TeX has a nine-argument limit,
+    * each block is in a sub-group.
+    * @param localeTag the language tag identifying the locale or null for
+    * the default locale
+    * @return locale data. First group:
+    * language tag, language name, language name in given locale,
+    * country name, country name in given locale, variant name,
+    * variant name in given locale.
+    * Second group: full date, long date, medium date, short date.
+    * Third group: full time, long time, medium time, short time.
+    * locale numerical information: number group separator,
+    * decimal separator, exponent separator, international currency
+    * identifier (e.g. GBP), currency symbol (e.g. £),
+    * monetary decimal separator.
+    */
+   public String getLocaleData(String localeTag)
+   {
+       Locale locale;
+
+       if (localeTag == null || "".equals(localeTag))
+       {
+          locale = Locale.getDefault();
+       }
+       else
+       {
+          locale = getLocale(localeTag);
+       }
+
+       // Get numerical data (as with getNumericalInfo)
+       DecimalFormatSymbols fmtSyms 
+               = DecimalFormatSymbols.getInstance(locale);
+
+       String languageName = locale.getDisplayLanguage();
+
+       if (languageName == null)
+       {
+          languageName = "";
+       }
+
+       String localeLanguageName = locale.getDisplayLanguage(locale);
+
+       if (localeLanguageName == null)
+       {
+          localeLanguageName = "";
+       }
+
+       String countryName = locale.getDisplayCountry();
+
+       if (countryName == null)
+       {
+          countryName = "";
+       }
+
+       String localeCountryName = locale.getDisplayCountry(locale);
+
+       if (localeCountryName == null)
+       {
+          localeCountryName = "";
+       }
+
+       String variantName = locale.getDisplayVariant();
+
+       if (variantName == null)
+       {
+          variantName = "";
+       }
+
+       String localeVariantName = locale.getDisplayVariant(locale);
+
+       if (localeVariantName == null)
+       {
+          localeVariantName = "";
+       }
+
+       DateFormat dateFullFormat = DateFormat.getDateInstance(
+        DateFormat.FULL, locale);
+
+       DateFormat dateLongFormat = DateFormat.getDateInstance(
+        DateFormat.LONG, locale);
+
+       DateFormat dateMediumFormat = DateFormat.getDateInstance(
+        DateFormat.MEDIUM, locale);
+
+       DateFormat dateShortFormat = DateFormat.getDateInstance(
+        DateFormat.SHORT, locale);
+
+       DateFormat timeFullFormat = DateFormat.getTimeInstance(
+        DateFormat.FULL, locale);
+
+       DateFormat timeLongFormat = DateFormat.getTimeInstance(
+        DateFormat.LONG, locale);
+
+       DateFormat timeMediumFormat = DateFormat.getTimeInstance(
+        DateFormat.MEDIUM, locale);
+
+       DateFormat timeShortFormat = DateFormat.getTimeInstance(
+        DateFormat.SHORT, locale);
+
+       return String.format("{{%s}{%s}{%s}{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}{%s}{%s}}",
+             getLanguageTag(locale),
+             languageName,
+             localeLanguageName,
+             countryName,
+             localeCountryName,
+             variantName,
+             localeVariantName,
+             dateFullFormat.format(now),
+             dateLongFormat.format(now),
+             dateMediumFormat.format(now),
+             dateShortFormat.format(now),
+             timeFullFormat.format(now),
+             timeLongFormat.format(now),
+             timeMediumFormat.format(now),
+             timeShortFormat.format(now),
+             escapeHash(fmtSyms.getGroupingSeparator()),
+             escapeHash(fmtSyms.getDecimalSeparator()),
+             escapeHash(fmtSyms.getExponentSeparator()), 
+             escapeHash(fmtSyms.getInternationalCurrencySymbol()),
+             escapeHash(fmtSyms.getCurrencySymbol()),
+             escapeHash(fmtSyms.getMonetaryDecimalSeparator()));
+   }
+
     /**
      * Prints the syntax usage.
      */
@@ -1329,6 +1491,7 @@ public class TeXOSQuery
       System.out.println("-a or --osarch\t\tDisplay OS architecture");
       System.out.println("-n or --pdfnow\t\tDisplay current date-time in PDF format");
       System.out.println("-N [locale] or --numeric [locale]\tDisplay locale numeric information");
+      System.out.println("-D [locale] or --locale-data [locale]\tDisplay all available locale information");
 
       System.out.println();
       System.out.println("File Queries:");
@@ -1470,7 +1633,7 @@ public class TeXOSQuery
          else if (args[i].equals("-b") || args[i].equals("--bcp47"))
          {
             // BCP47 language tag
-            print(group, Locale.getDefault().toLanguageTag());
+            print(group, getLanguageTag(null));
          }
          else if (args[i].equals("-N") || args[i].equals("--numeric"))
          {
@@ -1486,6 +1649,22 @@ public class TeXOSQuery
             else
             {
                print(group, getNumericalInfo(args[++i]));
+            }
+         }
+         else if (args[i].equals("-D") || args[i].equals("--locale-data"))
+         {
+            // Get the all available locale information for the default or given
+            // locale.
+
+            if (i == n || args[i+1].startsWith("-"))
+            {
+               // Either at end of argument list or the next argument
+               // is a switch so use default locale.
+               print(group, getLocaleData(null));
+            }
+            else
+            {
+               print(group, getLocaleData(args[++i]));
             }
          }
          else if (args[i].equals("-c") || args[i].equals("--cwd"))
@@ -1737,6 +1916,12 @@ public class TeXOSQuery
     private static final String VERSION_DATE = "2016-11-05";
     private static final char BACKSLASH = '\\';
     private static final long ZERO = 0L;
+
+    /**
+     * Initialise current date-time for consistency.
+     */ 
+
+    private Date now = new Date();
 
     /**
      * openin_any settings
