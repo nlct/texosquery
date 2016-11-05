@@ -3,6 +3,8 @@ package com.dickimawbooks.texosquery;
 import java.io.BufferedReader;
 import java.util.Locale;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.text.DecimalFormatSymbols;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -11,39 +13,76 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * Main class. java.util.toLanguageTag() and
- * java.util.Locale.forLanguageTag(String) require Java 1.7.
- * I was aiming at 1.5 for a lower bound, but the primary reason for
- * writing this was to access locale information.
+ * Application functions. These methods need to be Java version 1.5
+ * compatible. The 1.7 methods need to be in the TeXOSQueryJRE7 class.
  * @author Nicola Talbot
  * @version 1.2
  * @since 1.0
  */
 public class TeXOSQuery
 {
+   public TeXOSQuery(String name)
+   {
+      this.name = name;
+   }
 
-    private static final String VERSION_NUMBER = "1.2";
-    private static final String VERSION_DATE = "2016-11-01";
-    private static final char BACKSLASH = '\\';
-    private static final long ZERO = 0L;
+   /**
+    * Runs kpsewhich and returns the result. This is for single
+    * lookups through kpsewhich, such as a file location or variable value.
+    * @param arg The argument to pass to kpsewhich
+    * @return The result read from the first line of STDIN
+    */
+   protected String kpsewhich(String arg)
+      throws IOException,InterruptedException
+   {
+      // Create and start the process.
+      Process process = 
+        new ProcessBuilder("kpsewhich", arg).start();
 
-    /**
-     * openin_any settings
-     */
-    private static final byte OPENIN_UNSET=0; // unset
-    private static final byte OPENIN_A=1; // any
-    private static final byte OPENIN_R=2; // restricted
-    private static final byte OPENIN_P=3; // paranoid
+      int exitCode = process.waitFor();
 
-    private static byte openin = OPENIN_UNSET;
+      String line = null;
 
-    private static File texmfoutput = null;
+      if (exitCode == 0)
+      {
+         // kpsewhich completed with exit code 0.
+         // Read STDIN to find the result.
+                
+         InputStream stream = process.getInputStream();
+                    
+         if (stream == null)
+         {
+            throw new IOException(String.format(
+             "Unable to open input stream from \"kpsewhich '%s'\" process",
+             arg));
+         }
 
-    /**
-     * Debug level. (0 = no debugging, 1 or more print messages to
-     * STDERR.)
-     */
-    private static int debugLevel = 0;
+         BufferedReader reader = null;
+
+         try
+         {
+            reader = new BufferedReader(new InputStreamReader(stream));
+
+            line = reader.readLine();
+         }
+         finally
+         {
+            if (reader != null)
+            {
+               reader.close();
+            }
+         }
+      }
+      else
+      {
+         // kpsewhich failed.
+
+         throw new IOException(String.format(
+           "\"kpsewhich '%s'\" failed with exit code %d", arg, exitCode));
+      }
+
+      return line;
+   }
 
     /**
      * Print message if in debug mode. Message is printed to STDERR
@@ -51,23 +90,23 @@ public class TeXOSQuery
      * @param message Debugging message.
      * @param level Debugging level.
      */
-    private static void debug(String message, int level)
-    {
-       if (debugLevel >= level)
-       {
-          System.err.println(String.format("texosquery: %s", message));
-       }
-    }
+   public void debug(String message, int level)
+   {
+      if (debugLevel >= level)
+      {
+         System.err.println(String.format("%s: %s", name, message));
+      }
+   }
 
     /**
      * Print message if in debug mode. Message is printed to STDERR
      * if the debug level is greater than 0.
      * @param message Debugging message.
      */
-    private static void debug(String message)
-    {
-       debug(message, 1);
-    }
+   public void debug(String message)
+   {
+      debug(message, 1);
+   }
     
     /**
      * Print message and exception if in debug mode. Message is printed to
@@ -79,21 +118,21 @@ public class TeXOSQuery
      * @param msgLevel Debugging level for message.
      * @param traceLevel Debugging level for stack trace.
      */
-    private static void debug(String message, Throwable excpt, int msgLevel,
+   public void debug(String message, Throwable excpt, int msgLevel,
       int traceLevel)
-    {
-       debug(message, msgLevel);
+   {
+      debug(message, msgLevel);
 
-       if (excpt != null)
-       {
-          debug(excpt.getMessage(), msgLevel);
+      if (excpt != null)
+      {
+         debug(excpt.getMessage(), msgLevel);
 
-          if (debugLevel >= traceLevel)
-          {
-             excpt.printStackTrace();
-          }
-       }
-    }
+         if (debugLevel >= traceLevel)
+         {
+            excpt.printStackTrace();
+         }
+      }
+   }
 
     /**
      * Print message and exception if in debug mode. The message
@@ -101,10 +140,10 @@ public class TeXOSQuery
      * @param message Debugging message.
      * @param excpt Exception.
      */
-    private static void debug(String message, Throwable excpt)
-    {
-       debug(message, excpt, 1, 2);
-    }
+   public void debug(String message, Throwable excpt)
+   {
+      debug(message, excpt, 1, 2);
+   }
 
     /**
      * Checks if file is in or below the given directory. This might
@@ -114,7 +153,7 @@ public class TeXOSQuery
      * @param dir The directory being searched
      * @return true if found
      */
-   private static boolean isFileInTree(File file, File dir)
+   protected boolean isFileInTree(File file, File dir)
     throws IOException
    {
       if (file == null || dir == null) return false;
@@ -147,7 +186,7 @@ public class TeXOSQuery
      * no hidden files) or p (paranoid, as restricted and no parent
      * directories and no absolute paths except under $TEXMFOUTPUT)
      */
-   private static boolean isReadPermitted(File file)
+   public boolean isReadPermitted(File file)
    {
       // if file doesn't exist, it can't be read
       if (file == null || !file.exists())
@@ -162,84 +201,38 @@ public class TeXOSQuery
             //First time this method has been called. Use kpsewhich
             //to determine the value.
 
-            // Create and start the process.
-            Process process = 
-              new ProcessBuilder("kpsewhich", "--var-value=openin_any").start();
-
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0)
+            try
             {
-               // kpsewhich completed with exit code 0.
-               // Read STDIN to find the result.
-                
-               InputStream stream = process.getInputStream();
-                    
-               if (stream == null)
+               String result = kpsewhich("-var-value=openin_any");
+
+               if ("a".equals(result))
                {
-                  debug("Unable to open input stream from kpsewhich --var-value=openin_any process");
-                  // Have to assume paranoid
-                  openin = OPENIN_P;
+                  openin=OPENIN_A;
+               }
+               else if ("r".equals(result))
+               {
+                  openin=OPENIN_R;
+               }
+               else if ("p".equals(result))
+               {
+                  openin=OPENIN_P;
                }
                else
                {
-                     
-                  BufferedReader reader = null;
-
-                  try
-                  {
-                     reader = new BufferedReader(new InputStreamReader(stream));
-
-                     String line = reader.readLine();
-
-                     if ("a".equals(line))
-                     {
-                        openin=OPENIN_A;
-                     }
-                     else if ("r".equals(line))
-                     {
-                        openin=OPENIN_R;
-                     }
-                     else if ("p".equals(line))
-                     {
-                        openin=OPENIN_P;
-                     }
-                     else
-                     {
-                        debug(String.format("Invalid openin_any value '%s'",
-                           line));
-                     }
-                  }
-                  catch (Exception e)
-                  {
-                     debug(
-                       "Unable to open buffered input stream from kpsewhich --var-value=openin_any",
-                        e);
-
-                     // Have to assume paranoid
-                     openin = OPENIN_P;
-                  }
-                  finally
-                  {
-                     if (reader != null)
-                     {
-                        reader.close();
-                     }
-                  }
-
+                  // This shouldn't occur, but just in case...
+                  debug(String.format("Invalid openin_any value '%s'",
+                     result));
+                  openin = OPENIN_P;
                }
             }
-            else
+            catch (Exception e)
             {
-               // kpsewhich failed.
-               debug(String.format(
-                 "kpsewhich --var-value=openin_any failed with exit code %d",
-                 exitCode));
-
-               // Have to assume paranoid
+               // kpsewhich failed, assume paranoid
+               debug("Can't determine openin value, assuming 'p'", e);
                openin = OPENIN_P;
             }
 
+            // Now find TEXMFOUTPUT if set
             String path = null;
 
             try
@@ -276,9 +269,13 @@ public class TeXOSQuery
             }
          }
 
+         // Now check if the given file can be read according to the
+         // openin setting.
+
          switch (openin)
          {
             case OPENIN_A: 
+              // any file can be read as long as the OS allows it
                return file.canRead(); 
             case OPENIN_P:
               // paranoid check
@@ -295,11 +292,26 @@ public class TeXOSQuery
                  }
               } 
 
-              // does the file have a parent directory?
+              // does the file have an absolute path?
 
-              if (file.getParentFile() != null)
+              if (file.isAbsolute())
               {
-                 // has a parent directory, so not permitted.
+                 debug(String.format(
+                   "Read access for file '%s' forbidden by openin_any=%c (has absolute path outside TEXMFOUTPUT)",
+                   file, openin));
+                 return false;
+              }
+
+              // is the file outside the cwd?
+              File cwd = new File(getSystemProperty("user.dir", "."));
+
+              if (file.getParentFile() != null && !isFileInTree(file, cwd))
+              {
+                 // disallow going to parent directories
+
+                 debug(String.format(
+                   "Read access for file '%s' forbidden by openin_any=%c (outside cwd path)",
+                   file, openin));
                  return false;
               }
 
@@ -311,8 +323,18 @@ public class TeXOSQuery
               if (file.isHidden())
               {
                  // hidden file so not permitted
+                 debug(String.format(
+                   "Read access for file '%s' forbidden by openin_any=%c (hidden file)",
+                   file, openin));
                  return false;
               }
+
+            break;
+            default:
+              // this shouldn't happen, but just in case...
+              debug(String.format("Invalid openin value %d", openin));
+              // don't allow, something's gone badly wrong
+              return false;
          }
 
          // return read access
@@ -335,21 +357,21 @@ public class TeXOSQuery
      * @param defValue The default value
      * @return The property value or the default if unavailable
      */
-    private static String getSystemProperty(String propName, String defValue)
-    {
-       // This may cause a SecurityException if the security manager
-       // doesn't permit access to this property.
+   public String getSystemProperty(String propName, String defValue)
+   {
+      // This may cause a SecurityException if the security manager
+      // doesn't permit access to this property.
 
-       try
-       {
-          return System.getProperty(propName, defValue);
-       }
-       catch (SecurityException e)
-       {
-          debug(String.format("unable to access '%s' property", propName), e);
-          return defValue;
-       }
-    }
+      try
+      {
+         return System.getProperty(propName, defValue);
+      }
+      catch (SecurityException e)
+      {
+         debug(String.format("unable to access '%s' property", propName), e);
+         return defValue;
+      }
+   }
 
     /**
      * Escapes hash from input string.
@@ -374,30 +396,42 @@ public class TeXOSQuery
      * @param string Input string.
      * @return String with hash escaped.
      */
-    private static String escapeHash(String string)
-    {
-       return string.replaceAll("#", "\\\\#");
-    }
+   public static String escapeHash(String string)
+   {
+      return string.replaceAll("#", "\\\\#");
+   }
 
     /**
      * Escapes hash from input character.
      * @param c Input character.
      * @return String with hash escaped.
      */
-    private static String escapeHash(char c)
-    {
-       return String.format("%s", c == '#' ? "\\#" : c);
-    }
+   public static String escapeHash(char c)
+   {
+      return String.format("%s", c == '#' ? "\\#" : c);
+   }
+
+    /**
+     * Gets the script for the given locale. Java only introduced
+     * support for language scripts in version 1.7, so this returns
+     * null here. The JRE7 support needs to override this method.
+     * @param locale The locale
+     * @return The language script associated with the given locale or null if not available
+     */ 
+   public String getScript(Locale locale)
+   {
+      return null;
+   }
 
     /**
      * Gets a string representation of the provided locale.
      * @param locale The provided locale.
      * @return String representation.
      */
-    private static String getLocale(Locale locale)
-    {
-       return getLocale(locale, false);
-    }
+   public String getLocale(Locale locale)
+   {
+      return getLocale(locale, false);
+   }
 
     /**
      * Gets a POSIX representation of the provided locale, converting the code
@@ -411,101 +445,89 @@ public class TeXOSQuery
      * @param convertCodeset Boolean value to convert the code set.
      * @return String representation.
      */
-    private static String getLocale(Locale locale, boolean convertCodeset)
-    {
-       String identifier = "";
+   public String getLocale(Locale locale, boolean convertCodeset)
+   {
+      String identifier = "";
 
-       if (locale == null)
-       {
-          // No locale provided, so the empty string will be
-          // returned.
-          debug("null locale");
-       }
-       else
-       {
-          String language = locale.getLanguage();
+      if (locale == null)
+      {
+         // No locale provided, return empty string
+         debug("null locale");
+         return "";
+      }
 
-          if (language == null)
-          {
-             // No language provided for the locale. The language
-             // part will be omitted from the returned string.
-             debug("locale has no language");
-          }
-          else
-          {
-             identifier = language;
-          }
+      String language = locale.getLanguage();
 
-          String country = locale.getCountry();
+      if (language == null)
+      {
+          // No language provided for the locale. The language
+          // part will be omitted from the returned string.
+         debug("locale has no language", 3);
+      }
+      else
+      {
+         identifier = language;
+      }
 
-          if (country == null || "".equals(country))
-          {
-             // No country is associated with the locale. The
-             // country part will be omitted from the returned
-             // string.
-             debug("locale has no region");
-          }
-          else
-          {
-             if ("".equals(identifier))
-             {
-                // The identifier hasn't been set (no language
-                // provided), so just set it to the country code.
-                identifier = country;
-             }
-             else
-             {
-                // Append the country code to the identifier.
-                identifier = identifier.concat("-").concat(country);
-             }
-          }
+      String country = locale.getCountry();
 
-          // Get the OS default file encoding or "UTF-8" if not set.
-          // This may throw a SecurityException if the security
-          // manager doesn't allow access to this property.
+      if (country == null || "".equals(country))
+      {
+         // No country is associated with the locale. The
+         // country part will be omitted from the returned
+         // string.
+         debug("locale has no region", 3);
+      }
+      else
+      {
+         if ("".equals(identifier))
+         {
+            // The identifier hasn't been set (no language
+            // provided), so just set it to the country code.
+            identifier = country;
+         }
+         else
+         {
+            // Append the country code to the identifier.
+            identifier = identifier.concat("-").concat(country);
+         }
+      }
 
-          try
-          {
-             String codeset = System.getProperty("file.encoding", "UTF-8");
+      // Get the OS default file encoding or "UTF-8" if not set.
 
-             // The codeset should not be null here as a default has
-             // been provided if the property is missing.
+      String codeset = getSystemProperty("file.encoding", "UTF-8");
 
-             if (convertCodeset)
-             {
-                // If conversion is required, change to lower case
-                // and remove any hyphens.
-                codeset = codeset.toLowerCase().replaceAll("-", "");
-             }
+      // The codeset should not be null here as a default has
+      // been provided if the property is missing.
 
-             identifier = identifier.concat(".").concat(codeset);
-          }
-          catch (SecurityException e)
-          {
-             // Omit the codeset if it can't be accessed.
-             debug("Unable to access 'file.encoding' property", e);
-          }
+      if (convertCodeset)
+      {
+         // If conversion is required, change to lower case
+         // and remove any hyphens.
+         codeset = codeset.toLowerCase().replaceAll("-", "");
+      }
 
-          // Find the script. This is used as the modifier part. Is
-          // there a standard for POSIX locale modifiers?
+      identifier = identifier.concat(".").concat(codeset);
 
-          String script = locale.getScript();
+      // Find the script if available. This is used as the modifier part. Is
+      // there a standard for POSIX locale modifiers?
 
-          if (script == null || "".equals(script))
-          {
-             // Script information is missing. Ignore it.
-             debug("no script available for locale");
-          }
-          else
-          {
-             // Append the script. This will be a four letter string 
-             // (if it's not empty).
-             identifier = identifier.concat("@").concat(script);
-          }
-       }
+      String script = getScript(locale);
 
-       return identifier;
-    }
+      if (script == null || "".equals(script))
+      {
+         // Script information is missing. Ignore it.
+         debug("no script available for locale", 3);
+      }
+      else
+      {
+         // Append the script. This will be a four letter string 
+         // (if it's not empty).
+         identifier = identifier.concat("@").concat(script);
+      }
+
+      return identifier;
+   }
 
     /**
      * Gets the OS name. As far as I can tell, the "os.name"
@@ -514,20 +536,20 @@ public class TeXOSQuery
      * about special characters.
      * @return The OS name as string.
      */
-    private static String getOSname()
-    {
-       return getSystemProperty("os.name", "");
-    }
+   public String getOSname()
+   {
+      return getSystemProperty("os.name", "");
+   }
 
     /**
      * Gets the OS architecture. As with the OS name, this shouldn't
      * contain any special characters.
      * @return The OS architecture as string.
      */
-    private static String getOSarch()
-    {
-       return getSystemProperty("os.arch", "");
-    }
+   public String getOSarch()
+   {
+      return getSystemProperty("os.arch", "");
+   }
 
     /**
      * Gets the OS version. This may contain an underscore, but we
@@ -535,16 +557,16 @@ public class TeXOSQuery
      * category code for _ before parsing the result of texosquery.
      * @return The OS version as string.
      */
-    private static String getOSversion()
-    {
-       return getSystemProperty("os.version", "");
-    }
+   public String getOSversion()
+   {
+      return getSystemProperty("os.version", "");
+   }
 
     /**
      * Gets the user home.
      * @return The user home as string.
      */
-   private static String getUserHome()
+   public String getUserHome()
    {
       // The result path needs to be converted to a TeX path.
       return toTeXPath(getSystemProperty("user.home", ""));
@@ -558,36 +580,39 @@ public class TeXOSQuery
      * @param filename The filename string.
      * @return TeX path.
      */
-   private static String toTeXPath(String filename)
+   public String toTeXPath(String filename)
    {
-       String path = "";
+      String path = "";
         
-       if (filename == null)
-       {
-          // This shouldn't happen, but just in case...
-          try
-          {
-             throw new NullPointerException();
-          }
-          catch (NullPointerException e)
-          {
-             debug("null file name passed to toTeXPath()", e);
-          }
+      if (filename == null)
+      {
+         // This shouldn't happen, but just in case...
+         try
+         {
+            // throw so we can get a stack trace for debugging
+            throw new NullPointerException();
+         }
+         catch (NullPointerException e)
+         {
+            debug("null file name passed to toTeXPath()", e);
+         }
 
-          return "";
-       }
+         return "";
+      }
 
-       // If the OS uses backslash as the directory divider,
-       // convert all backslashes to forward slashes.
+      // If the OS uses backslash as the directory divider,
+      // convert all backslashes to forward slashes. The Java regex
+      // means that we need four backslashes to represent a single literal
+      // backslash.
 
-       if (File.separatorChar == BACKSLASH)
-       {
-          filename = filename.replaceAll("\\\\", "/");
-       }
+      if (File.separatorChar == BACKSLASH)
+      {
+         filename = filename.replaceAll("\\\\", "/");
+      }
 
-       path = escapeHash(filename);
+      path = escapeHash(filename);
         
-       return path;
+      return path;
    }
 
     /**
@@ -595,7 +620,7 @@ public class TeXOSQuery
      * @param filename The filename string.
      * @return The original representation.
      */
-   private static String fromTeXPath(String filename)
+   public String fromTeXPath(String filename)
    {
       if (filename == null)
       {
@@ -616,7 +641,8 @@ public class TeXOSQuery
       filename = filename.replaceAll("\\#", "#");
 
       // If the OS uses backslash as the directory divider,
-      // convert all forward slashes to backslashes.
+      // convert all forward slashes to backslashes. Again we need
+      // four backslashes to represent a single literal backslash.
 
       if (File.separatorChar == BACKSLASH)
       {
@@ -638,7 +664,7 @@ public class TeXOSQuery
      * @param filename Filename string.
      * @return File representation 
      */
-   private static File fileFromTeXPath(String filename)
+   public File fileFromTeXPath(String filename)
    {
       // Convert from TeX to the OS path representation.
       filename = fromTeXPath(filename);
@@ -652,47 +678,18 @@ public class TeXOSQuery
 
          try
          {
-            // Create and start the process.
-            Process process = new ProcessBuilder("kpsewhich", filename).start();
+            String result = kpsewhich(filename);
 
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0)
+            if ((result != null) && (!"".equals(result)))
             {
-               // kpsewhich completed with exit code 0.
-               // Read STDIN to find the result.
-                
-               InputStream stream = process.getInputStream();
-                    
-               if (stream != null)
-               {
-                        
-                        BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(stream)
-                        );
-
-                        String line = reader.readLine();
-                        reader.close();
-
-                        if ((line != null) && (!"".equals(line))) {
-                            file = new File(fromTeXPath(line));
-                        }
-                }
-            }
-            else
-            {
-               // kpsewhich failed.
-               debug(String.format("kpsewhich '%s' failed with exit code %d",
-                 filename, exitCode));
-
-               // The File object will be returned even though the file
-               // can't be found.
+               file = new File(fromTeXPath(result));
             }
          }
          catch (Exception exception)
          {
             // Catch all exceptions
-            debug(String.format("kpsewhich '%s' failed", filename),
+            debug(String.format("kpsewhich couldn't find the file '%s'",
+                                filename),
                   exception);
 
             // The File object will be returned even though the file
@@ -709,22 +706,23 @@ public class TeXOSQuery
      * to bar the current working directory.
      * @return The current working directory.
      */
-   private static String getCwd()
+   public String getCwd()
    {
       // The result path needs to be converted to a TeX path.
-      return toTeXPath(getSystemProperty("user.dir", ""));
+      return toTeXPath(getSystemProperty("user.dir", "."));
    }
 
     /**
      * Gets the temporary directory.
      * @return Temporary directory.
      */
-   private static String getTmpDir()
+   public String getTmpDir()
    {
       String filename = getSystemProperty("java.io.tmpdir", "");
 
       if ("".equals(filename))
       {
+         // Not set
          return "";
       }
 
@@ -736,7 +734,7 @@ public class TeXOSQuery
          return "";
       }
 
-      // The result path needs to be converted to a TeX path.
+      // The resulting path needs to be converted to a TeX path.
       return toTeXPath(filename);
    }
 
@@ -745,7 +743,7 @@ public class TeXOSQuery
      * \pdfcreationdate.)
      * @return The current date.
      */
-   private static String pdfnow()
+   public String pdfnow()
    {
       return pdfDate(Calendar.getInstance());
    }
@@ -755,23 +753,23 @@ public class TeXOSQuery
      * @param calendar A calendar object.
      * @return Date in PDF format.
      */
-    private static String pdfDate(Calendar calendar)
-    {
-        String tz = String.format("%1$tz", calendar);
-        return String.format(
-                "D:%1$tY%1$tm%1td%1$tH%1$tM%1$tS%2$s'%3$s'",
-                calendar,
-                tz.substring(0, 3),
-                tz.substring(3)
-        );
-    }
+   public String pdfDate(Calendar calendar)
+   {
+       String tz = String.format("%1$tz", calendar);
+       return String.format(
+               "D:%1$tY%1$tm%1td%1$tH%1$tM%1$tS%2$s'%3$s'",
+               calendar,
+               tz.substring(0, 3),
+               tz.substring(3)
+       );
+   }
 
-    /**
-     * Gets the date of a file in PDF format.
-     * @param file File.
-     * @return The date in PDF format.
-     */
-   private static String pdfDate(File file)
+   /**
+    * Gets the date of a file in PDF format.
+    * @param file File.
+    * @return The date in PDF format.
+    */
+   public String pdfDate(File file)
    {
       try
       {
@@ -825,7 +823,7 @@ public class TeXOSQuery
      * @param file The file.
      * @return The length as a string.
      */
-   private static String getFileLength(File file)
+   public String getFileLength(File file)
    {
       try
       {
@@ -876,7 +874,7 @@ public class TeXOSQuery
      * @param directory Directory.
      * @return List as a string.
      */
-   private static String getFileList(String separator, File directory)
+   public String getFileList(String separator, File directory)
    {
       if (directory == null)
       {
@@ -962,7 +960,7 @@ public class TeXOSQuery
      * @param directory Directory.
      * @return Filtered list as string.
      */
-   private static String getFilterFileList(String separator,
+   public String getFilterFileList(String separator,
             final String regex, File directory)
    {
       if (directory == null)
@@ -1053,11 +1051,12 @@ public class TeXOSQuery
     /**
      * Gets the file URI. This may contain % characters, but
      * \TeXOSQuery changes the category code before parsing the
-     * result.
+     * result. We shouldn't have to worry about any other special
+     * characters as they should be %-encoded.
      * @param file The file.
      * @return The URI.
      */
-   private static String fileURI(File file)
+   public String fileURI(File file)
    {
       if (file == null)
       {
@@ -1098,7 +1097,7 @@ public class TeXOSQuery
      * @param file The file.
      * @return The path.
      */
-   private static String filePath(File file)
+   public String filePath(File file)
    {
       if (file == null)
       {
@@ -1143,7 +1142,7 @@ public class TeXOSQuery
      * @param file The file.
      * @return The path.
      */
-   private static String parentPath(File file)
+   public String parentPath(File file)
    {
       if (file == null)
       {
@@ -1196,6 +1195,63 @@ public class TeXOSQuery
    }
 
    /**
+    * Gets the locale from the given language tag. Since Java didn't
+    * support BCP47 language tags until v1.7, we have can't use
+    * Locale.forLanguageTag(String) here. Only parse for language
+    * code, country code and variant. Grandfathered, irregular and private
+    * tags not supported.
+    * @param languageTag The language tag
+    * @return The locale that closest matches the language tag
+    */ 
+   public Locale getLocale(String languageTag)
+   {
+      // The BCP47 syntax is described in 
+      // https://tools.ietf.org/html/bcp47#section-2.1
+      // This is a match for a subset of the regular syntax.
+      // Numeric country codes aren't recognised. Only the 
+      // language tag, the region and the variant are
+      // captured.
+      // Note: named capturing groups introduced in Java 7, so we
+      // can't use them here.
+      Pattern p = Pattern.compile(
+        "(?:([a-z]{2,3}(?:-[a-z]{2,3})*))+(?:-[A-Z][a-z]{3})?(?:-([A-Z]{2}))?(?:-([a-zA-Z0-9]{5,8}|[0-9][a-zA-Z0-9]{3}))?(?:-.)*");
+
+      Matcher m = p.matcher(languageTag);
+
+      if (m.matches())
+      {
+         String language = m.group(1);
+         String region = m.group(2);
+         String variant = m.group(3);
+
+         // Language won't be null as the pattern requires it.
+
+         if (region == null)
+         {
+            // There isn't a Locale constructor that allows a
+            // variant without a region, so don't bother checking
+            // variant for null here.
+
+            return new Locale(language);
+         }
+
+         if (variant == null)
+         {
+            return new Locale(language, region);
+         }
+
+         return new Locale(language, region, variant);
+      }
+
+      debug(String.format("Can't parse language tag '%s'", languageTag));
+
+      // strip anything to a hyphen and try that
+      String[] split = languageTag.split("-", 1);
+
+      return new Locale(split[0]);
+   }
+
+   /**
     * Gets all numerical information for the given locale. If the
     * given locale tag is null, the default locale is used. The
     * information is returned with each item grouped to make it
@@ -1207,7 +1263,7 @@ public class TeXOSQuery
     * identifier (e.g. GBP), currency symbol (e.g. £),
     * monetary decimal separator.
     */
-   private static String getNumericalInfo(String localeTag)
+   public String getNumericalInfo(String localeTag)
    {
        Locale locale;
 
@@ -1217,7 +1273,7 @@ public class TeXOSQuery
        }
        else
        {
-          locale = Locale.forLanguageTag(localeTag);
+          locale = getLocale(localeTag);
        }
 
        DecimalFormatSymbols fmtSyms 
@@ -1235,9 +1291,9 @@ public class TeXOSQuery
     /**
      * Prints the syntax usage.
      */
-   private static void syntax()
+   protected void syntax()
    {
-      System.out.println("Usage: texosquery <option>...");
+      System.out.println(String.format("Usage: %s <option>...", name));
 
       System.out.println();
       System.out.println("Cross-platform OS query application");
@@ -1304,9 +1360,9 @@ public class TeXOSQuery
     /**
      * Prints the version.
      */
-   private static void version()
+   protected void version()
    {
-       System.out.println(String.format("texosquery %s %s", VERSION_NUMBER,
+       System.out.println(String.format("%s %s %s", name, VERSION_NUMBER,
                 VERSION_DATE));
        System.out.println("Copyright 2016 Nicola Talbot");
        System.out.println("License LPPL 1.3+ (http://ctan.org/license/lppl1.3)");
@@ -1317,7 +1373,7 @@ public class TeXOSQuery
      * @param group Determines whether to add grouping
      * @param info Information to print
      */ 
-   private static void print(boolean group, String info)
+   protected void print(boolean group, String info)
    {
       if (group)
       {
@@ -1330,14 +1386,15 @@ public class TeXOSQuery
    }
 
     /**
-     * Main method.
+     * Process command line arguments.
      * @param args Command line arguments.
      */
-   public static void main(String[] args)
+   public void processArgs(String[] args)
    {
       if (args.length == 0)
       {
-         System.err.println("Missing argument. Try texosquery --help");
+         System.err.println(String.format(
+           "Missing argument. Try %s --help", name));
          System.exit(1);
       }
 
@@ -1673,5 +1730,29 @@ public class TeXOSQuery
          }
       }
    }
+
+    private String name;
     
+    private static final String VERSION_NUMBER = "1.2";
+    private static final String VERSION_DATE = "2016-11-05";
+    private static final char BACKSLASH = '\\';
+    private static final long ZERO = 0L;
+
+    /**
+     * openin_any settings
+     */
+    private static final char OPENIN_UNSET=0; // unset
+    private static final char OPENIN_A='a'; // any
+    private static final char OPENIN_R='r'; // restricted
+    private static final char OPENIN_P='p'; // paranoid
+
+    private char openin = OPENIN_UNSET;
+
+    private File texmfoutput = null;
+
+    /**
+     * Debug level. (0 = no debugging, 1 or more print messages to
+     * STDERR.)
+     */
+    private int debugLevel = 0;
 }

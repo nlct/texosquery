@@ -27,6 +27,7 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{textcomp}
 \usepackage{tgtermes}
 \usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
@@ -81,7 +82,10 @@
 %\begin{important}
 %You will need \TeX's shell escape enabled,
 %and you will also need the Java Runtime Environment (JRE) 
-%installed to use \texttt{texosquery}. (At least Java 1.7)
+%installed to use \texttt{texosquery} (at least JRE~7).
+%If you have either JRE~5 or~6 and you're unable to upgrade to a
+%newer version, you can use \texttt{texosquery-jre5.jar} instead,
+%but it doesn't have proper language tag support. 
 %\end{important}
 %
 %If you want to rebuild the application, instructions for
@@ -108,21 +112,50 @@
 %function will display the result on a single line without
 %formatting. (For multiple results, each line is grouped 
 %from v1.1.) A blank line (or empty group) will be displayed
-%if the information isn't available. A forward slash is always 
+%if the information isn't available or is prohibited. A forward slash is always 
 %used as a directory divider, regardless of the operating 
 %system, so the result can be used, for example, in \cs{input} or
 %\cs{includegraphics}.
 %
+%\subsection{Accessing file information}
 %If an input file name is required (for example, with the
 %\longargfmt{pdfdate} argument described below) then the file may be in
 %the current working directory, relative to the current directory
 %(with forward slash \texttt{/} as the directory divider), an absolute path 
 %(again with forward slash) or on \TeX's path (in
-%which case, \texttt{kpsewhich} is used to locate it).
+%which case, \texttt{kpsewhich} is used to locate it). As from version 1.2, \texttt{texosquery}
+%honours the \texttt{openin\_any} attribute set in the
+%\texttt{texmf.cnf} configuration file. This value is fetched using
+%\begin{verbatim}
+%kpsewhich -var-value=openin_any
+%\end{verbatim}
+%(You can find the configuration files using \texttt{kpsewhich -a
+%texmf.cnf}) For example, suppose the file \texttt{/tmp/.test}
+%exists. If the \texttt{openin\_any} attribute is set to \texttt{a}
+%(any file), then (assuming the operating system allows read access
+%to that file) the \texttt{texosquery} file reading operations will
+%be permitted. For example
+%\begin{verbatim}
+%texosquery --pdfdate /tmp/.test
+%\end{verbatim}
+%will return the file modification date in PDF format. However, if
+%\texttt{openin\_any} is set to \texttt{r} (restricted), the read
+%access will be denied because the file is considered hidden so a
+%empty result is returned. Similarly, if \texttt{openin\_any} is set
+%to \texttt{p} (paranoid), the read access will be denied again
+%because the file is hidden but also because the file has an
+%absolute path that isn't under \texttt{\$TEXMFOUTPUT}.
 %
-%Command line invocation:
+%\subsection{Command line invocation}
+%The syntax for the command line invocation of \texttt{texosquery}
+%is:
 %\begin{flushleft}\ttfamily
 %texosquery \meta{action} ...
+%\end{flushleft}
+%The syntax for \texttt{texosquery-jre5} is exactly the same except
+%for the application name:
+%\begin{flushleft}\ttfamily
+%texosquery-jre5 \meta{action} ...
 %\end{flushleft}
 %Available actions (at least one required):
 %\begin{description}
@@ -159,10 +192,11 @@
 %system version.
 %\item[\shortarg{a} or \longarg{osarch}] Displays the operating
 %system architecture.
-%\item[\shortarg{N} \oarg{locale} or \longarg{numeric} \oarg{locale}]
-%Displays \marg{grp sep}\marg{dec sep}\marg{exp
-%sep}\marg{cur code}\marg{cur sym}\marg{cur sep} for the locale
-%given by the optional argument \meta{locale}. If omitted, the
+%\item[\shortarg{N} \oarg{language tag} or \longarg{numeric}
+%\oarg{language tag}]
+%(New to v1.2.) Displays \marg{grp sep}\marg{dec sep}\marg{exp
+%sep}\marg{cur code}\marg{cur sym}\marg{cur sep} for the 
+%\meta{language tag} given in the optional argument. If omitted, the
 %default locale is assumed. The returned values are:
 %\begin{itemize}
 %\item \meta{grp sep} the numeric group separator.
@@ -171,7 +205,14 @@
 %\item \meta{cur code} the currency code.
 %\item \meta{cur sym} the currency symbol.
 %\end{itemize}
-%(New to v1.2.) For example:
+%The language tag should conform to IETF BCP~47. See
+%\url{http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html}
+%for further details. If you are using \texttt{texosquery-jre5},
+%only the language, region and variant elements will be recognised
+%since the language tag support was introduced to Java until version
+%1.7.
+%
+%For example:
 %\begin{verbatim}
 %texosquery -N en-GB
 %\end{verbatim}
@@ -179,6 +220,10 @@
 %\begin{verbatim}
 %{,}{.}{E}{GBP}{£}{.}
 %\end{verbatim}
+%If Java doesn't support the given locale, the currency code will
+%appear as \texttt{XXX} with the symbol \textcurrency\ (generic
+%currency sign).
+%
 %\item[\shortarg{n} or \longarg{pdfnow}] Displays the current
 % date and time in PDF format. For example 
 %\begin{verbatim}
@@ -246,7 +291,8 @@
 %debugging information is suppressed (equivalent to
 %\longarg{nodebug}). If \meta{n} $\geq 1$, error messages are
 %written to STDERR. If \meta{n} $\geq 2$, any exceptions encountered
-%will additionally write the stack trace to STDERR.
+%will additionally write the stack trace to STDERR. If \meta{n}
+%$\geq 3$ non-error informational messages are included.
 %\end{description}
 %
 %If multiple options are given, they will be processed in the
@@ -286,6 +332,9 @@
 %texosquery -d nofile
 %\end{verbatim}
 %just displays an empty line.
+%
+%If you're puzzled as to why an empty line has been returned, try
+%rerunning the command with \longarg{debug} for further information.
 %
 %\section{texosquery.tex: generic \TeX\ code}
 %You can run \texttt{texosquery} directly from \TeX's shell escape.
@@ -330,7 +379,18 @@
 %where it might possibly occur in the result, but in general it's
 %best to avoid these characters in file names.)
 %
-%There are some short cut commands for convenience, described below.
+%\DescribeMacro\TeXOSInvokerName
+%The above command uses \cs{TeXOSInvokerName} to reference the
+%application name. This defaults to \texttt{texosquery}. If you need
+%to use \texttt{texosquery-jre5} instead, you can redefine it:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre5}
+%\end{verbatim}
+%This needs to be done before using \cs{TeXOSQuery} (or any of the
+%short cut commands).
+%
+%There are some short cut commands that call \texttt{texosquery}
+%with a particular option for convenience, described below.
 %If any of these commands cause an error message in the form:
 %\begin{verbatim}
 %I can't find file `|texosquery'.

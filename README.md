@@ -2,18 +2,10 @@
 Cross-platform Java application to query OS information designed for use in 
 TeX's shell escape mechanism.
 
-I was aiming at Java 1.5 as a lower bound for the version,
-but the language tags in java.util.Locale were only introduced
-in Java 1.7. Since the primary purpose of this application is
-to query locale information using TeX's shell escape mechanism
-this means that the oldest Java version has to be 1.7 for this
-application to work. (All the non-locale related functions
-were thrown in as extras. It seemed like overkill to write a Jave
-application that just returned the language and region information
-so I added a few other functions that might be useful.)
-My original attempt was in Lua rather than Java, but it wasn't
-possible to consistently access the locale information
-cross-platform. See also http://ctan.org/pkg/tracklang
+Note that texosquery.jar requires at least JRE 7. If you have either
+JRE 5 or 6 and are unable to upgrade for some reason, then you can
+use texosquery-jre5.jar instead, but you won't have proper language
+tag support.
 
 The application can query the following:
 
