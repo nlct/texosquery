@@ -1787,7 +1787,8 @@ public class TeXOSQuery
     * language tag, language name, language name in given locale,
     * country name, country name in given locale, variant name,
     * variant name in given locale.
-    * Second group: full date, long date, medium date, short date.
+    * Second group: full date, long date, medium date, short date,
+    * first day of the week index.
     * Third group: full time, long time, medium time, short time.
     * Fourth group: weekday names.
     * Fifth group: short weekday names.
@@ -1888,11 +1889,44 @@ public class TeXOSQuery
        DateFormat timeShortFormat = DateFormat.getTimeInstance(
         DateFormat.SHORT, locale);
 
-       String dateGroup = String.format("{%s}{%s}{%s}{%s}",
+       // first day of the week index consistent with pgfcalendar
+       // (0 = Monday, etc)
+       int firstDay = 0;
+
+       Calendar cal = Calendar.getInstance(locale);
+       cal.setTimeInMillis(now.getTime());
+
+       switch (cal.getFirstDayOfWeek())
+       {
+          case Calendar.MONDAY:
+            firstDay = 0;
+          break;
+          case Calendar.TUESDAY:
+            firstDay = 1;
+          break;
+          case Calendar.WEDNESDAY:
+            firstDay = 2;
+          break;
+          case Calendar.THURSDAY:
+            firstDay = 3;
+          break;
+          case Calendar.FRIDAY:
+            firstDay = 4;
+          break;
+          case Calendar.SATURDAY:
+            firstDay = 5;
+          break;
+          case Calendar.SUNDAY:
+            firstDay = 6;
+          break;
+       }
+
+       String dateGroup = String.format("{%s}{%s}{%s}{%s}{%d}",
              dateFullFormat.format(now),
              dateLongFormat.format(now),
              dateMediumFormat.format(now),
-             dateShortFormat.format(now));
+             dateShortFormat.format(now),
+             firstDay);
 
        String timeGroup = String.format("{%s}{%s}{%s}{%s}",
              timeFullFormat.format(now),

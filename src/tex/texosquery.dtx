@@ -302,7 +302,7 @@
 %for clarity:
 %\begin{verbatim}
 %{{en-GB}{English}{English}{United Kingdom}{United Kingdom}{}{}}
-%{{Saturday, 5 November 2016}{05 November 2016}{05-Nov-2016}{05/11/16}}
+%{{Saturday, 5 November 2016}{05 November 2016}{05-Nov-2016}{05/11/16}}{0}
 %{{23:58:25 o'clock GMT}{23:58:25 GMT}{23:58:25}{23:58}}
 %{{Monday}{Tuesday}{Wednesday}{Thursday}{Friday}{Saturday}{Sunday}}
 %{{Mon}{Tue}{Wed}{Thu}{Fri}{Sat}{Sun}}
@@ -311,6 +311,14 @@
 %{{Jan}{Feb}{Mar}{Apr}{May}{Jun}{Jul}{Aug}{Sep}{Oct}{Nov}{Dec}}
 %{{,}{.}{E}{GBP}{GBP}{£}{\texosquerycurrencypound }{.}{%}{‰}}
 %\end{verbatim}
+%
+%\textbf{Note that not all locales are supported by Java.}
+%For example, Irish is supported but Scottish and Welsh 
+%aren't supported in JRE~8.
+%See
+%\url{http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html}
+%for the list of support locales in JRE~8.
+%
 %The groups are:
 %\begin{enumerate}
 %\item The language information in the form:
@@ -340,10 +348,25 @@
 %default language and \meta{locale variant name} is the name of the
 %variant in the locale's language. In both the \texttt{en-GB} and
 %\texttt{fr-BE} examples, these are both empty.
-%\item The current date provided various formats suitable to
-%the given locale:
 %
-%\marg{full date}\marg{long date}\marg{medium date}\marg{short date}
+%\item The current date provided various formats suitable to
+%the given locale and also the index of the first day of the week
+%(starting with 0 for Monday, in order to be compatible with
+%\sty{pgfcalendar}):
+%
+%\marg{full date}\marg{long date}\marg{medium date}\marg{short
+%date}{first day}
+%
+%The formats can vary from one locale to another. For example, the
+%\texttt{en-GB} uses the form \qt{06-Nov-2016} for the medium date,
+%but \texttt{de-CH-1996} uses a numerical form \qt{06.11.2006}.
+%The \meta{short date} is typically numeric. Some locales
+%have identical \meta{full date} and \meta{long date} or 
+%identical \meta{long date} and \meta{medium date}.
+%
+%The final element of the groun \meta{first day} is the index of the
+%first day of the week.
+%
 %\item The current time provided in various formats suitable to the
 %given locale:
 %
