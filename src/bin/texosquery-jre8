@@ -1,0 +1,5 @@
+#!/bin/sh
+
+bindir=`dirname $0`
+java -Djava.locale.providers=CLDR,JRE -jar "$bindir/texosquery-jre8.jar" "$@"
+

@@ -4,8 +4,10 @@ dist	:
 	mkdir -p texosquery
 	cp texosquery.sh texosquery/texosquery
 	cp texosquery-jre5.sh texosquery/texosquery
+	cp texosquery-jre8.sh texosquery/texosquery
 	cp ../src/bin/texosquery.jar texosquery
 	cp ../src/bin/texosquery-jre5.jar texosquery
+	cp ../src/bin/texosquery-jre8.jar texosquery
 	cp ../src/tex/texosquery.dtx texosquery
 	cp ../src/tex/texosquery.ins texosquery
 	cp ../src/tex/texosquery.pdf texosquery

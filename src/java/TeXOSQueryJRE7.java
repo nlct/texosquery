@@ -37,10 +37,8 @@ public class TeXOSQueryJRE7 extends TeXOSQuery
    {
       Locale locale = Locale.forLanguageTag(languageTag);
 
-      // Locale.forLanguageTag() doesn't seem to recognise
-      // numeric regions. (It should do according to the
-      // documentation, as far as I can tell.)
-      // So test for a numeric region.
+      // Locale.forLanguageTag() doesn't recognise
+      // numeric regions. So test for a numeric region.
 
       String region = locale.getCountry();
 

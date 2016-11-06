@@ -1,11 +1,19 @@
-test	: bin/texosquery.jar bin/texosquery-jre5.jar tex/texosquery.* tests/*.tex
+test	: bin/texosquery.jar bin/texosquery-jre8.jar bin/texosquery-jre5.jar tex/texosquery.* tests/*.tex
 	make -C tests
 
-bin/texosquery.jar	: java/Manifest.txt \
+bin/texosquery.jar	: java/Manifest-jre7.txt \
 			classes/com/dickimawbooks/texosquery/TeXOSQueryJRE7.class
 			cd classes; \
-			jar cmf ../java/Manifest.txt ../bin/texosquery.jar \
+			jar cmf ../java/Manifest-jre7.txt ../bin/texosquery.jar \
 			com/dickimawbooks/texosquery/TeXOSQueryJRE7.class \
+			com/dickimawbooks/texosquery/TeXOSQuery.class \
+			com/dickimawbooks/texosquery/TeXOSQuery\$$*.class
+
+bin/texosquery-jre8.jar	: java/Manifest-jre8.txt \
+			classes/com/dickimawbooks/texosquery/TeXOSQueryJRE8.class
+			cd classes; \
+			jar cmf ../java/Manifest-jre8.txt ../bin/texosquery-jre8.jar \
+			com/dickimawbooks/texosquery/TeXOSQueryJRE8.class \
 			com/dickimawbooks/texosquery/TeXOSQuery.class \
 			com/dickimawbooks/texosquery/TeXOSQuery\$$*.class
 
@@ -23,6 +31,13 @@ classes/com/dickimawbooks/texosquery/TeXOSQueryJRE7.class	: classes/com/dickimaw
 	javac -source 1.7 -target 1.7 -d ../classes \
 	-Xlint:unchecked -Xlint:deprecation -Xlint:-options \
 	TeXOSQuery.java TeXOSQueryJRE7.java
+
+classes/com/dickimawbooks/texosquery/TeXOSQueryJRE8.class	: classes/com/dickimawbooks/texosquery \
+	java/TeXOSQuery.java java/TeXOSQueryJRE8.java
+	cd java; \
+	javac -source 1.8 -target 1.8 -d ../classes \
+	-Xlint:unchecked -Xlint:deprecation -Xlint:-options \
+	TeXOSQuery.java TeXOSQueryJRE8.java
 
 classes/com/dickimawbooks/texosquery/TeXOSQueryJRE5.class	: classes/com/dickimawbooks/texosquery \
 	java/TeXOSQuery.java java/TeXOSQueryJRE5.java

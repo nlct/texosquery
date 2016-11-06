@@ -106,6 +106,11 @@
 %If you have either JRE~5 or~6 and you're unable to upgrade to a
 %newer version, you can use \app{texosquery-jre5.jar} instead,
 %but it doesn't have proper language tag support. 
+%There is also \app{texosquery-jre8} which requires at least JRE~8.
+%This provides support for standalone month and week day names (see
+%the \longarg{locale-data} option, described later). The
+%\app{texosquery} version (JRE~7) is considered the default
+%application.
 %\end{important}
 %
 %If you want to rebuild the application, instructions for
@@ -192,6 +197,52 @@
 %because the file is hidden but also because the file has an
 %absolute path that isn't under \texttt{\$TEXMFOUTPUT} (assuming
 %that environment variable hasn't been set to \file{/tmp}).
+%
+%\section{Locales}
+%\label{sec:locales}
+%The options that have a locale identifier as an argument need the
+%locale formatted as a regular IEFT BCP 47 language tag that uses
+%hyphens as separators. POSIX style locales are only used as a
+%return value in the \longarg{locale} and \longarg{locale-lcs}
+%options.
+%
+%\textbf{Not all locales are supported by Java.}
+%For example, Irish is supported but Scottish and Welsh 
+%aren't supported in JRE~8.
+%See
+%\url{http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html}
+%for the list of supported locales in JRE~8.
+%
+%The Unicode Consortium's Common Locale Data Repository is bundled
+%with JRE~8, but
+%\href{http://openjdk.java.net/jeps/252}{the CLDR isn't
+%enabled by default}. It can be turned on using the system property
+%\texttt{java.locale.providers}, which may provide additional
+%support.
+%
+%For example, if the environment variable
+%\texttt{JAVA\_TOOL\_OPTIONS} is set to
+%\begin{verbatim}
+%-Djava.locale.providers=JRE,CLDR
+%\end{verbatim}
+%then additional locales may be available (but only with JRE~8).
+%The CLDR should be enabled by default with Java~9.
+%
+%Note that the bash script \file{texosquery-jre8.sh}
+%automatically sets \texttt{java.locale.providers} to 
+%\texttt{CLDR,JRE}.
+%
+%You may find that the results are different depending on the data
+%provider. For example with \texttt{java.locale.providers} set to 
+%\texttt{JRE,CLDR} then 
+%\begin{verbatim}
+%texosquery -D en-GB
+%\end{verbatim}
+%displays the long date in the form \qt{06 November 2016} and the
+%medium date in the form \qt{06-Nov-2016}, but with the ordering
+%reversed to \texttt{CLDR,JRE} (so that the CLDR is queried first)
+%then the long date is now in the form \qt{6 November 2016} and the 
+%medium date is in the form \qt{6 Nov 2016}.
 %
 %\subsection{Command line invocation}
 %The syntax for the command line invocation of \app{texosquery}
@@ -309,30 +360,23 @@
 %{{January}{February}{March}{April}{May}{June}{July}{August}{September}
 %{October}{November}{December}}
 %{{Jan}{Feb}{Mar}{Apr}{May}{Jun}{Jul}{Aug}{Sep}{Oct}{Nov}{Dec}}
+%{{Monday}{Tuesday}{Wednesday}{Thursday}{Friday}{Saturday}{Sunday}}
+%{{Mon}{Tue}{Wed}{Thu}{Fri}{Sat}{Sun}}
+%{{January}{February}{March}{April}{May}{June}{July}{August}{September}
+%{October}{November}{December}}
+%{{Jan}{Feb}{Mar}{Apr}{May}{Jun}{Jul}{Aug}{Sep}{Oct}{Nov}{Dec}}
 %{{,}{.}{E}{GBP}{GBP}{£}{\texosquerycurrencypound }{.}{%}{‰}}
 %\end{verbatim}
+%(See section~\ref{sec:locales} for the difference in locale
+%providers.)
 %
-%\textbf{Note that not all locales are supported by Java.}
-%For example, Irish is supported but Scottish and Welsh 
-%aren't supported in JRE~8.
-%See
-%\url{http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html}
-%for the list of support locales in JRE~8.
-%
-%The Unicode Consortium's Common Locale Data Repository is bundled
-%with JRE~8, but
-%\href{http://openjdk.java.net/jeps/252}{The CLDR isn't
-%enabled by default}. It can be turned on using the system property
-%\texttt{java.locale.providers}, which may provide additional
-%support.
-%
-%For example, if the environment variable
-%\texttt{JAVA\_TOOL\_OPTIONS} is set to
-%\begin{verbatim}
-%-Djava.locale.providers=JRE,CLDR
-%\end{verbatim}
-%then additional locales may be available (but only with JRE~8).
-%The CLDR should be enabled by default with Java~9.
+%There may seem to be some repetition here with the month and week
+%day names, but with \app{texosquery-jre8}, the second set are the
+%standalone version (for example, for a column header). In some
+%languages, these may be different from the names used in the date
+%format. Since this is new to Java 8, it's not supported in
+%\app{texosquery} or \app{texosquery-jre5} and they simply reproduce
+%the date format names.
 %
 %The groups are:
 %\begin{enumerate}

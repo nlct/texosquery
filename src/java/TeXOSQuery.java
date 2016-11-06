@@ -1775,12 +1775,114 @@ public class TeXOSQuery
       return builder.toString();
    }
 
+   /** Gets the standalone month names for the locale data.
+    * These are only available for Java 8, so just return the 
+    * month names used in the date format instead.
+    * @param cal The calendar
+    * @param locale The locale
+    * @return month names
+    */  
+   public String getStandaloneMonths(Calendar cal, Locale locale)
+   {
+      // can't use Calendar.getDisplayName() as it's not available
+      // with Java 5.
+      DateFormatSymbols dateFmtSyms = DateFormatSymbols.getInstance(locale);
+
+      StringBuilder monthNamesGroup = new StringBuilder();
+
+      String[] names = dateFmtSyms.getMonths();
+
+      for (int i = 0; i < 12; i++)
+      {
+         monthNamesGroup.append(String.format("{%s}", names[i]));
+      }
+
+      return monthNamesGroup.toString();
+   }
+
+   /** Gets the standalone short month names for the locale data.
+    * These are only available for Java 8, so just return the 
+    * month names used in the date format instead.
+    * @param cal The calendar
+    * @param locale The locale
+    * @return short month names
+    */  
+   public String getStandaloneShortMonths(Calendar cal, Locale locale)
+   {
+      // can't use Calendar.getDisplayName() as it's not available
+      // with Java 5.
+      DateFormatSymbols dateFmtSyms = DateFormatSymbols.getInstance(locale);
+
+      StringBuilder shortMonthNamesGroup = new StringBuilder();
+
+      String[] names = dateFmtSyms.getShortMonths();
+
+      for (int i = 0; i < 12; i++)
+      {
+         shortMonthNamesGroup.append(String.format("{%s}", names[i]));
+      }
+
+      return shortMonthNamesGroup.toString();
+   }
+
+   /** Gets the standalone day names for the locale data.
+    * These are only available for Java 8, so just return the 
+    * names used in the date format instead.
+    * @param cal The calendar
+    * @param locale The locale
+    * @return day of week names
+    */  
+   public String getStandaloneWeekdays(Calendar cal, Locale locale)
+   {
+      DateFormatSymbols dateFmtSyms = DateFormatSymbols.getInstance(locale);
+
+      String[] names = dateFmtSyms.getWeekdays();
+
+      // Be consistent with pgfcalendar:
+
+      return String.format("{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+          names[Calendar.MONDAY],
+          names[Calendar.TUESDAY],
+          names[Calendar.WEDNESDAY],
+          names[Calendar.THURSDAY],
+          names[Calendar.FRIDAY],
+          names[Calendar.SATURDAY],
+          names[Calendar.SUNDAY]);
+   }
+
+   /** Gets the standalone short day names for the locale data.
+    * These are only available for Java 8, so just return the 
+    * names used in the date format instead.
+    * @param cal The calendar
+    * @param locale The locale
+    * @return day of week names
+    */  
+   public String getStandaloneShortWeekdays(Calendar cal, Locale locale)
+   {
+      DateFormatSymbols dateFmtSyms = DateFormatSymbols.getInstance(locale);
+
+      String[] names = dateFmtSyms.getShortWeekdays();
+
+      // Be consistent with pgfcalendar:
+
+      return String.format("{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+          names[Calendar.MONDAY],
+          names[Calendar.TUESDAY],
+          names[Calendar.WEDNESDAY],
+          names[Calendar.THURSDAY],
+          names[Calendar.FRIDAY],
+          names[Calendar.SATURDAY],
+          names[Calendar.SUNDAY]);
+   }
+
    /**
     * Gets all available for the given locale. If the
     * given locale tag is null, the default locale is used. The
     * information is returned with grouping to make it
     * easier to parse in TeX. Since TeX has a nine-argument limit,
-    * each block is in a sub-group.
+    * each block is in a sub-group (although this still exceeds nine
+    * arguments). The standalone month names and day of week names are new
+    * to Java 8, so we can't use it for earlier versions.
     * @param localeTag the language tag identifying the locale or null for
     * the default locale
     * @return locale data. First group:
@@ -1794,10 +1896,14 @@ public class TeXOSQuery
     * Fifth group: short weekday names.
     * Sixth group: month names
     * Seventh group: short month names.
+    * Eighth group: standalone week day names.
+    * Ninth group: standalone short week day names.
+    * Tenth group: standalone month names.
+    * Eleventh group: standalone short month names.
     * Last group: number group separator,
     * decimal separator, exponent separator, grouping flag, ISO 4217 currency
     * identifier (e.g. GBP), region currency identifier (usually the same as
-    * the ISO 4217 code, but may be an unoffical currency code, such as IMP),
+    * the ISO 4217 code, but may be an unofficial currency code, such as IMP),
     * currency symbol (e.g. £), TeX currency symbol, monetary decimal separator,
     * percent symbol, per mill symbol.
     */
@@ -2057,7 +2163,7 @@ public class TeXOSQuery
              escapeHash(fmtSyms.getPerMill()));
 
        return String.format(
-          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
              langRegionGroup,
              dateGroup,
              timeGroup,
@@ -2065,6 +2171,10 @@ public class TeXOSQuery
              shortWeekdayNamesGroup,
              monthNamesGroup,
              shortMonthNamesGroup,
+             getStandaloneWeekdays(cal, locale),
+             getStandaloneShortWeekdays(cal, locale),
+             getStandaloneMonths(cal, locale),
+             getStandaloneShortMonths(cal, locale),
              numGroup);
    }
 
