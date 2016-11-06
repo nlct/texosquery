@@ -319,6 +319,21 @@
 %\url{http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html}
 %for the list of support locales in JRE~8.
 %
+%The Unicode Consortium's Common Locale Data Repository is bundled
+%with JRE~8, but
+%\href{http://openjdk.java.net/jeps/252}{The CLDR isn't
+%enabled by default}. It can be turned on using the system property
+%\texttt{java.locale.providers}, which may provide additional
+%support.
+%
+%For example, if the environment variable
+%\texttt{JAVA\_TOOL\_OPTIONS} is set to
+%\begin{verbatim}
+%-Djava.locale.providers=JRE,CLDR
+%\end{verbatim}
+%then additional locales may be available (but only with JRE~8).
+%The CLDR should be enabled by default with Java~9.
+%
 %The groups are:
 %\begin{enumerate}
 %\item The language information in the form:
