@@ -47,7 +47,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{369}
+\CheckSum{545}
 
 \RecordChanges
 \PageIndex
@@ -393,7 +393,12 @@
 %\file{texosquery.tex}. Since there are no generic \TeX\ commands
 %available for all these symbols, these commands will need to be
 %redefined as appropriate but are provided in the event that there's
-%no UTF-8 support.
+%no UTF-8 support. There is a limited check for some known currency
+%commands, such as \cs{texteuro} or \cs{euro}, but if appropriate
+%currency command can be found, the
+%\cs{texosquerycurrency}\meta{xxx} commands will be defined to
+%simply the current label (usually the same as the \meta{xxx}
+%part).
 %\end{itemize}
 %\end{enumerate}
 %
@@ -573,7 +578,15 @@
 %document, you can create a file called \file{texosquery.cfg} that
 %contains the redefinition of \cs{TeXOSInvokerName} and place the
 %file somewhere on \TeX's path. If the configuration file is found
-%it will be automatically loaded. 
+%it will be automatically loaded. Since this file is input at the
+%end of \file{texosquery.tex}, you can also add your preferred
+%definitions of the currency commands to \file{texosquery.cfg}.
+%For example:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery.sh}
+%\def\texosquerycurrencydollar{\textdollar}
+%\def\texosquerycurrencypound{\textstirling}
+%\end{verbatim}
 %
 %There are some short cut commands that call \app{texosquery}
 %with a particular option for convenience, described below.
@@ -856,19 +869,6 @@
 \def\TeXOSInvokerName{texosquery}
 %    \end{macrocode}
 %\end{macro}
-%Load the configuration file if it exists.
-%    \begin{macrocode}
-\openin0=texosquery.cfg
-\ifeof0\relax
-\else
-  \closein0\relax
-  \begingroup
-    \newlinechar=`\^^J
-    \message{^^JTeXOSQuery: reading configuration file^^J}%
-  \endgroup
-  \input texosquery.cfg
-\fi
-%    \end{macrocode}
 %
 %\begin{macro}{\TeXOSQueryInvoker}
 %If we're using \LaTeX, we'll need to use \cs{@@input} rather
@@ -993,38 +993,68 @@
 %
 %Provide the currency commands that may be returned
 %\app{texosquery}. Most of these will need redefining.
+%The \sty{fontawesome} package has the most support for currency
+%symbols, so these are checked first.
 %\begin{macro}{\texosquerycurrencydollar}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencydollar{\$}
+\ifx\faDollar\undefined
+  \def\texosquerycurrencydollar{\$}
+\else
+  \def\texosquerycurrencydollar{\faDollar}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencycent}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencycent{cent}
+\ifx\textcent\undefined
+  \def\texosquerycurrencycent{cent}
+\else
+  \def\texosquerycurrencycent{\textcent}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencypound}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencypound{pound}
+\ifx\faGbp\undefined
+  \ifx\pounds\undefined
+    \def\texosquerycurrencypound{pound}
+  \else
+    \def\texosquerycurrencypound{\pounds}
+  \fi
+\else
+  \def\texosquerycurrencypound{\faGbp}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencysign}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencysign{currency-sign}
+\ifx\textcurrency\undefined
+  \def\texosquerycurrencysign{currency-sign}
+\else
+  \def\texosquerycurrencysign{\textcurrency}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyyen}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencyyen{yen}
+\ifx\faYen\undefined
+  \ifx\textyen\undefined
+    \def\texosquerycurrencyyen{yen}
+  \else
+    \def\texosquerycurrencyyen{\textyen}
+  \fi
+\else
+  \def\texosquerycurrencyyen{\faYen}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1059,7 +1089,11 @@
 %\begin{macro}{\texosquerycurrencylira}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencylira{lira}
+\ifx\textlira\undefined
+  \def\texosquerycurrencylira{lira}
+\else
+  \def\texosquerycurrencylira{\textlira}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1073,7 +1107,11 @@
 %\begin{macro}{\texosquerycurrencynaira}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencynaira{naira}
+\ifx\textnira\undefined
+  \def\texosquerycurrencynaira{naira}
+\else
+  \def\texosquerycurrencynaira{\textnaira}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1087,35 +1125,67 @@
 %\begin{macro}{\texosquerycurrencyrupee}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencyrupee{rupee}
+\ifx\faRupee\undefined
+  \def\texosquerycurrencyrupee{rupee}
+\else
+  \def\texosquerycurrencyrupee{\faRupee}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencywon}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencywon{won}
+\ifx\faWon\undefined
+  \ifx\textwon\undefined
+    \def\texosquerycurrencywon{won}
+  \else
+    \def\texosquerycurrencywon{\textwon}
+  \fi
+\else
+  \def\texosquerycurrencywon{\faWon}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencynewsheqel}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencynewsheqel{newsheqel}
+\ifx\faSheqel\undefined
+  \def\texosquerycurrencynewsheqel{newsheqel}
+\else
+  \def\texosquerycurrencynewsheqel{\faSheqel}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencydong}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencydong{dong}
+\ifx\textdong\undefined
+  \def\texosquerycurrencydong{dong}
+\else
+  \def\texosquerycurrencydong{\textdong}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyeuro}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencyeuro{euro}
+\ifx\texteuro\undefined
+  \ifx\euro\undefined
+    \ifx\faEuro\undefined
+      \def\texosquerycurrencyeuro{euro}
+    \else
+      \def\texosquerycurrencyeuro{\faEuro}
+    \fi
+  \else
+    \def\texosquerycurrencyeuro{\euro}
+  \fi
+\else
+  \def\texosquerycurrencyeuro{\texteuro}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1150,14 +1220,22 @@
 %\begin{macro}{\texosquerycurrencypeso}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencypeso{peso}
+\ifx\textpeso\undefined
+  \def\texosquerycurrencypeso{peso}
+\else
+  \def\texosquerycurrencypeso{\textpeso}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyguarani}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencyguarani{guarani}
+\ifx\textguarani\undefined
+  \def\texosquerycurrencyguarani{guarani}
+\else
+  \def\texosquerycurrencyguarani{\textguarani}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1178,7 +1256,11 @@
 %\begin{macro}{\texosquerycurrencycedi}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencycedi{cedi}
+\ifx\textcolonmonetary\undefined
+  \def\texosquerycurrencycedi{cedi}
+\else
+  \def\texosquerycurrencycedi{\textcolonmonetary}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1213,7 +1295,11 @@
 %\begin{macro}{\texosquerycurrencyturkishlira}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencyturkishlira{turkish-lira}
+\ifx\faTurkishLira\undefined
+  \def\texosquerycurrencyturkishlira{turkish-lira}
+\else
+  \def\texosquerycurrencyturkishlira{\faTurkishLira}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1234,7 +1320,11 @@
 %\begin{macro}{\texosquerycurrencyruble}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
-\def\texosquerycurrencyruble{ruble}
+\ifx\faRuble\undefined
+  \def\texosquerycurrencyruble{ruble}
+\else
+  \def\texosquerycurrencyruble{\faRuble}
+\fi
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1389,6 +1479,19 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%Load the configuration file if it exists.
+%    \begin{macrocode}
+\openin0=texosquery.cfg
+\ifeof0\relax
+\else
+  \closein0\relax
+  \begingroup
+    \newlinechar=`\^^J
+    \message{^^JTeXOSQuery: reading configuration file^^J}%
+  \endgroup
+  \input texosquery.cfg
+\fi
+%    \end{macrocode}
 %All done.
 %Restore the category code of \texttt{@}:
 %    \begin{macrocode}

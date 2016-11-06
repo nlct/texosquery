@@ -19,6 +19,12 @@ import java.io.InputStreamReader;
 /**
  * Application functions. These methods need to be Java version 1.5
  * compatible. The 1.7 methods need to be in the TeXOSQueryJRE7 class.
+ * Since this application is designed to be run from TeX, the output
+ * needs to be easy to parse using TeX commands. For this reason,
+ * most exceptions are caught and an empty string is returned. The
+ * TeX code can then check for an empty value to determine failure.
+ * There's a debug mode to print error messages to STDERR to
+ * investigate the reason for failure.
  * @author Nicola Talbot
  * @version 1.2
  * @since 1.0
@@ -32,7 +38,8 @@ public class TeXOSQuery
 
    /**
     * Runs kpsewhich and returns the result. This is for single
-    * lookups through kpsewhich, such as a file location or variable value.
+    * argument lookups through kpsewhich, such as a file location
+    * or variable value.
     * @param arg The argument to pass to kpsewhich
     * @return The result read from the first line of STDIN
     */
@@ -67,6 +74,8 @@ public class TeXOSQuery
          {
             reader = new BufferedReader(new InputStreamReader(stream));
 
+            // only read a single line, nothing further is required
+            // for a variable or file location query.
             line = reader.readLine();
          }
          finally
@@ -2488,7 +2497,7 @@ public class TeXOSQuery
     private String name;
     
     private static final String VERSION_NUMBER = "1.2";
-    private static final String VERSION_DATE = "2016-11-05";
+    private static final String VERSION_DATE = "2016-11-06";
     private static final char BACKSLASH = '\\';
     private static final long ZERO = 0L;
 
