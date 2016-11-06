@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.DecimalFormatSymbols;
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.NumberFormat;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -1779,7 +1780,11 @@ public class TeXOSQuery
     * variant name in given locale.
     * Second group: full date, long date, medium date, short date.
     * Third group: full time, long time, medium time, short time.
-    * locale numerical information: number group separator,
+    * Fourth group: weekday names.
+    * Fifth group: short weekday names.
+    * Sixth group: month names
+    * Seventh group: short month names.
+    * Last group: number group separator,
     * decimal separator, exponent separator, grouping flag, ISO 4217 currency
     * identifier (e.g. GBP), region currency identifier (usually the same as
     * the ISO 4217 code, but may be an unoffical currency code, such as IMP),
@@ -1841,6 +1846,15 @@ public class TeXOSQuery
           localeVariantName = "";
        }
 
+       String langRegionGroup = String.format("{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+             getLanguageTag(locale),
+             languageName,
+             localeLanguageName,
+             countryName,
+             localeCountryName,
+             escapeHash(variantName),
+             escapeHash(localeVariantName));
+
        DateFormat dateFullFormat = DateFormat.getDateInstance(
         DateFormat.FULL, locale);
 
@@ -1864,6 +1878,65 @@ public class TeXOSQuery
 
        DateFormat timeShortFormat = DateFormat.getTimeInstance(
         DateFormat.SHORT, locale);
+
+       String dateGroup = String.format("{%s}{%s}{%s}{%s}",
+             dateFullFormat.format(now),
+             dateLongFormat.format(now),
+             dateMediumFormat.format(now),
+             dateShortFormat.format(now));
+
+       String timeGroup = String.format("{%s}{%s}{%s}{%s}",
+             timeFullFormat.format(now),
+             timeLongFormat.format(now),
+             timeMediumFormat.format(now),
+             timeShortFormat.format(now));
+
+       DateFormatSymbols dateFmtSyms = DateFormatSymbols.getInstance(locale);
+
+       String[] names = dateFmtSyms.getWeekdays();
+
+       // Be consistent with pgfcalendar:
+
+       String weekdayNamesGroup = String.format(
+          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+           names[Calendar.MONDAY],
+           names[Calendar.TUESDAY],
+           names[Calendar.WEDNESDAY],
+           names[Calendar.THURSDAY],
+           names[Calendar.FRIDAY],
+           names[Calendar.SATURDAY],
+           names[Calendar.SUNDAY]);
+
+       names = dateFmtSyms.getShortWeekdays();
+
+       String shortWeekdayNamesGroup = String.format(
+          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+           names[Calendar.MONDAY],
+           names[Calendar.TUESDAY],
+           names[Calendar.WEDNESDAY],
+           names[Calendar.THURSDAY],
+           names[Calendar.FRIDAY],
+           names[Calendar.SATURDAY],
+           names[Calendar.SUNDAY]);
+
+       StringBuilder monthNamesGroup = new StringBuilder();
+
+       names = dateFmtSyms.getMonths();
+
+       for (int i = 0; i < 12; i++)
+       {
+          // skip 13th month (Calendar.UNDECIMBER)
+          monthNamesGroup.append(String.format("{%s}", names[i]));
+       }
+
+       StringBuilder shortMonthNamesGroup = new StringBuilder();
+
+       names = dateFmtSyms.getShortMonths();
+
+       for (int i = 0; i < 12; i++)
+       {
+          shortMonthNamesGroup.append(String.format("{%s}", names[i]));
+       }
 
        // Get numerical data (as with getNumericalInfo)
        DecimalFormatSymbols fmtSyms 
@@ -1926,23 +1999,8 @@ public class TeXOSQuery
 
        String texCurrency = getTeXCurrency(currency);
 
-       return String.format(
-          "{{%s}{%s}{%s}{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}}",
-             getLanguageTag(locale),
-             languageName,
-             localeLanguageName,
-             countryName,
-             localeCountryName,
-             escapeHash(variantName),
-             escapeHash(localeVariantName),
-             dateFullFormat.format(now),
-             dateLongFormat.format(now),
-             dateMediumFormat.format(now),
-             dateShortFormat.format(now),
-             timeFullFormat.format(now),
-             timeLongFormat.format(now),
-             timeMediumFormat.format(now),
-             timeShortFormat.format(now),
+       String numGroup = String.format(
+         "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
              escapeHash(fmtSyms.getGroupingSeparator()),
              escapeHash(fmtSyms.getDecimalSeparator()),
              escapeHash(fmtSyms.getExponentSeparator()), 
@@ -1953,8 +2011,18 @@ public class TeXOSQuery
              texCurrency,
              escapeHash(fmtSyms.getMonetaryDecimalSeparator()),
              escapeHash(fmtSyms.getPercent()),
-             escapeHash(fmtSyms.getPerMill())
-             );
+             escapeHash(fmtSyms.getPerMill()));
+
+       return String.format(
+          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+             langRegionGroup,
+             dateGroup,
+             timeGroup,
+             weekdayNamesGroup,
+             shortWeekdayNamesGroup,
+             monthNamesGroup,
+             shortMonthNamesGroup,
+             numGroup);
    }
 
     /**

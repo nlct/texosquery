@@ -29,10 +29,25 @@
 \usepackage[utf8]{inputenc}
 \usepackage{textcomp}
 \usepackage{tgtermes}
+\usepackage{upquote}
 \usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{352}
+\makeatletter% doc.sty interferes with upquote.sty
+\def\@verbatim{\trivlist \item[]\if@minipage\else\vskip\parskip\fi
+      \leftskip\@totalleftmargin\rightskip\z@
+      \parindent\z@\parfillskip\@flushglue\parskip\z@
+      \@@par
+      \@tempswafalse
+ \def\par{\if@tempswa\hbox{}\fi\@tempswatrue\@@par
+          \penalty\interlinepenalty
+   \check@percent}%
+ \obeylines
+ \@noligs
+ \let\do\@makeother \dospecials}
+\makeatother
+
+\CheckSum{369}
 
 \RecordChanges
 \PageIndex
@@ -43,14 +58,17 @@
 \renewcommand*{\main}[1]{\hyperpage{#1}}
 
 \newcommand*{\qt}[1]{``#1''}
+\newcommand*{\sty}[1]{\textsf{#1}}
+\newcommand*{\app}[1]{\texttt{#1}}
+\newcommand*{\file}[1]{\texttt{#1}}
 
 \newcommand*{\shortargfmt}[1]{\texttt{-#1}}
 \newcommand*{\longargfmt}[1]{\texttt{-{}-#1}}
 
 \newcommand*{\shortarg}[1]{\shortargfmt{#1}%
- \index{texosquery options=\texttt{texosquery} options>#1=\protect\shortargfmt{-#1}|hyperpage}}
+ \index{texosquery options=\app{texosquery} options>#1=\protect\shortargfmt{-#1}|hyperpage}}
 \newcommand*{\longarg}[1]{\longargfmt{#1}%
- \index{texosquery options=\texttt{texosquery} options>#1=\protect\longargfmt{#1}|hyperpage}}
+ \index{texosquery options=\app{texosquery} options>#1=\protect\longargfmt{#1}|hyperpage}}
 
 \newenvironment{important}
  {\begin{quote}\textbf{Important Note:}}
@@ -68,15 +86,15 @@
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2016-11-01 (v1.2)}
+%\date{2016-11-06 (v1.2)}
 %\maketitle
 %
 %\begin{abstract}
-%\texttt{texosquery.jar} is a cross-platform Java application
+%\app{texosquery.jar} is a cross-platform Java application
 %to query certain OS information designed for use in \TeX's
 %shell escape mechanism.
 %The accompanying \TeX\ code provides a simple interface to the
-%\texttt{texosquery} Java application, which may be skipped
+%\app{texosquery} Java application, which may be skipped
 %if you want to explicitly use \cs{input} (but take
 %care of any special characters appearing in the result).
 %\end{abstract}
@@ -84,20 +102,20 @@
 %\begin{important}
 %You will need \TeX's shell escape enabled,
 %and you will also need the Java Runtime Environment (JRE) 
-%installed to use \texttt{texosquery} (at least JRE~7).
+%installed to use \app{texosquery} (at least JRE~7).
 %If you have either JRE~5 or~6 and you're unable to upgrade to a
-%newer version, you can use \texttt{texosquery-jre5.jar} instead,
+%newer version, you can use \app{texosquery-jre5.jar} instead,
 %but it doesn't have proper language tag support. 
 %\end{important}
 %
 %If you want to rebuild the application, instructions for
 %compiling the source code (including the code for this document)
-%are in the accompanying \texttt{README.md} file.
+%are in the accompanying \file{README.md} file.
 %
 %\tableofcontents
 %
 %\section{texosquery.jar: the Java application}
-%The \texttt{texosquery} Java command line application looks up
+%The \app{texosquery} Java command line application looks up
 %certain system information that may be of use in \TeX\ 
 %documents. All this information can easily be obtained using 
 %native commands, but the Java application allows an 
@@ -106,7 +124,7 @@
 %formatting information.
 %
 %\begin{important}
-%\texttt{texosquery} provides read-only actions, and I don't 
+%\app{texosquery} provides read-only actions, and I don't 
 %intend adding any actions that modify system settings or files.
 %\end{important}
 %
@@ -119,42 +137,69 @@
 %system, so the result can be used, for example, in \cs{input} or
 %\cs{includegraphics}.
 %
+%Note that the result will be returned using Java's native codeset.
+%(For example, UTF-8.) You will need to ensure that your \TeX\
+%document uses the same encoding if you want to typeset any of the
+%results that may contain non-ASCII characters. You can determine
+%the default codeset with \texttt{texosquery \shortarg{L}}, which
+%will include the codeset after the language and region part.
+%You can change the default encoding by invoking the Java Virtual
+%Machine with the option \texttt{-Dfile.encoding=}\meta{codeset}.
+%For example, bash users can modify the \file{texosquery.sh} 
+%script to set the encoding to UTF-8 as follows:
+%\begin{verbatim}
+%#!/bin/sh
+%
+%jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar`
+%java -Dfile.encoding=UTF-8 -jar "$jarpath" "$@"
+%\end{verbatim}
+%If this file can't be modified or you don't have bash available
+%(for example, Windows users) you can set the
+%\href{https://docs.oracle.com/javase/8/docs/platform/jvmti/jvmti.html#tooloptions}{\texttt{JAVA\_TOOL\_OPTIONS} environment variable}.
+%For example:
+%\begin{verbatim}
+%declare -x JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
+%\end{verbatim}
+%Note that this will affect all your Java applications.
+%
 %\subsection{Accessing file information}
 %If an input file name is required (for example, with the
 %\longargfmt{pdfdate} argument described below) then the file may be in
 %the current working directory, relative to the current directory
 %(with forward slash \texttt{/} as the directory divider), an absolute path 
 %(again with forward slash) or on \TeX's path (in
-%which case, \texttt{kpsewhich} is used to locate it). As from version 1.2, \texttt{texosquery}
+%which case, \app{kpsewhich} is used to locate it). As from version
+%1.2, \app{texosquery}
 %honours the \texttt{openin\_any} attribute set in the
-%\texttt{texmf.cnf} configuration file. This value is fetched using
+%\file{texmf.cnf} configuration file. This value is fetched using
 %\begin{verbatim}
 %kpsewhich -var-value=openin_any
 %\end{verbatim}
 %(You can find the configuration files using \texttt{kpsewhich -a
-%texmf.cnf}) For example, suppose the file \texttt{/tmp/.test}
+%texmf.cnf}) For example, suppose the file \file{/tmp/.test}
 %exists. If the \texttt{openin\_any} attribute is set to \texttt{a}
 %(any file), then (assuming the operating system allows read access
-%to that file) the \texttt{texosquery} file reading operations will
+%to that file) the \app{texosquery} file-reading operations will
 %be permitted. For example
 %\begin{verbatim}
 %texosquery --pdfdate /tmp/.test
 %\end{verbatim}
 %will return the file modification date in PDF format. However, if
 %\texttt{openin\_any} is set to \texttt{r} (restricted), the read
-%access will be denied because the file is considered hidden so a
+%access will be denied because the file is considered hidden so an
 %empty result is returned. Similarly, if \texttt{openin\_any} is set
 %to \texttt{p} (paranoid), the read access will be denied again
 %because the file is hidden but also because the file has an
-%absolute path that isn't under \texttt{\$TEXMFOUTPUT}.
+%absolute path that isn't under \texttt{\$TEXMFOUTPUT} (assuming
+%that environment variable hasn't been set to \file{/tmp}).
 %
 %\subsection{Command line invocation}
-%The syntax for the command line invocation of \texttt{texosquery}
+%The syntax for the command line invocation of \app{texosquery}
 %is:
 %\begin{flushleft}\ttfamily
 %texosquery \meta{action} ...
 %\end{flushleft}
-%The syntax for \texttt{texosquery-jre5} is exactly the same except
+%The syntax for \app{texosquery-jre5} is exactly the same except
 %for the application name:
 %\begin{flushleft}\ttfamily
 %texosquery-jre5 \meta{action} ...
@@ -211,7 +256,7 @@
 %\end{itemize}
 %The language tag should conform to IETF BCP~47. See
 %\url{http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html}
-%for further details. If you are using \texttt{texosquery-jre5},
+%for further details. If you are using \app{texosquery-jre5},
 %only the language, region and variant elements will be recognised
 %since the language tag support was introduced to Java in version
 %1.7.
@@ -236,9 +281,12 @@
 %{,}{.}{E}{GBP}{GBP}{.}
 %\end{verbatim}
 %
-%\item[\shortarg{D} \oarg{language tag} or \longarg{locale-data} \oarg{language tag}] This provides more
+%\item[\shortarg{D} \oarg{language tag} or \longarg{locale-data} \oarg{language tag}]
+%(New to v1.2.) This provides more
 %extensive information than \longarg{numeric}. Since TeX only
 %supports a maximum of nine arguments, the result has nested groups.
+%(Note that the month names are a special case with twelve
+%sub-groups.)
 %Again the \meta{language tag} may be omitted. For example, 
 %\begin{verbatim}
 %texosquery --locale-data
@@ -250,12 +298,17 @@
 %for the locale identified by \texttt{en-GB}.
 %As with all the other actions, the result is written to STDOUT on a
 %single line. Since this is too long for this page width, below
-%shows the result from the above example with line breaks inserted after
-%each of the main groups for clarity:
+%shows the result from the above example with line breaks inserted 
+%for clarity:
 %\begin{verbatim}
 %{{en-GB}{English}{English}{United Kingdom}{United Kingdom}{}{}}
 %{{Saturday, 5 November 2016}{05 November 2016}{05-Nov-2016}{05/11/16}}
 %{{23:58:25 o'clock GMT}{23:58:25 GMT}{23:58:25}{23:58}}
+%{{Monday}{Tuesday}{Wednesday}{Thursday}{Friday}{Saturday}{Sunday}}
+%{{Mon}{Tue}{Wed}{Thu}{Fri}{Sat}{Sun}}
+%{{January}{February}{March}{April}{May}{June}{July}{August}{September}
+%{October}{November}{December}}
+%{{Jan}{Feb}{Mar}{Apr}{May}{Jun}{Jul}{Aug}{Sep}{Oct}{Nov}{Dec}}
 %{{,}{.}{E}{GBP}{GBP}{£}{\texosquerycurrencypound }{.}{%}{‰}}
 %\end{verbatim}
 %The groups are:
@@ -275,9 +328,11 @@
 %language name} are \qt{English}. If, instead, I have looked up the
 %locale data for \texttt{fr-BE}, the \meta{language name} would be
 %listed as \qt{French} whereas the \meta{locale language name}
-%would be listed as \qt{fran\c{c}ais}. Note the UTF-8 character.
+%would be listed as \qt{fran\c{c}ais}. Note the non-ASCII character.
 %If you want to use this result in your \TeX\ document you'll need
-%UTF-8 support. Similarly the \meta{region name} is the name of the
+%support for the encoding (which can be identified with the
+%\longarg{locale} or \longarg{locale-lcs} options).
+%Similarly the \meta{region name} is the name of the
 %region using the default language (in the case of \qt{fr-BE}, this
 %would be \qt{Belgium} for me) and \meta{locale region name} is the
 %name of the region in the locale language (\qt{Belgique}).
@@ -293,6 +348,16 @@
 %given locale:
 %
 %\marg{full time}\marg{long time}\marg{medium time}\marg{short time}
+%
+%\item The week day names (starting with Monday for consistency with
+%\sty{pgfcalendar}).
+%
+%\item The abbreviated week day names.
+%
+%\item The month names.
+%
+%\item The abbreviated month names.
+%
 %\item The numeric data similar to \longarg{numeric} but thereare
 %some extra items:
 %
@@ -320,12 +385,12 @@
 %per mill symbols (UTF-8). Note that \cs{TeXOSQuery} automatically
 %changes the category code of the percent character \verb|%| to
 %12 (\qt{other}), so the percent symbol can be parsed from the output of
-%\texttt{texosquery}.
+%\app{texosquery}.
 %
 %The \meta{TeX cur} part is obtained by substituting known Unicode
 %currency symbols occurring in \meta{cur sym} with commands in the
 %form \cs{texosquerycurrency\ldots} which are defined by
-%\texttt{texosquery.tex}. Since there are no generic \TeX\ commands
+%\file{texosquery.tex}. Since there are no generic \TeX\ commands
 %available for all these symbols, these commands will need to be
 %redefined as appropriate but are provided in the event that there's
 %no UTF-8 support.
@@ -373,7 +438,7 @@
 %doesn't exist or the file permissions prohibit this action.
 %Note that this may include in a percent character in the result. The \TeX\ 
 %command \cs{TeXOSQuery} protects against this by changing the
-%category code, but if you explicitly call \texttt{texosquery}
+%category code, but if you explicitly call \app{texosquery}
 %using the shell escape, you'll need to be careful of this.
 %\item[\shortarg{p} \meta{file} or \longarg{path} \meta{file}]
 %Displays the canonical path of the given file or a blank line if
@@ -385,7 +450,7 @@
 %directory containing \meta{file}) or a blank line if
 %the file doesn't exist or the file permissions prohibit this
 %action. Note that this is different to the Unix-like 
-%\texttt{dirname} command, which will return a relative path if
+%\app{dirname} command, which will return a relative path if
 %\meta{file} isn't an absolute path.
 %\item[\shortarg{h} or \longarg{help}] Displays help message and
 %exits.
@@ -425,7 +490,7 @@
 %{D:20160714112732+01'00'}
 %\end{verbatim}
 %Note that unavailable information will produce an empty group.
-%For example (assuming \texttt{nofile} doesn't exist):
+%For example (assuming \file{nofile} doesn't exist):
 %\begin{verbatim}
 %texosquery -l -d nofile -n
 %\end{verbatim}
@@ -445,12 +510,12 @@
 %rerunning the command with \longarg{debug} for further information.
 %
 %\section{texosquery.tex: generic \TeX\ code}
-%You can run \texttt{texosquery} directly from \TeX's shell escape.
+%You can run \app{texosquery} directly from \TeX's shell escape.
 %For example:
 %\begin{verbatim}
 %\input|"texosquery --locale"
 %\end{verbatim}
-%However, \texttt{texosquery.tex} provides generic \TeX\ code to do
+%However, \file{texosquery.tex} provides generic \TeX\ code to do
 %this for you and store the result in a control sequence.
 %
 %Plain \TeX\ users can input this file through the usual \cs{input}
@@ -471,7 +536,7 @@
 %The commands described below are all fragile.
 %\end{important}
 %
-%The basic command to run \texttt{texosquery} and capture its output
+%The basic command to run \app{texosquery} and capture its output
 %in a control sequence is:
 %\DescribeMacro\TeXOSQuery
 %\begin{flushleft}\ttfamily
@@ -479,25 +544,38 @@
 %\end{flushleft}
 %where \meta{cs} is the control sequence in which to store the
 %result and \meta{args} are the command line arguments to pass to 
-%\texttt{texosquery}. This first locally changes the category code
+%\app{texosquery}. This first locally changes the category code
 %of some problematic characters that may appear in the result.
 %The only special characters that aren't changed are the backslash
 %\verb|\|, curly braces \verb|{| and \verb|}|, and hash \verb|#|.
-%(\texttt{texosquery.jar} will replace \verb|#| with \verb|\#| in places
+%(\app{texosquery.jar} will replace \verb|#| with \verb|\#| in places
 %where it might possibly occur in the result, but in general it's
 %best to avoid these characters in file names.)
 %
 %\DescribeMacro\TeXOSInvokerName
 %The above command uses \cs{TeXOSInvokerName} to reference the
-%application name. This defaults to \texttt{texosquery}. If you need
-%to use \texttt{texosquery-jre5} instead, you can redefine it:
+%application name. This defaults to \app{texosquery}. Bash users may
+%need to change this to \file{texosquery.sh}. For example:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery.sh}
+%\end{verbatim}
+%If you need
+%to use \app{texosquery-jre5} instead, you can redefine it:
 %\begin{verbatim}
 %\def\TeXOSInvokerName{texosquery-jre5}
 %\end{verbatim}
+%or
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre5.sh}
+%\end{verbatim}
 %This needs to be done before using \cs{TeXOSQuery} (or any of the
-%short cut commands).
+%short cut commands). To avoid the hassle of doing this for every
+%document, you can create a file called \file{texosquery.cfg} that
+%contains the redefinition of \cs{TeXOSInvokerName} and place the
+%file somewhere on \TeX's path. If the configuration file is found
+%it will be automatically loaded. 
 %
-%There are some short cut commands that call \texttt{texosquery}
+%There are some short cut commands that call \app{texosquery}
 %with a particular option for convenience, described below.
 %If any of these commands cause an error message in the form:
 %\begin{verbatim}
@@ -505,9 +583,9 @@
 %\end{verbatim}
 %then check that you have the shell escape on. If the error 
 %persists with the shell escape enabled
-%(and not restricted), check that \texttt{texosquery} is on 
+%(and not restricted), check that \app{texosquery} is on 
 %your system's path. To do this, open a command prompt or terminal and
-%type \texttt{texosquery}. If it isn't installed correctly, there will be a
+%type \app{texosquery}. If it isn't installed correctly, there will be a
 %message like:
 %\begin{verbatim}
 %`texosquery' is not recognised
@@ -517,7 +595,7 @@
 %texosquery: command not found
 %\end{verbatim}
 %If this happens, check the installation. (Instructions are
-%in the accompanying \texttt{README.md} file.)
+%in the accompanying \file{README.md} file.)
 %
 %Dry run mode is determined by the conditional
 %\DescribeMacro\ifTeXOSQueryDryRun
@@ -532,7 +610,7 @@
 %(the control sequence \meta{cs} will be set to empty).
 %This conditional will automatically be switched on unless
 %\cs{shellescape} or \cs{pdfshellescape} is 1. (If
-%\texttt{texosquery.jar} is later allowed on the restricted list,
+%\app{texosquery.jar} is later allowed on the restricted list,
 %newer versions may change this default.)
 %
 %If multiple queries are required, it's more efficient to
@@ -559,7 +637,7 @@
 %\cs{TeXOSQueryLocale}\marg{cs}
 %\end{flushleft}
 %Note that this uses the lower case codeset form, which has a better
-%chance of matching the encoding names used by the \texttt{inputenc}
+%chance of matching the encoding names used by the \sty{inputenc}
 %package. If you want the unprocessed codeset name, you can do:
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQuery}\marg{cs}\{\shortarg{L}\}
@@ -700,8 +778,8 @@
 %\TeXOSQueryFilterFileList{\result}{,}{.+\string\..*}{.}
 %\end{verbatim}
 %Note the use of \verb|\string\.| to ensure that \cs{.} isn't
-%interpreted as a command. Another example, list only \texttt{.png}
-%and \texttt{.jpg} files in the directory called \texttt{images}:
+%interpreted as a command. Another example, list only \file{.png}
+%and \file{.jpg} files in the directory called \file{images}:
 %\begin{verbatim}
 %\TeXOSQueryFilterFileList{\result}{,}{.+\string\.(jpg|png)}{images}
 %\end{verbatim}
@@ -766,12 +844,31 @@
   \expandafter\endinput
 \fi
 %    \end{macrocode}
+% Version info.
+%    \begin{macrocode}
+\expandafter\def\csname ver@texosquery.tex\endcsname{2016/11/06 v1.2
+(NLCT)}
+%    \end{macrocode}
+%
 %\begin{macro}{\TeXOSInvokerName}
-%The name of the \texttt{texosquery} application.
+%The name of the \app{texosquery} application.
 %    \begin{macrocode}
 \def\TeXOSInvokerName{texosquery}
 %    \end{macrocode}
 %\end{macro}
+%Load the configuration file if it exists.
+%    \begin{macrocode}
+\openin0=texosquery.cfg
+\ifeof0\relax
+\else
+  \closein0\relax
+  \begingroup
+    \newlinechar=`\^^J
+    \message{^^JTeXOSQuery: reading configuration file^^J}%
+  \endgroup
+  \input texosquery.cfg
+\fi
+%    \end{macrocode}
 %
 %\begin{macro}{\TeXOSQueryInvoker}
 %If we're using \LaTeX, we'll need to use \cs{@@input} rather
@@ -812,7 +909,7 @@
 %    \end{macrocode}
 %
 %\begin{macro}{\TeXOSQuery}
-%Use \texttt{texosquery} with the option given in the second
+%Use \app{texosquery} with the option given in the second
 %argument and store the result in control sequence given in the
 %first argument.
 %    \begin{macrocode}
@@ -895,7 +992,7 @@
 %\end{macro}
 %
 %Provide the currency commands that may be returned
-%\texttt{texosquery}. Most of these will need redefining.
+%\app{texosquery}. Most of these will need redefining.
 %\begin{macro}{\texosquerycurrencydollar}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
@@ -1190,7 +1287,7 @@
 \def\TeXOSQueryNow#1{%
 %    \end{macrocode}
 % The \texttt{D} needs category code 12. (Don't need to worry about
-% \texttt{Z} as \texttt{texosquery.jar} uses \texttt{+00'00'} for
+% \texttt{Z} as \app{texosquery.jar} uses \texttt{+00'00'} for
 % UTC+0.) This change can't be done with the other catcode changes
 % in \cs{TeXOSQuery}, as this is only appropriate for the PDF dates.
 % Save and restore the catcode rather than fiddle around with
@@ -1304,7 +1401,7 @@
 %\fi
 %
 %\subsection{\LaTeX\ Code}
-%This is just a simple wrapper for \texttt{texosquery.tex}
+%This is just a simple wrapper for \file{texosquery.tex}
 %so that it can be loaded using \LaTeX's standard \cs{usepackage}
 %method.
 %\iffalse
@@ -1315,9 +1412,9 @@
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2016/07/14 v1.1 (NLCT)]
+\ProvidesPackage{texosquery}[2016/11/06 v1.2 (NLCT)]
 %    \end{macrocode}
-%Load \texttt{texosquery.tex}:
+%Load \file{texosquery.tex}:
 %    \begin{macrocode}
 \input{texosquery}
 %    \end{macrocode}
