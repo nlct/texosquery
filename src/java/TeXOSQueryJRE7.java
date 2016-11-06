@@ -1,14 +1,7 @@
 package com.dickimawbooks.texosquery;
 
-import java.io.BufferedReader;
 import java.util.Locale;
-import java.util.Calendar;
-import java.text.DecimalFormatSymbols;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Locale.Builder;
 
 /**
  * Main class. Supports Java 1.7.
@@ -42,7 +35,31 @@ public class TeXOSQueryJRE7 extends TeXOSQuery
    @Override
    public Locale getLocale(String languageTag)
    {
-      return Locale.forLanguageTag(languageTag);
+      Locale locale = Locale.forLanguageTag(languageTag);
+
+      // Locale.forLanguageTag() doesn't seem to recognise
+      // numeric regions. (It should do according to the
+      // documentation, as far as I can tell.)
+      // So test for a numeric region.
+
+      String region = locale.getCountry();
+
+      try
+      {
+         region = getRegionAlpha2Code(Integer.parseInt(region));
+      }
+      catch (NumberFormatException e)
+      {
+         // region isn't numeric, so we don't need to do anything
+         // else
+         return locale;
+      }
+
+      Locale.Builder builder = new Locale.Builder();
+      builder.setLocale(locale);
+      builder.setRegion(region);
+
+      return builder.build();
    }
 
    /**

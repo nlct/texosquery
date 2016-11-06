@@ -204,15 +204,16 @@
 %\item \meta{grp sep} the numeric group separator.
 %\item \meta{dec sep} the decimal separator.
 %\item \meta{exp sep} the exponent separator.
-%\item \meta{cur code} the currency code.
-%\item \meta{cur sym} the currency symbol.
+%\item \meta{cur code} the ISO 4217 currency code.
+%\item \meta{cur sym} the currency symbol. (This may sometimes be
+%the same as \meta{cur code}.)
 %\item \meta{cur sep} the currency decimal separator.
 %\end{itemize}
 %The language tag should conform to IETF BCP~47. See
 %\url{http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html}
 %for further details. If you are using \texttt{texosquery-jre5},
 %only the language, region and variant elements will be recognised
-%since the language tag support was introduced to Java until version
+%since the language tag support was introduced to Java in version
 %1.7.
 %
 %For example:
@@ -225,7 +226,15 @@
 %\end{verbatim}
 %If Java doesn't support the given locale, the currency code will
 %appear as \texttt{XXX} with the symbol \textcurrency\ (generic
-%currency sign).
+%currency sign). Note that Java only returns official ISO 4217
+%currency codes. For example,
+%\begin{verbatim}
+%texosquery -N en-IM
+%\end{verbatim}
+%produces
+%\begin{verbatim}
+%{,}{.}{E}{GBP}{GBP}{.}
+%\end{verbatim}
 %
 %\item[\shortarg{D} \oarg{language tag} or \longarg{locale-data} \oarg{language tag}] This provides more
 %extensive information than \longarg{numeric}. Since TeX only
@@ -247,7 +256,7 @@
 %{{en-GB}{English}{English}{United Kingdom}{United Kingdom}{}{}}
 %{{Saturday, 5 November 2016}{05 November 2016}{05-Nov-2016}{05/11/16}}
 %{{23:58:25 o'clock GMT}{23:58:25 GMT}{23:58:25}{23:58}}
-%{{,}{.}{E}{GBP}{£}{\texosquerycurrencypound }{.}}
+%{{,}{.}{E}{GBP}{GBP}{£}{\texosquerycurrencypound }{.}{%}{‰}}
 %\end{verbatim}
 %The groups are:
 %\begin{enumerate}
@@ -284,11 +293,34 @@
 %given locale:
 %
 %\marg{full time}\marg{long time}\marg{medium time}\marg{short time}
-%\item The numeric data similar to \longarg{numeric} but there's an
-%extra item:
+%\item The numeric data similar to \longarg{numeric} but thereare
+%some extra items:
 %
-%\marg{grp sep}\marg{dec sep}\marg{exp sep}\marg{cur code}\marg{cur
-%sym}\marg{TeX cur}\marg{cur sep}
+%\marg{grp sep}\marg{dec sep}\marg{exp sep}\marg{grp flag}\marg{cur
+%code}\marg{locale cur code}\marg{cur
+%sym}\marg{TeX cur}\marg{cur sep}\marg{percent sym}\marg{per mill
+%sym}
+%
+%See above for the elements that are also provided in
+%\longarg{numeric}. The additional elements are described below.
+%\begin{itemize}
+%\item \meta{grp flag} will be either \texttt{true} or
+%\texttt{false} indicating whether or not number grouping is used.
+%
+%\item
+%The extra currency code \meta{locale cur code} will usually be the
+%same as \meta{cur code}, except for the following regions:
+%\texttt{GG} (Guernsey), \texttt{JEP} (Jersey), \texttt{IM} (Isle of
+%Man), \texttt{KI} (Kiribati) and \texttt{TV} (Tuvaluan). These set
+%\meta{locale cur code} to, respectively, the unofficial codes \texttt{GGP},
+%\texttt{JEP}, \texttt{IMP}, \texttt{KID} and \texttt{TVD}.
+%
+%\item
+%The \meta{percent sym} and \meta{per mill sym} are the percent and
+%per mill symbols (UTF-8). Note that \cs{TeXOSQuery} automatically
+%changes the category code of the percent character \verb|%| to
+%12 (\qt{other}), so the percent symbol can be parsed from the output of
+%\texttt{texosquery}.
 %
 %The \meta{TeX cur} part is obtained by substituting known Unicode
 %currency symbols occurring in \meta{cur sym} with commands in the
@@ -297,6 +329,7 @@
 %available for all these symbols, these commands will need to be
 %redefined as appropriate but are provided in the event that there's
 %no UTF-8 support.
+%\end{itemize}
 %\end{enumerate}
 %
 %\item[\shortarg{n} or \longarg{pdfnow}] Displays the current

@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.DecimalFormatSymbols;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -1109,14 +1110,14 @@ public class TeXOSQuery
 
       String country = locale.getCountry();
 
-      if (country != null)
+      if (country != null && !"".equals(country))
       {
          tag = String.format("%s-%s", tag, country);
       }
 
       String variant = locale.getVariant();
 
-      if (variant != null)
+      if (variant != null && !"".equals(variant))
       {
          tag = String.format("%s-%s", tag, variant);
       }
@@ -1231,6 +1232,270 @@ public class TeXOSQuery
    }
 
    /**
+    * Gets the two-letter alpha region code from the numeric code.
+    * @param ISO 3166-1 numeric code
+    * @return ISO 3166-1 alpha code
+    */ 
+   public String getRegionAlpha2Code(int code)
+   {
+      switch (code)
+      {
+         case 4: return "AF";
+         case 8: return "AL";
+         case 10: return "AQ";
+         case 12: return "DZ";
+         case 16: return "AS";
+         case 20: return "AD";
+         case 24: return "AO";
+         case 28: return "AG";
+         case 31: return "AZ";
+         case 32: return "AR";
+         case 36: return "AU";
+         case 40: return "AT";
+         case 44: return "BS";
+         case 48: return "BH";
+         case 50: return "BD";
+         case 51: return "AM";
+         case 52: return "BB";
+         case 56: return "BE";
+         case 60: return "BM";
+         case 64: return "BT";
+         case 68: return "BO";
+         case 70: return "BA";
+         case 72: return "BW";
+         case 74: return "BV";
+         case 76: return "BR";
+         case 84: return "BZ";
+         case 86: return "IO";
+         case 90: return "SB";
+         case 92: return "VG";
+         case 96: return "BN";
+         case 100: return "BG";
+         case 104: return "MM";
+         case 108: return "BI";
+         case 112: return "BY";
+         case 116: return "KH";
+         case 120: return "CM";
+         case 124: return "CA";
+         case 132: return "CV";
+         case 136: return "KY";
+         case 140: return "CF";
+         case 144: return "LK";
+         case 148: return "TD";
+         case 152: return "CL";
+         case 156: return "CN";
+         case 158: return "TW";
+         case 162: return "CX";
+         case 166: return "CC";
+         case 170: return "CO";
+         case 174: return "KM";
+         case 175: return "YT";
+         case 178: return "CG";
+         case 180: return "CD";
+         case 184: return "CK";
+         case 188: return "CR";
+         case 191: return "HR";
+         case 192: return "CU";
+         case 196: return "CY";
+         case 203: return "CZ";
+         case 204: return "BJ";
+         case 208: return "DK";
+         case 212: return "DM";
+         case 214: return "DO";
+         case 218: return "EC";
+         case 222: return "SV";
+         case 226: return "GQ";
+         case 231: return "ET";
+         case 232: return "ER";
+         case 233: return "EE";
+         case 234: return "FO";
+         case 238: return "FK";
+         case 239: return "GS";
+         case 242: return "FJ";
+         case 246: return "FI";
+         case 248: return "AX";
+         case 250: return "FR";
+         case 254: return "GF";
+         case 258: return "PF";
+         case 260: return "TF";
+         case 262: return "DJ";
+         case 266: return "GA";
+         case 268: return "GE";
+         case 270: return "GM";
+         case 275: return "PS";
+         case 276: return "DE";
+         case 288: return "GH";
+         case 292: return "GI";
+         case 296: return "KI";
+         case 300: return "GR";
+         case 304: return "GL";
+         case 308: return "GD";
+         case 312: return "GP";
+         case 316: return "GU";
+         case 320: return "GT";
+         case 324: return "GN";
+         case 328: return "GY";
+         case 332: return "HT";
+         case 334: return "HM";
+         case 336: return "VA";
+         case 340: return "HN";
+         case 344: return "HK";
+         case 348: return "HU";
+         case 352: return "IS";
+         case 356: return "IN";
+         case 360: return "ID";
+         case 364: return "IR";
+         case 368: return "IQ";
+         case 372: return "IE";
+         case 376: return "IL";
+         case 380: return "IT";
+         case 384: return "CI";
+         case 388: return "JM";
+         case 392: return "JP";
+         case 398: return "KZ";
+         case 400: return "JO";
+         case 404: return "KE";
+         case 408: return "KP";
+         case 410: return "KR";
+         case 414: return "KW";
+         case 417: return "KG";
+         case 418: return "LA";
+         case 422: return "LB";
+         case 426: return "LS";
+         case 428: return "LV";
+         case 430: return "LR";
+         case 434: return "LY";
+         case 438: return "LI";
+         case 440: return "LT";
+         case 442: return "LU";
+         case 446: return "MO";
+         case 450: return "MG";
+         case 454: return "MW";
+         case 458: return "MY";
+         case 462: return "MV";
+         case 466: return "ML";
+         case 470: return "MT";
+         case 474: return "MQ";
+         case 478: return "MR";
+         case 480: return "MU";
+         case 484: return "MX";
+         case 492: return "MC";
+         case 496: return "MN";
+         case 498: return "MD";
+         case 499: return "ME";
+         case 500: return "MS";
+         case 504: return "MA";
+         case 508: return "MZ";
+         case 512: return "OM";
+         case 516: return "NA";
+         case 520: return "NR";
+         case 524: return "NP";
+         case 528: return "NL";
+         case 531: return "CW";
+         case 533: return "AW";
+         case 534: return "SX";
+         case 535: return "BQ";
+         case 540: return "NC";
+         case 548: return "VU";
+         case 554: return "NZ";
+         case 558: return "NI";
+         case 562: return "NE";
+         case 566: return "NG";
+         case 570: return "NU";
+         case 574: return "NF";
+         case 578: return "NO";
+         case 580: return "MP";
+         case 581: return "UM";
+         case 583: return "FM";
+         case 584: return "MH";
+         case 585: return "PW";
+         case 586: return "PK";
+         case 591: return "PA";
+         case 598: return "PG";
+         case 600: return "PY";
+         case 604: return "PE";
+         case 608: return "PH";
+         case 612: return "PN";
+         case 616: return "PL";
+         case 620: return "PT";
+         case 624: return "GW";
+         case 626: return "TL";
+         case 630: return "PR";
+         case 634: return "QA";
+         case 638: return "RE";
+         case 642: return "RO";
+         case 643: return "RU";
+         case 646: return "RW";
+         case 652: return "BL";
+         case 654: return "SH";
+         case 659: return "KN";
+         case 660: return "AI";
+         case 662: return "LC";
+         case 663: return "MF";
+         case 666: return "PM";
+         case 670: return "VC";
+         case 674: return "SM";
+         case 678: return "ST";
+         case 682: return "SA";
+         case 686: return "SN";
+         case 688: return "RS";
+         case 690: return "SC";
+         case 694: return "SL";
+         case 702: return "SG";
+         case 703: return "SK";
+         case 704: return "VN";
+         case 705: return "SI";
+         case 706: return "SO";
+         case 710: return "ZA";
+         case 716: return "ZW";
+         case 724: return "ES";
+         case 728: return "SS";
+         case 729: return "SD";
+         case 732: return "EH";
+         case 740: return "SR";
+         case 744: return "SJ";
+         case 748: return "SZ";
+         case 752: return "SE";
+         case 756: return "CH";
+         case 760: return "SY";
+         case 762: return "TJ";
+         case 764: return "TH";
+         case 768: return "TG";
+         case 772: return "TK";
+         case 776: return "TO";
+         case 780: return "TT";
+         case 784: return "AE";
+         case 788: return "TN";
+         case 792: return "TR";
+         case 795: return "TM";
+         case 796: return "TC";
+         case 798: return "TV";
+         case 800: return "UG";
+         case 804: return "UA";
+         case 807: return "MK";
+         case 818: return "EG";
+         case 826: return "GB";
+         case 831: return "GG";
+         case 832: return "JE";
+         case 833: return "IM";
+         case 834: return "TZ";
+         case 840: return "US";
+         case 850: return "VI";
+         case 854: return "BF";
+         case 858: return "UY";
+         case 860: return "UZ";
+         case 862: return "VE";
+         case 876: return "WF";
+         case 882: return "WS";
+         case 887: return "YE";
+         case 894: return "ZM";
+      }
+
+      // not recognised, return the code as a string
+      return String.format("%d", code);
+   }
+
+   /**
     * Gets the locale from the given language tag. Since Java didn't
     * support BCP47 language tags until v1.7, we have can't use
     * Locale.forLanguageTag(String) here. Only parse for language
@@ -1250,7 +1515,7 @@ public class TeXOSQuery
       // Note: named capturing groups introduced in Java 7, so we
       // can't use them here.
       Pattern p = Pattern.compile(
-        "(?:([a-z]{2,3}(?:-[a-z]{2,3})*))+(?:-[A-Z][a-z]{3})?(?:-([A-Z]{2}))?(?:-([a-zA-Z0-9]{5,8}|[0-9][a-zA-Z0-9]{3}))?(?:-.)*");
+        "(?:([a-z]{2,3}(?:-[a-z]{2,3})*))+(?:-[A-Z][a-z]{3})?(?:-([A-Z]{2}|[0-9]{3}))?(?:-([a-zA-Z0-9]{5,8}|[0-9][a-zA-Z0-9]{3}))?(?:-.)*");
 
       Matcher m = p.matcher(languageTag);
 
@@ -1259,6 +1524,15 @@ public class TeXOSQuery
          String language = m.group(1);
          String region = m.group(2);
          String variant = m.group(3);
+
+         try
+         {
+            region = getRegionAlpha2Code(Integer.parseInt(region));
+         }
+         catch (NumberFormatException e)
+         {
+            // ignore, alpha region code supplied
+         }
 
          // Language won't be null as the pattern requires it.
 
@@ -1291,7 +1565,10 @@ public class TeXOSQuery
     * Gets all numerical information for the given locale. If the
     * given locale tag is null, the default locale is used. The
     * information is returned with each item grouped to make it
-    * easier to parse in TeX.
+    * easier to parse in TeX. Note that Java doesn't support any of
+    * the unofficial currency codes, such as IMP, that aren't
+    * recognised in ISO 4217. Use getLocaleData() for unofficial
+    * codes.
     * @param localeTag the tag identifying the locale or null for
     * the default locale
     * @return locale numerical information: number group separator,
@@ -1503,9 +1780,11 @@ public class TeXOSQuery
     * Second group: full date, long date, medium date, short date.
     * Third group: full time, long time, medium time, short time.
     * locale numerical information: number group separator,
-    * decimal separator, exponent separator, international currency
-    * identifier (e.g. GBP), currency symbol (e.g. £), TeX currency
-    * symbol, monetary decimal separator.
+    * decimal separator, exponent separator, grouping flag, ISO 4217 currency
+    * identifier (e.g. GBP), region currency identifier (usually the same as
+    * the ISO 4217 code, but may be an unoffical currency code, such as IMP),
+    * currency symbol (e.g. £), TeX currency symbol, monetary decimal separator,
+    * percent symbol, per mill symbol.
     */
    public String getLocaleData(String localeTag)
    {
@@ -1519,17 +1798,6 @@ public class TeXOSQuery
        {
           locale = getLocale(localeTag);
        }
-
-       // Get numerical data (as with getNumericalInfo)
-       DecimalFormatSymbols fmtSyms 
-               = DecimalFormatSymbols.getInstance(locale);
-
-       // Convert known Unicode currency symbols to commands that
-       // may be redefined in TeX
-
-       String currency = fmtSyms.getCurrencySymbol();
-
-       String texCurrency = getTeXCurrency(currency);
 
        String languageName = locale.getDisplayLanguage();
 
@@ -1597,7 +1865,69 @@ public class TeXOSQuery
        DateFormat timeShortFormat = DateFormat.getTimeInstance(
         DateFormat.SHORT, locale);
 
-       return String.format("{{%s}{%s}{%s}{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}{%s}{%s}{%s}}",
+       // Get numerical data (as with getNumericalInfo)
+       DecimalFormatSymbols fmtSyms 
+               = DecimalFormatSymbols.getInstance(locale);
+
+       // ISO 4217 code
+       String currencyCode = fmtSyms.getInternationalCurrencySymbol();
+
+       // Currency symbol
+       String currency = fmtSyms.getCurrencySymbol();
+
+       // Check for known unofficial currency codes
+
+       String localeCurrencyCode = currencyCode;
+
+       String countryCode = locale.getCountry();
+
+       if (countryCode != null && !"".equals(countryCode))
+       {
+          if (countryCode.equals("GG") || countryCode.equals("GGY")
+           || countryCode.equals("831"))
+          {// Guernsey
+             localeCurrencyCode = "GGP";
+             currency = "£";
+          }
+          else if (countryCode.equals("JE") || countryCode.equals("JEY")
+           || countryCode.equals("832"))
+          {// Jersey
+             localeCurrencyCode = "JEP";
+             currency = "£";
+          }
+          else if (countryCode.equals("IM") || countryCode.equals("IMN")
+           || countryCode.equals("833"))
+          {// Isle of Man
+             localeCurrencyCode = "IMP";
+             currency = "M£";
+          }
+          else if (countryCode.equals("KI") || countryCode.equals("KIR")
+           || countryCode.equals("296"))
+          {// Kiribati
+             localeCurrencyCode = "KID";
+             currency = "$";
+          }
+          else if (countryCode.equals("TV") || countryCode.equals("TUV")
+           || countryCode.equals("798"))
+          {// Tuvaluan
+             localeCurrencyCode = "TVD";
+             currency = "$";
+          }
+          // Transnistrian ruble omitted as it conflicts with ISO
+          // 4217 so omitted. There's also no country code for
+          // Transnistria. Other currencies don't have an associated
+          // region code (for example, Somaliland) or don't have an
+          // known unofficial currency (for example, Alderney).
+          // code.
+       }
+
+       // Convert known Unicode currency symbols to commands that
+       // may be redefined in TeX
+
+       String texCurrency = getTeXCurrency(currency);
+
+       return String.format(
+          "{{%s}{%s}{%s}{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}}",
              getLanguageTag(locale),
              languageName,
              localeLanguageName,
@@ -1616,10 +1946,15 @@ public class TeXOSQuery
              escapeHash(fmtSyms.getGroupingSeparator()),
              escapeHash(fmtSyms.getDecimalSeparator()),
              escapeHash(fmtSyms.getExponentSeparator()), 
-             escapeHash(fmtSyms.getInternationalCurrencySymbol()),
+             NumberFormat.getNumberInstance(locale).isGroupingUsed(),
+             currencyCode,
+             localeCurrencyCode,
              escapeHash(currency),
              texCurrency,
-             escapeHash(fmtSyms.getMonetaryDecimalSeparator()));
+             escapeHash(fmtSyms.getMonetaryDecimalSeparator()),
+             escapeHash(fmtSyms.getPercent()),
+             escapeHash(fmtSyms.getPerMill())
+             );
    }
 
     /**
