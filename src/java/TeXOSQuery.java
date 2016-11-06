@@ -1325,6 +1325,170 @@ public class TeXOSQuery
    }
 
    /**
+    * Gets the currency with known symbols replaced by TeX commands
+    * provided by texosquery.tex.
+    * @param currency The original currency string 
+    * @return The TeX version
+    */ 
+   public String getTeXCurrency(String currency)
+   {
+      StringBuilder builder = new StringBuilder();
+
+      for (int i = 0, n = currency.length(); i < n; )
+      {
+         int codepoint = currency.codePointAt(i);
+         i += Character.charCount(codepoint);
+
+         if (codepoint == 0x0024)
+         {
+            builder.append("\\texosquerycurrencydollar ");
+         }
+         else if (codepoint == 0x00A2)
+         {
+            builder.append("\\texosquerycurrencycent ");
+         }
+         else if (codepoint == 0x00A3)
+         {
+            builder.append("\\texosquerycurrencypound ");
+         }
+         else if (codepoint == 0x00A4)
+         {
+            builder.append("\\texosquerycurrencysign ");
+         }
+         else if (codepoint == 0x00A5)
+         {
+            builder.append("\\texosquerycurrencyyen ");
+         }
+         else if (codepoint == 0x20A0)
+         {
+            builder.append("\\texosquerycurrencyecu ");
+         }
+         else if (codepoint == 0x20A1)
+         {
+            builder.append("\\texosquerycurrencycolon ");
+         }
+         else if (codepoint == 0x20A2)
+         {
+            builder.append("\\texosquerycurrencycruzeiro ");
+         }
+         else if (codepoint == 0x20A3)
+         {
+            builder.append("\\texosquerycurrencyfranc ");
+         }
+         else if (codepoint == 0x20A4)
+         {
+            builder.append("\\texosquerycurrencylira ");
+         }
+         else if (codepoint == 0x20A5)
+         {
+            builder.append("\\texosquerycurrencymill ");
+         }
+         else if (codepoint == 0x20A6)
+         {
+            builder.append("\\texosquerycurrencynaira ");
+         }
+         else if (codepoint == 0x20A7)
+         {
+            builder.append("\\texosquerycurrencypeseta ");
+         }
+         else if (codepoint == 0x20A8)
+         {
+            builder.append("\\texosquerycurrencyrupee ");
+         }
+         else if (codepoint == 0x20A9)
+         {
+            builder.append("\\texosquerycurrencywon ");
+         }
+         else if (codepoint == 0x20AA)
+         {
+            builder.append("\\texosquerycurrencynewsheqel ");
+         }
+         else if (codepoint == 0x20AB)
+         {
+            builder.append("\\texosquerycurrencydong ");
+         }
+         else if (codepoint == 0x20AC)
+         {
+            builder.append("\\texosquerycurrencyeuro ");
+         }
+         else if (codepoint == 0x20AD)
+         {
+            builder.append("\\texosquerycurrencykip ");
+         }
+         else if (codepoint == 0x20AE)
+         {
+            builder.append("\\texosquerycurrencytugrik ");
+         }
+         else if (codepoint == 0x20AF)
+         {
+            builder.append("\\texosquerycurrencydrachma ");
+         }
+         else if (codepoint == 0x20B0)
+         {
+            builder.append("\\texosquerycurrencygermanpenny ");
+         }
+         else if (codepoint == 0x20B1)
+         {
+            builder.append("\\texosquerycurrencypeso ");
+         }
+         else if (codepoint == 0x20B2)
+         {
+            builder.append("\\texosquerycurrencyguarani ");
+         }
+         else if (codepoint == 0x20B3)
+         {
+            builder.append("\\texosquerycurrencyaustral ");
+         }
+         else if (codepoint == 0x20B4)
+         {
+            builder.append("\\texosquerycurrencyhryvnia ");
+         }
+         else if (codepoint == 0x20B5)
+         {
+            builder.append("\\texosquerycurrencycedi ");
+         }
+         else if (codepoint == 0x20B6)
+         {
+            builder.append("\\texosquerycurrencylivretournois ");
+         }
+         else if (codepoint == 0x20B7)
+         {
+            builder.append("\\texosquerycurrencyspesmilo ");
+         }
+         else if (codepoint == 0x20B8)
+         {
+            builder.append("\\texosquerycurrencytenge ");
+         }
+         else if (codepoint == 0x20B9)
+         {
+            builder.append("\\texosquerycurrencyrupee ");
+         }
+         else if (codepoint == 0x20BA)
+         {
+            builder.append("\\texosquerycurrencyturkishlira ");
+         }
+         else if (codepoint == 0x20BB)
+         {
+            builder.append("\\texosquerycurrencynordicmark ");
+         }
+         else if (codepoint == 0x20BC)
+         {
+            builder.append("\\texosquerycurrencymanat ");
+         }
+         else if (codepoint == 0x20BD)
+         {
+            builder.append("\\texosquerycurrencyruble ");
+         }
+         else
+         {
+            builder.appendCodePoint(codepoint);
+         }
+      }
+
+      return builder.toString();
+   }
+
+   /**
     * Gets all available for the given locale. If the
     * given locale tag is null, the default locale is used. The
     * information is returned with grouping to make it
@@ -1340,8 +1504,8 @@ public class TeXOSQuery
     * Third group: full time, long time, medium time, short time.
     * locale numerical information: number group separator,
     * decimal separator, exponent separator, international currency
-    * identifier (e.g. GBP), currency symbol (e.g. £),
-    * monetary decimal separator.
+    * identifier (e.g. GBP), currency symbol (e.g. £), TeX currency
+    * symbol, monetary decimal separator.
     */
    public String getLocaleData(String localeTag)
    {
@@ -1359,6 +1523,13 @@ public class TeXOSQuery
        // Get numerical data (as with getNumericalInfo)
        DecimalFormatSymbols fmtSyms 
                = DecimalFormatSymbols.getInstance(locale);
+
+       // Convert known Unicode currency symbols to commands that
+       // may be redefined in TeX
+
+       String currency = fmtSyms.getCurrencySymbol();
+
+       String texCurrency = getTeXCurrency(currency);
 
        String languageName = locale.getDisplayLanguage();
 
@@ -1426,14 +1597,14 @@ public class TeXOSQuery
        DateFormat timeShortFormat = DateFormat.getTimeInstance(
         DateFormat.SHORT, locale);
 
-       return String.format("{{%s}{%s}{%s}{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}{%s}{%s}}",
+       return String.format("{{%s}{%s}{%s}{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}}{{%s}{%s}{%s}{%s}{%s}{%s}{%s}}",
              getLanguageTag(locale),
              languageName,
              localeLanguageName,
              countryName,
              localeCountryName,
-             variantName,
-             localeVariantName,
+             escapeHash(variantName),
+             escapeHash(localeVariantName),
              dateFullFormat.format(now),
              dateLongFormat.format(now),
              dateMediumFormat.format(now),
@@ -1446,7 +1617,8 @@ public class TeXOSQuery
              escapeHash(fmtSyms.getDecimalSeparator()),
              escapeHash(fmtSyms.getExponentSeparator()), 
              escapeHash(fmtSyms.getInternationalCurrencySymbol()),
-             escapeHash(fmtSyms.getCurrencySymbol()),
+             escapeHash(currency),
+             texCurrency,
              escapeHash(fmtSyms.getMonetaryDecimalSeparator()));
    }
 

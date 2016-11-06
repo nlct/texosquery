@@ -32,7 +32,7 @@
 \usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
 
-\CheckSum{277}
+\CheckSum{352}
 
 \RecordChanges
 \PageIndex
@@ -41,6 +41,8 @@
 
 \renewcommand*{\usage}[1]{\hyperpage{#1}}
 \renewcommand*{\main}[1]{\hyperpage{#1}}
+
+\newcommand*{\qt}[1]{``#1''}
 
 \newcommand*{\shortargfmt}[1]{\texttt{-#1}}
 \newcommand*{\longargfmt}[1]{\texttt{-{}-#1}}
@@ -204,6 +206,7 @@
 %\item \meta{exp sep} the exponent separator.
 %\item \meta{cur code} the currency code.
 %\item \meta{cur sym} the currency symbol.
+%\item \meta{cur sep} the currency decimal separator.
 %\end{itemize}
 %The language tag should conform to IETF BCP~47. See
 %\url{http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html}
@@ -223,6 +226,78 @@
 %If Java doesn't support the given locale, the currency code will
 %appear as \texttt{XXX} with the symbol \textcurrency\ (generic
 %currency sign).
+%
+%\item[\shortarg{D} \oarg{language tag} or \longarg{locale-data} \oarg{language tag}] This provides more
+%extensive information than \longarg{numeric}. Since TeX only
+%supports a maximum of nine arguments, the result has nested groups.
+%Again the \meta{language tag} may be omitted. For example, 
+%\begin{verbatim}
+%texosquery --locale-data
+%\end{verbatim}
+%For the default locale or 
+%\begin{verbatim}
+%texosquery --locale-data en-GB
+%\end{verbatim}
+%for the locale identified by \texttt{en-GB}.
+%As with all the other actions, the result is written to STDOUT on a
+%single line. Since this is too long for this page width, below
+%shows the result from the above example with line breaks inserted after
+%each of the main groups for clarity:
+%\begin{verbatim}
+%{{en-GB}{English}{English}{United Kingdom}{United Kingdom}{}{}}
+%{{Saturday, 5 November 2016}{05 November 2016}{05-Nov-2016}{05/11/16}}
+%{{23:58:25 o'clock GMT}{23:58:25 GMT}{23:58:25}{23:58}}
+%{{,}{.}{E}{GBP}{£}{\texosquerycurrencypound }{.}}
+%\end{verbatim}
+%The groups are:
+%\begin{enumerate}
+%\item The language information in the form:
+%
+%\marg{tag}\marg{language name}\marg{locale language
+%name}\marg{region name}\marg{locale region name}\marg{variant
+%name}\marg{locale variant name}
+%
+%The \meta{tag} is the language tag (as \longarg{bcp47}).
+%The \meta{language name} is the language name in the default
+%language. The \meta{locale language name} is the language name in
+%the locale's language. In the above example, I used \texttt{en-GB}
+%as the argument to \longarg{locale-data} but as my default language
+%is set to English, both \meta{language name} and \meta{locale
+%language name} are \qt{English}. If, instead, I have looked up the
+%locale data for \texttt{fr-BE}, the \meta{language name} would be
+%listed as \qt{French} whereas the \meta{locale language name}
+%would be listed as \qt{fran\c{c}ais}. Note the UTF-8 character.
+%If you want to use this result in your \TeX\ document you'll need
+%UTF-8 support. Similarly the \meta{region name} is the name of the
+%region using the default language (in the case of \qt{fr-BE}, this
+%would be \qt{Belgium} for me) and \meta{locale region name} is the
+%name of the region in the locale language (\qt{Belgique}).
+%The \meta{variant name} is the name of the variant using the
+%default language and \meta{locale variant name} is the name of the
+%variant in the locale's language. In both the \texttt{en-GB} and
+%\texttt{fr-BE} examples, these are both empty.
+%\item The current date provided various formats suitable to
+%the given locale:
+%
+%\marg{full date}\marg{long date}\marg{medium date}\marg{short date}
+%\item The current time provided in various formats suitable to the
+%given locale:
+%
+%\marg{full time}\marg{long time}\marg{medium time}\marg{short time}
+%\item The numeric data similar to \longarg{numeric} but there's an
+%extra item:
+%
+%\marg{grp sep}\marg{dec sep}\marg{exp sep}\marg{cur code}\marg{cur
+%sym}\marg{TeX cur}\marg{cur sep}
+%
+%The \meta{TeX cur} part is obtained by substituting known Unicode
+%currency symbols occurring in \meta{cur sym} with commands in the
+%form \cs{texosquerycurrency\ldots} which are defined by
+%\texttt{texosquery.tex}. Since there are no generic \TeX\ commands
+%available for all these symbols, these commands will need to be
+%redefined as appropriate but are provided in the event that there's
+%no UTF-8 support.
+%\end{enumerate}
 %
 %\item[\shortarg{n} or \longarg{pdfnow}] Displays the current
 % date and time in PDF format. For example 
@@ -772,6 +847,264 @@
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
 \def\TeXOSQueryNumeric#1#2{\TeXOSQuery{#1}{\string-N #2}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryLocaleData}
+%Query the data for the locale given in the second
+%argument and store the result in the control sequence
+%provided in the argument. Leave the second argument empty for the
+%default locale.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\TeXOSQueryLocaleData#1#2{\TeXOSQuery{#1}{\string-D #2}}
+%    \end{macrocode}
+%\end{macro}
+%
+%Provide the currency commands that may be returned
+%\texttt{texosquery}. Most of these will need redefining.
+%\begin{macro}{\texosquerycurrencydollar}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencydollar{\$}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencycent}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencycent{cent}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencypound}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencypound{pound}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencysign}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencysign{currency-sign}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyyen}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyyen{yen}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyecu}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyecu{ecu}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencycolon}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencycolon{colon}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencycruzeiro}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencycruzeiro{cruzeiro}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyfranc}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyfranc{franc}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencylira}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencylira{lira}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencymill}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencymill{mill}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencynaira}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencynaira{naira}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencypeseta}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencypeseta{peseta}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyrupee}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyrupee{rupee}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencywon}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencywon{won}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencynewsheqel}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencynewsheqel{newsheqel}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencydong}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencydong{dong}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyeuro}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyeuro{euro}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencykip}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencykip{kip}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencytugrik}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencytugrik{tugrik}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencydrachma}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencydrachma{drachma}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencygermanpenny}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencygermanpenny{german-penny}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencypeso}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencypeso{peso}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyguarani}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyguarani{guarani}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyaustral}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyaustral{austral}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyhryvnia}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyhryvnia{hryvnia}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencycedi}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencycedi{cedi}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencylivretournois}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencylivretournois{livre-tournois}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyspesmilo}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyspesmilo{spesmilo}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencytenge}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencytenge{tenge}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyrupee}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyrupee{rupee}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyturkishlira}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyturkishlira{turkish-lira}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencynordicmark}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencynordicmark{nordic-mark}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencymanat}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencymanat{manat}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycurrencyruble}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrencyruble{ruble}
 %    \end{macrocode}
 %\end{macro}
 %
