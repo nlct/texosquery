@@ -1,0 +1,188 @@
+% arara: pdflatex: {shell: on}
+\documentclass{article}
+
+\usepackage{etoolbox}
+\usepackage{textcomp}% currency symbols
+\usepackage{texosquery}
+
+
+\newcommand{\querydata}[1]{% empty #1 means use default locale
+  \TeXOSQueryLocaleData{\result}{#1}% 
+  \ifx\result\empty
+    Query failed.%
+  \else
+    \expandafter\parseresult\result
+  \fi
+}
+
+\newcommand{\parseresult}[1]{%
+  % first block is the language and region information
+  \parselocale#1% lose outer braces
+  \par
+  \parsedateblock
+}
+
+\newcommand*{\parselocale}[7]{%
+  Tag: \texttt{#1}.
+  Language: #2% language name in default locale's language
+  \ifstrequal{#2}{#3}{}%
+  {#3}% language name in this locale's language
+  . Region: #4% region name in default locale's language
+  \ifstrequal{#4}{#5}{}%
+  {#5}% region name in this locale's language
+  . Variant: #6% variant name in default locale's language
+  \ifstrequal{#6}{#7}{}%
+  {#7}. % region name in this locale's language
+}
+
+\newcommand{\parsedateblock}[1]{%
+  \parsedate#1% lose outer braces
+  \par
+  \parsetimeblock
+}
+
+\newcommand*{\parsedate}[5]{%
+  Full date: #1.
+  Long date: #2.
+  Medium date: #3.
+  Short date: #4.
+  First day of week: #5. % index 0 = Monday, etc
+}
+
+\newcommand{\parsetimeblock}[1]{%
+  \parsetime#1% lose outer braces
+  \par
+  \parsedayblock
+}
+
+\newcommand*{\parsetime}[4]{%
+  Full time: #1.
+  Long time: #2.
+  Medium time: #3.
+  Short time: #4.
+}
+
+\newcommand{\parsedayblock}[1]{%
+  \parsedaynames#1% lose outer block
+  \par
+  \parseshortdayblock
+}
+
+\newcommand*{\parsedaynames}[7]{%
+  Days of the week: #1, #2, #3, #4, #5, #6, #7.
+}
+
+\newcommand{\parseshortdayblock}[1]{%
+  \parseshortdaynames#1% lose outer block
+  \par
+  \parsemonthblock
+}
+
+\newcommand*{\parseshortdaynames}[7]{%
+  Abbreviated days of the week: #1, #2, #3, #4, #5, #6, #7.
+}
+
+\newcommand{\parsemonthblock}[1]{%
+  \parsemonthnames#1% lose outer block
+  \par
+  \parseshortmonthblock
+}
+
+\newcommand*{\parsemonthnames}[9]{%
+  Months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
+  \parseendmonthnames
+}
+
+\newcommand*{\parseendmonthnames}[3]{%
+  #1, #2, #3.
+}
+
+\newcommand{\parseshortmonthblock}[1]{%
+  \parseshortmonthnames#1% lose outer block
+  \par
+  \parsestandalonedayblock
+}
+
+\newcommand*{\parseshortmonthnames}[9]{%
+  Months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
+  \parseendshortmonthnames
+}
+
+\newcommand*{\parseendshortmonthnames}[3]{%
+  #1, #2, #3.
+}
+
+\newcommand{\parsestandalonedayblock}[1]{%
+  \parsestandalonedaynames#1% lose outer block
+  \par
+  \parsestandaloneshortdayblock
+}
+
+\newcommand*{\parsestandalonedaynames}[7]{%
+  Standalone days of the week: #1, #2, #3, #4, #5, #6, #7.
+}
+
+\newcommand{\parsestandaloneshortdayblock}[1]{%
+  \parsestandaloneshortdaynames#1% lose outer block
+  \par
+  \parsestandalonemonthblock
+}
+
+\newcommand*{\parsestandaloneshortdaynames}[7]{%
+  Standalone abbreviated days of the week: #1, #2, #3, #4, #5, #6, #7.
+}
+
+\newcommand{\parsestandalonemonthblock}[1]{%
+  \parsestandalonemonthnames#1% lose outer block
+  \par
+  \parsestandaloneshortmonthblock
+}
+
+\newcommand*{\parsestandalonemonthnames}[9]{%
+  Standalone months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
+  \parseendstandalonemonthnames
+}
+
+\newcommand*{\parseendstandalonemonthnames}[3]{%
+  #1, #2, #3.
+}
+
+\newcommand{\parsestandaloneshortmonthblock}[1]{%
+  \parsestandaloneshortmonthnames#1% lose outer block
+  \par
+  \parsenumericblock
+}
+
+\newcommand*{\parsestandaloneshortmonthnames}[9]{%
+  Standalone abbreviated months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
+  \parseendstandaloneshortmonthnames
+}
+
+\newcommand*{\parseendstandaloneshortmonthnames}[3]{%
+  #1, #2, #3.
+}
+
+\newcommand*{\parsenumericblock}[1]{%
+  \parsenumericdata#1% lose outer block
+}
+
+\newcommand*{\parsenumericdata}[9]{%
+  Numeric data: #1 (number group separator)
+  #2 (decimal separator)
+  #3 (exponent symbol)
+  #9 (monetary decimal separator).
+  Uses number grouping: #4.
+  Currency ISO~4217 code: #5%
+  \ifstrequal{#5}{#6}{}%
+  { (Unofficial non ISO~4217 code: #6)}.
+  % #6 is the currency symbol but may contain non-ASCII characters
+  Currency symbol: #8%
+  % The final two arguments are the percent and permill symbols.
+  % Discard them for this test.
+  \csname @gobbletwo\endcsname
+}
+
+\begin{document}
+\querydata{}% query default locale
+
+\end{document}
