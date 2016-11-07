@@ -2208,9 +2208,9 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("General:");
       System.out.println();
-      System.out.println("-L or --locale\t\tDisplay locale information");
+      System.out.println("-L or --locale\t\tDisplay POSIX locale information");
       System.out.println("-l or --locale-lcs\tAs --locale but codeset ");
-      System.out.println("\t\t\tin lowercase with hyphens stripped");
+      System.out.println("-b or --bcp47\tDisplay locale as BCP47 tag");
       System.out.println("-c or --cwd\t\tDisplay current working directory");
       System.out.println("-m or --userhome\tDisplay user's home directory");
       System.out.println("-t or --tmpdir\t\tDisplay temporary directory");
