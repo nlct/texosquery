@@ -1,0 +1,216 @@
+% arara: xelatex: {shell: on}
+\documentclass{article}
+
+\usepackage{fontspec}
+\usepackage{texosquery}
+% Use texosquery-jre8 (this line should typically go in
+% texosquery.cfg to allow for user preference) 
+\def\TeXOSInvokerName{texosquery-jre8}
+
+\def\querydata#1{% empty #1 means use default locale
+  \TeXOSQueryLocaleData{\result}{#1}% 
+  \ifx\result\empty
+    Query failed.%
+  \else
+    \expandafter\parseresult\result
+  \fi
+}
+
+\long\def\parseresult#1{%
+  % first block is the language and region information
+  \parselocale#1% lose outer braces
+  \par
+  \parsedateblock
+}
+
+\def\parselocale#1#2#3#4#5#6#7{%
+  Tag: \texttt{#1}.
+  Language: #2 % language name in default locale's language
+  (#3)% language name in this locale's language
+  . Region: #4 % region name in default locale's language
+  (#5)% region name in this locale's language
+  . Variant: #6 % variant name in default locale's language
+  (#7). % region name in this locale's language
+}
+
+\long\def\parsedateblock#1{%
+  \parsedate#1% lose outer braces
+  \par
+  \parsetimeblock
+}
+
+\def\parsedate#1#2#3#4#5{%
+  Full date: #1.
+  Long date: #2.
+  Medium date: #3.
+  Short date: #4.
+  First day of week: #5. % index 0 = Monday, etc
+}
+
+\long\def\parsetimeblock#1{%
+  \parsetime#1% lose outer braces
+  \par
+  \parsedayblock
+}
+
+\def\parsetime#1#2#3#4{%
+  Full time: #1.
+  Long time: #2.
+  Medium time: #3.
+  Short time: #4.
+}
+
+\long\def\parsedayblock#1{%
+  \parsedaynames#1% lose outer block
+  \par
+  \parseshortdayblock
+}
+
+\def\parsedaynames#1#2#3#4#5#6#7{%
+  Days of the week: #1, #2, #3, #4, #5, #6, #7.
+}
+
+\def\parseshortdayblock#1{%
+  \parseshortdaynames#1% lose outer block
+  \par
+  \parsemonthblock
+}
+
+\def\parseshortdaynames#1#2#3#4#5#6#7{%
+  Abbreviated days of the week: #1, #2, #3, #4, #5, #6, #7.
+}
+
+\long\def\parsemonthblock#1{%
+  \parsemonthnames#1% lose outer block
+  \par
+  \parseshortmonthblock
+}
+
+\def\parsemonthnames#1#2#3#4#5#6#7#8#9{%
+  Months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
+  \parseendmonthnames
+}
+
+\def\parseendmonthnames#1#2#3{%
+  #1, #2, #3.
+}
+
+\long\def\parseshortmonthblock#1{%
+  \parseshortmonthnames#1% lose outer block
+  \par
+  \parsestandalonedayblock
+}
+
+\def\parseshortmonthnames#1#2#3#4#5#6#7#8#9{%
+  Abbreviated months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
+  \parseendshortmonthnames
+}
+
+\def\parseendshortmonthnames#1#2#3{%
+  #1, #2, #3.
+}
+
+\long\def\parsestandalonedayblock#1{%
+  \parsestandalonedaynames#1% lose outer block
+  \par
+  \parsestandaloneshortdayblock
+}
+
+\def\parsestandalonedaynames#1#2#3#4#5#6#7{%
+  Standalone days of the week: #1, #2, #3, #4, #5, #6, #7.
+}
+
+\long\def\parsestandaloneshortdayblock#1{%
+  \parsestandaloneshortdaynames#1% lose outer block
+  \par
+  \parsestandalonemonthblock
+}
+
+\def\parsestandaloneshortdaynames#1#2#3#4#5#6#7{%
+  Standalone abbreviated days of the week: #1, #2, #3, #4, #5, #6, #7.
+}
+
+\long\def\parsestandalonemonthblock#1{%
+  \parsestandalonemonthnames#1% lose outer block
+  \par
+  \parsestandaloneshortmonthblock
+}
+
+\def\parsestandalonemonthnames#1#2#3#4#5#6#7#8#9{%
+  Standalone months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
+  \parseendstandalonemonthnames
+}
+
+\def\parseendstandalonemonthnames#1#2#3{%
+  #1, #2, #3.
+}
+
+\long\def\parsestandaloneshortmonthblock#1{%
+  \parsestandaloneshortmonthnames#1% lose outer block
+  \par
+  \parsenumericblock
+}
+
+\def\parsestandaloneshortmonthnames#1#2#3#4#5#6#7#8#9{%
+  Standalone abbreviated months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
+  \parseendstandaloneshortmonthnames
+}
+
+\def\parseendstandaloneshortmonthnames#1#2#3{%
+  #1, #2, #3.
+}
+
+\def\parsenumericblock#1{%
+  \parsenumericdata#1% lose outer block
+}
+
+\def\parsenumericdata#1#2#3#4#5#6#7#8#9{%
+  Numeric data: #1 (number group separator)
+  #2 (decimal separator)
+  #3 (exponent symbol)
+  #9 (monetary decimal separator).
+  Uses number grouping: #4.
+  Currency ISO~4217 code: #5
+  (#6).
+  % Support may be needed for any non-ASCII characters in #7
+  Currency symbol: #7 (#8).
+  % The final two arguments are the percent and permill symbols.
+  \parsepercentmill
+}
+
+\def\parsepercentmill#1#2{%
+  Percent: #1.
+  Per mill: #2.
+}
+
+\begin{document}
+
+\section{en-GB}
+
+\querydata{en-GB}
+
+\section{en-IM}
+
+\querydata{en-IM}
+
+\section{pt-BR}
+
+\querydata{pt-BR}
+
+\section{fr-BE}
+
+\querydata{fr-BE}
+
+\section{de-DE-1996}
+
+\querydata{de-DE-1996}
+
+\section{cy-GB}
+\texttt{-Djava.locale.providers=CLDR,JRE} required for this one to
+work since JRE doesn't support Welsh, but CLDR does. (The bash shell
+script for \texttt{texosquery-jre8} sets this in the java call.)
+Not supported for version below JRE~8.
+
+\querydata{cy-GB}
+
+\end{document}

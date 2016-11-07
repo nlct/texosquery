@@ -1628,143 +1628,143 @@ public class TeXOSQuery
 
          if (codepoint == 0x0024)
          {
-            builder.append("\\texosquerycurrencydollar ");
+            builder.append("\\texosquerycurrency{dollar}");
          }
          else if (codepoint == 0x00A2)
          {
-            builder.append("\\texosquerycurrencycent ");
+            builder.append("\\texosquerycurrency{cent}");
          }
          else if (codepoint == 0x00A3)
          {
-            builder.append("\\texosquerycurrencypound ");
+            builder.append("\\texosquerycurrency{pound}");
          }
          else if (codepoint == 0x00A4)
          {
-            builder.append("\\texosquerycurrencysign ");
+            builder.append("\\texosquerycurrency{sign}");
          }
          else if (codepoint == 0x00A5)
          {
-            builder.append("\\texosquerycurrencyyen ");
+            builder.append("\\texosquerycurrency{yen}");
          }
          else if (codepoint == 0x20A0)
          {
-            builder.append("\\texosquerycurrencyecu ");
+            builder.append("\\texosquerycurrency{ecu}");
          }
          else if (codepoint == 0x20A1)
          {
-            builder.append("\\texosquerycurrencycolon ");
+            builder.append("\\texosquerycurrency{colon}");
          }
          else if (codepoint == 0x20A2)
          {
-            builder.append("\\texosquerycurrencycruzeiro ");
+            builder.append("\\texosquerycurrency{cruzeiro}");
          }
          else if (codepoint == 0x20A3)
          {
-            builder.append("\\texosquerycurrencyfranc ");
+            builder.append("\\texosquerycurrency{franc}");
          }
          else if (codepoint == 0x20A4)
          {
-            builder.append("\\texosquerycurrencylira ");
+            builder.append("\\texosquerycurrency{lira}");
          }
          else if (codepoint == 0x20A5)
          {
-            builder.append("\\texosquerycurrencymill ");
+            builder.append("\\texosquerycurrency{mill}");
          }
          else if (codepoint == 0x20A6)
          {
-            builder.append("\\texosquerycurrencynaira ");
+            builder.append("\\texosquerycurrency{naira}");
          }
          else if (codepoint == 0x20A7)
          {
-            builder.append("\\texosquerycurrencypeseta ");
+            builder.append("\\texosquerycurrency{peseta}");
          }
          else if (codepoint == 0x20A8)
          {
-            builder.append("\\texosquerycurrencyrupee ");
+            builder.append("\\texosquerycurrency{rupee}");
          }
          else if (codepoint == 0x20A9)
          {
-            builder.append("\\texosquerycurrencywon ");
+            builder.append("\\texosquerycurrency{won}");
          }
          else if (codepoint == 0x20AA)
          {
-            builder.append("\\texosquerycurrencynewsheqel ");
+            builder.append("\\texosquerycurrency{newsheqel}");
          }
          else if (codepoint == 0x20AB)
          {
-            builder.append("\\texosquerycurrencydong ");
+            builder.append("\\texosquerycurrency{dong}");
          }
          else if (codepoint == 0x20AC)
          {
-            builder.append("\\texosquerycurrencyeuro ");
+            builder.append("\\texosquerycurrency{euro}");
          }
          else if (codepoint == 0x20AD)
          {
-            builder.append("\\texosquerycurrencykip ");
+            builder.append("\\texosquerycurrency{kip}");
          }
          else if (codepoint == 0x20AE)
          {
-            builder.append("\\texosquerycurrencytugrik ");
+            builder.append("\\texosquerycurrency{tugrik}");
          }
          else if (codepoint == 0x20AF)
          {
-            builder.append("\\texosquerycurrencydrachma ");
+            builder.append("\\texosquerycurrency{drachma}");
          }
          else if (codepoint == 0x20B0)
          {
-            builder.append("\\texosquerycurrencygermanpenny ");
+            builder.append("\\texosquerycurrency{germanpenny}");
          }
          else if (codepoint == 0x20B1)
          {
-            builder.append("\\texosquerycurrencypeso ");
+            builder.append("\\texosquerycurrency{peso}");
          }
          else if (codepoint == 0x20B2)
          {
-            builder.append("\\texosquerycurrencyguarani ");
+            builder.append("\\texosquerycurrency{guarani}");
          }
          else if (codepoint == 0x20B3)
          {
-            builder.append("\\texosquerycurrencyaustral ");
+            builder.append("\\texosquerycurrency{austral}");
          }
          else if (codepoint == 0x20B4)
          {
-            builder.append("\\texosquerycurrencyhryvnia ");
+            builder.append("\\texosquerycurrency{hryvnia}");
          }
          else if (codepoint == 0x20B5)
          {
-            builder.append("\\texosquerycurrencycedi ");
+            builder.append("\\texosquerycurrency{cedi}");
          }
          else if (codepoint == 0x20B6)
          {
-            builder.append("\\texosquerycurrencylivretournois ");
+            builder.append("\\texosquerycurrency{livretournois}");
          }
          else if (codepoint == 0x20B7)
          {
-            builder.append("\\texosquerycurrencyspesmilo ");
+            builder.append("\\texosquerycurrency{spesmilo}");
          }
          else if (codepoint == 0x20B8)
          {
-            builder.append("\\texosquerycurrencytenge ");
+            builder.append("\\texosquerycurrency{tenge}");
          }
          else if (codepoint == 0x20B9)
          {
-            builder.append("\\texosquerycurrencyrupee ");
+            builder.append("\\texosquerycurrency{rupee}");
          }
          else if (codepoint == 0x20BA)
          {
-            builder.append("\\texosquerycurrencyturkishlira ");
+            builder.append("\\texosquerycurrency{turkishlira}");
          }
          else if (codepoint == 0x20BB)
          {
-            builder.append("\\texosquerycurrencynordicmark ");
+            builder.append("\\texosquerycurrency{nordicmark}");
          }
          else if (codepoint == 0x20BC)
          {
-            builder.append("\\texosquerycurrencymanat ");
+            builder.append("\\texosquerycurrency{manat}");
          }
          else if (codepoint == 0x20BD)
          {
-            builder.append("\\texosquerycurrencyruble ");
+            builder.append("\\texosquerycurrency{ruble}");
          }
          else
          {

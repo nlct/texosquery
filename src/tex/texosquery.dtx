@@ -47,7 +47,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{545}
+\CheckSum{551}
 
 \RecordChanges
 \PageIndex
@@ -1070,6 +1070,17 @@
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
 \def\TeXOSQueryLocaleData#1#2{\TeXOSQuery{#1}{\string-D #2}}
+%    \end{macrocode}
+%\end{macro}
+%
+%Since \cs{TeXOSQuery} expands the results, we need a way to prevent
+%it from prematurely expanding the currency control sequences.
+%\begin{macro}{\texosquerycurrency}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerycurrency#1{%
+ \expandafter\noexpand\csname texosquerycurrency#1\endcsname
+}
 %    \end{macrocode}
 %\end{macro}
 %

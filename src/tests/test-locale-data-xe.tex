@@ -1,12 +1,11 @@
-% arara: pdflatex: {shell: on}
-\documentclass{article}
+% arara: xetex: {shell: on}
 
-\usepackage{etoolbox}
-\usepackage{textcomp}% currency symbols
-\usepackage{texosquery}
+\input texosquery
+% Use texosquery-jre8 (this line should typically go in
+% texosquery.cfg to allow for user preference) 
+\def\TeXOSInvokerName{texosquery-jre8}
 
-
-\newcommand{\querydata}[1]{% empty #1 means use default locale
+\def\querydata#1{% empty #1 means use default locale
   \TeXOSQueryLocaleData{\result}{#1}% 
   \ifx\result\empty
     Query failed.%
@@ -15,33 +14,30 @@
   \fi
 }
 
-\newcommand{\parseresult}[1]{%
+\long\def\parseresult#1{%
   % first block is the language and region information
   \parselocale#1% lose outer braces
   \par
   \parsedateblock
 }
 
-\newcommand*{\parselocale}[7]{%
-  Tag: \texttt{#1}.
-  Language: #2% language name in default locale's language
-  \ifstrequal{#2}{#3}{}%
-  {#3}% language name in this locale's language
-  . Region: #4% region name in default locale's language
-  \ifstrequal{#4}{#5}{}%
-  {#5}% region name in this locale's language
-  . Variant: #6% variant name in default locale's language
-  \ifstrequal{#6}{#7}{}%
-  {#7}. % region name in this locale's language
+\def\parselocale#1#2#3#4#5#6#7{%
+  Tag: {\tt #1}.
+  Language: #2 % language name in default locale's language
+  (#3)% language name in this locale's language
+  . Region: #4 % region name in default locale's language
+  (#5)% region name in this locale's language
+  . Variant: #6 % variant name in default locale's language
+  (#7). % region name in this locale's language
 }
 
-\newcommand{\parsedateblock}[1]{%
+\long\def\parsedateblock#1{%
   \parsedate#1% lose outer braces
   \par
   \parsetimeblock
 }
 
-\newcommand*{\parsedate}[5]{%
+\def\parsedate#1#2#3#4#5{%
   Full date: #1.
   Long date: #2.
   Medium date: #3.
@@ -49,140 +45,160 @@
   First day of week: #5. % index 0 = Monday, etc
 }
 
-\newcommand{\parsetimeblock}[1]{%
+\long\def\parsetimeblock#1{%
   \parsetime#1% lose outer braces
   \par
   \parsedayblock
 }
 
-\newcommand*{\parsetime}[4]{%
+\def\parsetime#1#2#3#4{%
   Full time: #1.
   Long time: #2.
   Medium time: #3.
   Short time: #4.
 }
 
-\newcommand{\parsedayblock}[1]{%
+\long\def\parsedayblock#1{%
   \parsedaynames#1% lose outer block
   \par
   \parseshortdayblock
 }
 
-\newcommand*{\parsedaynames}[7]{%
+\def\parsedaynames#1#2#3#4#5#6#7{%
   Days of the week: #1, #2, #3, #4, #5, #6, #7.
 }
 
-\newcommand{\parseshortdayblock}[1]{%
+\def\parseshortdayblock#1{%
   \parseshortdaynames#1% lose outer block
   \par
   \parsemonthblock
 }
 
-\newcommand*{\parseshortdaynames}[7]{%
+\def\parseshortdaynames#1#2#3#4#5#6#7{%
   Abbreviated days of the week: #1, #2, #3, #4, #5, #6, #7.
 }
 
-\newcommand{\parsemonthblock}[1]{%
+\long\def\parsemonthblock#1{%
   \parsemonthnames#1% lose outer block
   \par
   \parseshortmonthblock
 }
 
-\newcommand*{\parsemonthnames}[9]{%
+\def\parsemonthnames#1#2#3#4#5#6#7#8#9{%
   Months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
   \parseendmonthnames
 }
 
-\newcommand*{\parseendmonthnames}[3]{%
+\def\parseendmonthnames#1#2#3{%
   #1, #2, #3.
 }
 
-\newcommand{\parseshortmonthblock}[1]{%
+\long\def\parseshortmonthblock#1{%
   \parseshortmonthnames#1% lose outer block
   \par
   \parsestandalonedayblock
 }
 
-\newcommand*{\parseshortmonthnames}[9]{%
+\def\parseshortmonthnames#1#2#3#4#5#6#7#8#9{%
   Abbreviated months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
   \parseendshortmonthnames
 }
 
-\newcommand*{\parseendshortmonthnames}[3]{%
+\def\parseendshortmonthnames#1#2#3{%
   #1, #2, #3.
 }
 
-\newcommand{\parsestandalonedayblock}[1]{%
+\long\def\parsestandalonedayblock#1{%
   \parsestandalonedaynames#1% lose outer block
   \par
   \parsestandaloneshortdayblock
 }
 
-\newcommand*{\parsestandalonedaynames}[7]{%
+\def\parsestandalonedaynames#1#2#3#4#5#6#7{%
   Standalone days of the week: #1, #2, #3, #4, #5, #6, #7.
 }
 
-\newcommand{\parsestandaloneshortdayblock}[1]{%
+\long\def\parsestandaloneshortdayblock#1{%
   \parsestandaloneshortdaynames#1% lose outer block
   \par
   \parsestandalonemonthblock
 }
 
-\newcommand*{\parsestandaloneshortdaynames}[7]{%
+\def\parsestandaloneshortdaynames#1#2#3#4#5#6#7{%
   Standalone abbreviated days of the week: #1, #2, #3, #4, #5, #6, #7.
 }
 
-\newcommand{\parsestandalonemonthblock}[1]{%
+\long\def\parsestandalonemonthblock#1{%
   \parsestandalonemonthnames#1% lose outer block
   \par
   \parsestandaloneshortmonthblock
 }
 
-\newcommand*{\parsestandalonemonthnames}[9]{%
+\def\parsestandalonemonthnames#1#2#3#4#5#6#7#8#9{%
   Standalone months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
   \parseendstandalonemonthnames
 }
 
-\newcommand*{\parseendstandalonemonthnames}[3]{%
+\def\parseendstandalonemonthnames#1#2#3{%
   #1, #2, #3.
 }
 
-\newcommand{\parsestandaloneshortmonthblock}[1]{%
+\long\def\parsestandaloneshortmonthblock#1{%
   \parsestandaloneshortmonthnames#1% lose outer block
   \par
   \parsenumericblock
 }
 
-\newcommand*{\parsestandaloneshortmonthnames}[9]{%
+\def\parsestandaloneshortmonthnames#1#2#3#4#5#6#7#8#9{%
   Standalone abbreviated months: #1, #2, #3, #4, #5, #6, #7, #8, #9,
   \parseendstandaloneshortmonthnames
 }
 
-\newcommand*{\parseendstandaloneshortmonthnames}[3]{%
+\def\parseendstandaloneshortmonthnames#1#2#3{%
   #1, #2, #3.
 }
 
-\newcommand*{\parsenumericblock}[1]{%
+\def\parsenumericblock#1{%
   \parsenumericdata#1% lose outer block
 }
 
-\newcommand*{\parsenumericdata}[9]{%
+\def\parsenumericdata#1#2#3#4#5#6#7#8#9{%
   Numeric data: #1 (number group separator)
   #2 (decimal separator)
   #3 (exponent symbol)
   #9 (monetary decimal separator).
   Uses number grouping: #4.
-  Currency ISO~4217 code: #5%
-  \ifstrequal{#5}{#6}{}%
-  { (Unofficial non ISO~4217 code: #6)}.
-  % #7 is the currency symbol but may contain non-ASCII characters
-  Currency symbol: #8%
+  Currency ISO~4217 code: #5
+  (#6).
+  % Support may be needed for any non-ASCII characters in #7
+  Currency symbol: #7 (#8).
   % The final two arguments are the percent and permill symbols.
-  % Discard them for this test.
-  \csname @gobbletwo\endcsname
+  \parsepercentmill
 }
 
-\begin{document}
-\querydata{}% query default locale
+\def\parsepercentmill#1#2{%
+  Percent: #1.
+  Per mill: #2.
+}
 
-\end{document}
+{\bf en-GB}
+
+\querydata{en-GB}
+
+{\bf en-IM}
+
+\querydata{en-IM}
+
+{\bf pt-BR}
+
+\querydata{pt-BR}
+
+{\bf fr-BE}
+
+\querydata{fr-BE}
+
+{\bf de-DE-1996}
+
+\querydata{de-DE-1996}
+
+\bye
