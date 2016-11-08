@@ -47,7 +47,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{551}
+\CheckSum{581}
 
 \RecordChanges
 \PageIndex
@@ -271,10 +271,12 @@
 % \meta{modifier} omitted, and \texttt{en} has all but the language
 % omitted.
 %\item[\shortarg{l} or \longarg{locale-lcs}] As the above but the
-%codeset (if present) is converted to lower case and any hyphens are
+%codeset is converted to lower case and any hyphens are
 %stripped. For example, if \longargfmt{locale} returns
 %\texttt{en-GB.UTF-8}, then \longargfmt{locale-lcs} would return
 %\texttt{en-GB.utf8}.
+%\item[\shortarg{C} or \longarg{codeset-lcs}] (New to version 1.2.)
+%Obtains just the codeset converted to lower case with hyphens stripped.
 %\item[\shortarg{b} or \longarg{bcp47}] (New to version 1.2.)
 %Displays the BCP~47 language tag.
 %
@@ -331,6 +333,12 @@
 %\begin{verbatim}
 %{,}{.}{E}{GBP}{GBP}{.}
 %\end{verbatim}
+%
+%\begin{important}
+%This option and the following (\longarg{locale-data}) are best used
+%with \XeTeX\ or \LuaTeX. Problems may occur if \sty{inputenc} has
+%been loaded before the query is performed.
+%\end{important}
 %
 %\item[\shortarg{D} \oarg{language tag} or \longarg{locale-data} \oarg{language tag}]
 %(New to v1.2.) This provides more
@@ -737,6 +745,11 @@
 %\begin{flushleft}\ttfamily
 %\cs{TeXOSQuery}\marg{cs}\{\shortarg{L}\}
 %\end{flushleft}
+%If you just want the codeset in the same form as
+%\longarg{locale-lcs} you can do:
+%\begin{flushleft}\ttfamily
+%\cs{TeXOSQuery}\marg{cs}\{\shortarg{C}\}
+%\end{flushleft}
 %
 %The BCP 47 language tag (\shortarg{b} or \longarg{bcp47}) can be obtained using:
 %\DescribeMacro\TeXOSQueryLangTag
@@ -990,6 +1003,24 @@
 \fi
 %    \end{macrocode}
 %
+%\begin{macro}{\@texosquery@edef}
+%Need to provide some protection (if available) against non-ASCII characters 
+%that have been made active by \sty{inputenc} when reading in the
+%results of the shell escape. This command may be defined before loading
+%\sty{texosquery}, otherwise it's set to \cs{protected@edef}, if
+%defined, or \cs{edef}.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\ifx\@texosquery@edef\undefined
+  \ifx\protected@edef\undefined
+    \let\@texosquery@edef\edef
+  \else
+    \let\@texosquery@edef\protected@edef
+  \fi
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\TeXOSQuery}
 %Use \app{texosquery} with the option given in the second
 %argument and store the result in control sequence given in the
@@ -1025,7 +1056,7 @@
     \catcode`\;=12\relax
     \catcode`\%=12\relax
     \everyeof{\noexpand}\relax
-    \edef\x{\endgroup\def\noexpand#1{\TeXOSQueryInvoker{#2}}}\x
+    \@texosquery@edef\x{\endgroup\def\noexpand#1{\TeXOSQueryInvoker{#2}}}\x
   \fi
 }
 %    \end{macrocode}
@@ -1075,6 +1106,19 @@
 %
 %Since \cs{TeXOSQuery} expands the results, we need a way to prevent
 %it from prematurely expanding the currency control sequences.
+%\begin{macro}{\@texosquery@protect}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\ifx\@texosquery@protect\undefined
+  \ifx\protect\undefined
+   \def\@texosquery@protect{\noexpand}
+  \else
+   \def\@texosquery@protect{\protect}
+  \fi
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\texosquerycurrency}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}

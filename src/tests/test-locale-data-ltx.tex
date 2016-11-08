@@ -1,10 +1,12 @@
 % arara: pdflatex: {shell: on}
 \documentclass{article}
 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
 \usepackage{etoolbox}
 \usepackage{textcomp}% currency symbols
 \usepackage{texosquery}
-
 
 \newcommand{\querydata}[1]{% empty #1 means use default locale
   \TeXOSQueryLocaleData{\result}{#1}% 
@@ -26,13 +28,20 @@
   Tag: \texttt{#1}.
   Language: #2% language name in default locale's language
   \ifstrequal{#2}{#3}{}%
-  {#3}% language name in this locale's language
-  . Region: #4% region name in default locale's language
-  \ifstrequal{#4}{#5}{}%
-  {#5}% region name in this locale's language
-  . Variant: #6% variant name in default locale's language
-  \ifstrequal{#6}{#7}{}%
-  {#7}. % region name in this locale's language
+  { (#3)}% language name in this locale's language
+  .  Region: 
+  \ifstrempty{#4}{none supplied}
+  {%
+    #4% region name in default locale's language
+    \ifstrequal{#4}{#5}{}%
+    { (#5)}% region name in this locale's language
+  }.  Variant: 
+  \ifstrempty{#6}{none supplied}
+  {%
+    #6% variant name in default locale's language
+    \ifstrequal{#6}{#7}{}%
+    { (#7)}% variant name in this locale's language
+  }.
 }
 
 \newcommand{\parsedateblock}[1]{%
@@ -166,23 +175,44 @@
   \parsenumericdata#1% lose outer block
 }
 
-\newcommand*{\parsenumericdata}[9]{%
+\makeatletter
+\newcommand{\parsenumericdata}[9]{%
   Numeric data: #1 (number group separator)
   #2 (decimal separator)
   #3 (exponent symbol)
-  #9 (monetary decimal separator).
   Uses number grouping: #4.
+  \par Example numbers: 
+  1\ifstrequal{#4}{true}{#1}{}234#20 (decimal) and
+  1#2234#3+3 (scientific).
+  \par
   Currency ISO~4217 code: #5%
   \ifstrequal{#5}{#6}{}%
   { (Unofficial non ISO~4217 code: #6)}.
-  % #7 is the currency symbol but may contain non-ASCII characters
-  Currency symbol: #8%
+  Currency Symbol: #7 (character). % may contain non-ASCII characters
+  Currency symbol: #8 (code: 
+  \def\tmp{#8}\@onelevel@sanitize\tmp\texttt{\tmp}).
+  Monetary decimal separator: #9 (e.g. #712#934)
+  \par
   % The final two arguments are the percent and permill symbols.
-  % Discard them for this test.
-  \csname @gobbletwo\endcsname
+  \parseperdata
 }
+\makeatother
 
+\newcommand*{\parseperdata}[2]{%
+ Percent symbol: #1.
+ Per-mill symbol: #2.
+}
 \begin{document}
+\section{Default Locale}
 \querydata{}% query default locale
+
+\section{fr-BE}
+\querydata{fr-BE}
+
+\section{de-CH-1996}
+\querydata{de-CH-1996}
+
+\section{no-NO}
+\querydata{no-NO}
 
 \end{document}

@@ -1205,19 +1205,7 @@ public class TeXOSQuery
          }
       }
 
-      // Get the OS default file encoding or "UTF-8" if not set.
-
-      String codeset = getSystemProperty("file.encoding", "UTF-8");
-
-      // The codeset should not be null here as a default has
-      // been provided if the property is missing.
-
-      if (convertCodeset)
-      {
-         // If conversion is required, change to lower case
-         // and remove any hyphens.
-         codeset = codeset.toLowerCase().replaceAll("-", "");
-      }
+      String codeset = getCodeSet(convertCodeset);
 
       identifier = identifier.concat(".").concat(codeset);
 
@@ -1239,6 +1227,31 @@ public class TeXOSQuery
       }
 
       return identifier;
+   }
+
+   /**
+    * Gets default file encoding.
+    * @param convertCodeset If true convert codeset to fit
+    * inputenc.sty
+    * @return the file encoding.
+    */ 
+   public String getCodeSet(boolean convertCodeset)
+   {
+      // Get the OS default file encoding or "UTF-8" if not set.
+
+      String codeset = getSystemProperty("file.encoding", "UTF-8");
+
+      // The codeset should not be null here as a default has
+      // been provided if the property is missing.
+
+      if (convertCodeset)
+      {
+         // If conversion is required, change to lower case
+         // and remove any hyphens.
+         codeset = codeset.toLowerCase().replaceAll("-", "");
+      }
+
+      return codeset;
    }
 
    /**
@@ -2210,7 +2223,9 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("-L or --locale\t\tDisplay POSIX locale information");
       System.out.println("-l or --locale-lcs\tAs --locale but codeset ");
-      System.out.println("-b or --bcp47\tDisplay locale as BCP47 tag");
+      System.out.println("\t\tconverted to lower case with hyphens stripped");
+      System.out.println("-C or --codeset-lcs\t\tlower case codeset");
+      System.out.println("-b or --bcp47\t\tDisplay locale as BCP47 tag");
       System.out.println("-c or --cwd\t\tDisplay current working directory");
       System.out.println("-m or --userhome\tDisplay user's home directory");
       System.out.println("-t or --tmpdir\t\tDisplay temporary directory");
@@ -2357,6 +2372,10 @@ public class TeXOSQuery
          {
             // POSIX style locale with converted codeset.
             print(group, getLocale(Locale.getDefault(), true));
+         }
+         else if (args[i].equals("-C") || args[i].equals("--codeset-lcs"))
+         {
+            print(group, getCodeSet(true));
          }
          else if (args[i].equals("-b") || args[i].equals("--bcp47"))
          {
