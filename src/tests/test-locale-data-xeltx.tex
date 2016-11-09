@@ -33,7 +33,7 @@
 \long\def\parsedateblock#1{%
   \parsedate#1% lose outer braces
   \par
-  \parsetimeblock
+  \parsedatefmtblock
 }
 
 \def\parsedate#1#2#3#4#5{%
@@ -44,10 +44,23 @@
   First day of week: #5. % index 0 = Monday, etc
 }
 
+\def\parsedatefmtblock#1{%
+  \parsedatefmt#1% lose outer braces
+  \par
+  \parsetimeblock
+}
+
+\def\parsedatefmt#1#2#3#4{%
+  Full date format: #1.
+  Long date format: #2.
+  Medium date format: #3.
+  Short date format: #4.
+}
+
 \long\def\parsetimeblock#1{%
   \parsetime#1% lose outer braces
   \par
-  \parsedayblock
+  \parsetimefmtblock
 }
 
 \def\parsetime#1#2#3#4{%
@@ -55,6 +68,19 @@
   Long time: #2.
   Medium time: #3.
   Short time: #4.
+}
+
+\long\def\parsetimefmtblock#1{%
+  \parsetimefmt#1% lose outer braces
+  \par
+  \parsedayblock
+}
+
+\def\parsetimefmt#1#2#3#4{%
+  Full time format: #1.
+  Long time format: #2.
+  Medium time format: #3.
+  Short time format: #4.
 }
 
 \long\def\parsedayblock#1{%
@@ -159,6 +185,7 @@
 
 \def\parsenumericblock#1{%
   \parsenumericdata#1% lose outer block
+  \parsenumericfmtdatablock
 }
 
 \def\parsenumericdata#1#2#3#4#5#6#7#8#9{%
@@ -178,6 +205,18 @@
 \def\parsepercentmill#1#2{%
   Percent: #1.
   Per mill: #2.
+}
+
+\def\parsenumericfmtdatablock#1{%
+  \parsenumericfmtdata#1% discard outer group
+}
+
+\def\parsenumericfmtdata#1#2#3#4{%
+  Numeric data formats:\par
+  Decimals: #1\par
+  Integers: #2\par
+  Currency: #3\par
+  Percentages: #4
 }
 
 \begin{document}

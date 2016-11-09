@@ -38,7 +38,7 @@ changed to 12 while reading the result.
 
 ## Installation
 
-In the following, replace TEXMF with the path to your TEXMF directory.
+In the following, replace _TEXMF_ with the path to your TEXMF directory.
 
 ### Installing the Application
 
@@ -55,7 +55,7 @@ There are corresponding bash scripts for Unix-like users:
  - `texosquery-jre5.sh`
 
 Each bash script uses `kpsewhich` to find the corresponding `.jar` file
-and run it. Put the `.jar` files in TEXMF/scripts/texosquery/ and the
+and run it. Put the `.jar` files in _TEXMF_`/scripts/texosquery/` and the
 `.sh` files somewhere on your path. To test the installation, run
 ```bash
 texosquery.sh -v
@@ -80,10 +80,10 @@ the version number.
 The `.tex`, `.cfg` and `.sty` files can be extracted from `texosquery.dtx`
 using `tex texosquery.ins`.
 
- - Move `texosquery.tex` to `TEXMF/tex/generic/texosquery/`
- - Move `texosquery.cfg` to `TEXMF/tex/generic/texosquery/`
- - Move `texosquery.sty` to `TEXMF/tex/latex/texosquery/`
- - Move `texosquery.pdf` to `TEXMF/doc/generic/texosquery/`
+ - Move `texosquery.tex` to _TEXMF_`/tex/generic/texosquery/`
+ - Move `texosquery.cfg` to _TEXMF_`/tex/generic/texosquery/`
+ - Move `texosquery.sty` to _TEXMF_`/tex/latex/texosquery/`
+ - Move `texosquery.pdf` to _TEXMF_`/doc/generic/texosquery/`
 
 The `texosquery.cfg` file allows you to specify which application you
 want to use. First check which version of the Java Runtime
@@ -94,7 +94,7 @@ java -version
 This should display the version information. (For example, `"1.8.0_92"`)
 If this starts with `1.8` (“Java 8”), then you can use `texosquery-jre8.jar`.
 This is the full application. You can use the `texosquery` or 
-`texosquery-jre5` as well, but the locale support will be more limited. 
+`texosquery-jre5` as well, but there's less locale support with them. 
 The `texosquery-jre8.sh` bash script invokes Java with 
 `-Djava.locale.providers=CLDR,JRE`.
 Windows users will need to find some way to set this if they want to use the
@@ -105,13 +105,14 @@ by default, so this will only be relevant to Java 8.)
 If the version information starts with `1.7` (“Java 7”), then you can use 
 `texosquery.jar`. This is the default application and provides most
 of the functions of the full application, but there's less locale support.
-You can also use `texosquery-jre5`, but you can't use
-`texosquery-jre8`.
+You can also use the even more limited `texosquery-jre5`, but you can't use
+`texosquery-jre8`, so you can take advantage of the CLDR.
 
 If the version information starts with `1.5` (“Java 5”) or `1.6`
 (“Java 6”), then you can _only_ use `texosquery-jre5`.  The locale
 support is significantly reduced in this case and there's no support
-for language scripts.
+for language scripts. Note that these versions of Java are quite old
+and are not recommended.
 
 Once you have determined which application you want to use, edit the
 `texosquery.cfg` so that `\TeXOSInvokerName` expands to your chosen

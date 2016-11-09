@@ -47,7 +47,7 @@
 \newcommand{\parsedateblock}[1]{%
   \parsedate#1% lose outer braces
   \par
-  \parsetimeblock
+  \parsedatefmtblock
 }
 
 \newcommand*{\parsedate}[5]{%
@@ -58,10 +58,23 @@
   First day of week: #5. % index 0 = Monday, etc
 }
 
+\newcommand{\parsedatefmtblock}[1]{%
+  \parsedatefmt#1% lose outer braces
+  \par
+  \parsetimeblock
+}
+
+\newcommand*{\parsedatefmt}[4]{%
+  Full date format: #1.
+  Long date format: #2.
+  Medium date format: #3.
+  Short date format: #4.
+}
+
 \newcommand{\parsetimeblock}[1]{%
   \parsetime#1% lose outer braces
   \par
-  \parsedayblock
+  \parsetimefmtblock
 }
 
 \newcommand*{\parsetime}[4]{%
@@ -69,6 +82,19 @@
   Long time: #2.
   Medium time: #3.
   Short time: #4.
+}
+
+\newcommand{\parsetimefmtblock}[1]{%
+  \parsetimefmt#1% lose outer braces
+  \par
+  \parsedayblock
+}
+
+\newcommand*{\parsetimefmt}[4]{%
+  Full time format: #1.
+  Long time format: #2.
+  Medium time format: #3.
+  Short time format: #4.
 }
 
 \newcommand{\parsedayblock}[1]{%
@@ -173,6 +199,8 @@
 
 \newcommand*{\parsenumericblock}[1]{%
   \parsenumericdata#1% lose outer block
+  \par
+  \parsenumericfmtdatablock
 }
 
 \makeatletter
@@ -202,6 +230,19 @@
  Percent symbol: #1.
  Per-mill symbol: #2.
 }
+
+\newcommand{\parsenumericfmtdatablock}[1]{%
+  \parsenumericfmtdata#1% discard outer group
+}
+
+\newcommand{\parsenumericfmtdata}[4]{%
+  Numeric data formats:\par
+  Decimals: #1\par
+  Integers: #2\par
+  Currency: #3\par
+  Percentages: #4
+}
+
 \begin{document}
 \section{Default Locale}
 \querydata{}% query default locale

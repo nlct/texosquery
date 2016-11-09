@@ -12,6 +12,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.DateFormatSymbols;
 import java.text.NumberFormat;
+import java.text.DecimalFormat;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -1918,7 +1919,7 @@ public class TeXOSQuery
       catch (Exception e)
       {
          // this shouldn't happen
-         debug(String.format("invalid argument '%s'"), e);
+         debug(String.format("invalid argument '%s'", localeFormat), e);
          return "";
       }
 
@@ -1928,14 +1929,36 @@ public class TeXOSQuery
 
       char prev = 0;
       int fieldLen = 0;
-
-      System.out.println(pattern);
+      boolean inString = false;
 
       for (int i = 0, n = pattern.length(); i < n; i++)
       {
          char c = pattern.charAt(i);
 
-         if (c == prev)
+         if (inString)
+         {
+            if (c == '\'')
+            {
+               if (i == n-1 || pattern.charAt(i+1) != '\'')
+               {
+                  // reached the end of the string
+                  builder.append('}');
+                  inString = false;
+               }
+               else
+               {
+                  // literal '
+                  builder.append("\\apo ");
+                  i++;
+               }
+            }
+            else
+            {
+               // still inside the string
+               builder.append(escapeFmtChar(c));
+            }
+         }
+         else if (c == prev)
          {
             fieldLen++;
          }
@@ -1943,6 +1966,21 @@ public class TeXOSQuery
          {
             switch (c)
             {
+               case '\'': // quote
+
+                  if (prev != 0)
+                  {
+                     builder.append(String.format(
+                         "\\dtf{%d}{%c}", fieldLen, prev));
+                     prev = 0;
+                     fieldLen = 0;
+                  }
+
+                  // start of the string
+                  builder.append("\\str{");
+                  inString = true;
+
+               break;
                case 'G': // era
                case 'y': // year
                case 'Y': // week year
@@ -1970,14 +2008,17 @@ public class TeXOSQuery
                  fieldLen = 1;
                break;
                default:
+                 // prev doesn't need escaping as it will be one
+                 // of the above letter cases.
+
                  if (prev == 0)
                  {
-                    builder.append(c);
+                     builder.append(escapeFmtChar(c));
                  }
                  else
                  {
-                    builder.append(String.format(
-                     "\\dtf{%d}{%c}%c", fieldLen, prev, c));
+                     builder.append(String.format(
+                       "\\dtf{%d}{%c}%s", fieldLen, prev, escapeFmtChar(c)));
                  }
                  prev = 0;
                  fieldLen = 0;
@@ -1989,6 +2030,460 @@ public class TeXOSQuery
       {
          builder.append(String.format(
            "\\dtf{%d}{%c}", fieldLen, prev));
+      }
+
+      return builder.toString();
+   }
+
+   /**
+    * Processes a literal character. This escapes the hash # and
+    * the backslash, but also a space in case it follows a control
+    * sequence.
+    * @param c the character to be treated literally
+    * @return TeX code
+    */ 
+   private String escapeFmtChar(char c)
+   {
+      if (c == '\\')
+      {
+         // convert backslash
+         return "\\bks ";
+      }
+      else if (c == ' ')
+      {
+         // convert space
+         return "\\spc ";
+      }
+      else
+      {
+         return escapeHash(c);
+      }
+   }
+
+   /**
+    * Converts numeric pattern to a form that's easier for TeX to parse. 
+    * @param numFormat the numeric pattern
+    * @return TeX code
+    */ 
+   public String formatNumberPattern(Format numFormat)
+   {
+      DecimalFormat fmt = null;
+
+      try
+      {
+         fmt = (DecimalFormat)numFormat;
+
+         if (fmt == null)
+         {
+            throw new NullPointerException();
+         }
+      }
+      catch (Exception e)
+      {
+         // this shouldn't happen
+         debug(String.format("invalid argument '%s'", numFormat), e);
+         return "";
+      }
+
+      String pattern = fmt.toPattern();
+
+      // Is there a +ve;-ve sub-pattern pair?
+
+      Pattern p = Pattern.compile("(.*(?:[^'](?:'')+){0,1})(?:;(.*))?");
+      Matcher m = p.matcher(pattern);
+
+      if (!m.matches())
+      {
+         debug(String.format(
+              "Can't match number format pattern '%s' against regexp \"%s\"",
+               pattern, p));
+         return "";
+      }
+
+      String positive = m.group(1);
+      String negative = m.group(2);
+
+      if (negative == null || "".equals(negative))
+      {
+         return String.format("\\numfmt{%s}", 
+           formatNumberSubPattern(positive));
+      }
+      else
+      {
+         return String.format("\\pmnumfmt{%s}{%s}", 
+           formatNumberSubPattern(positive),
+           formatNumberSubPattern(negative));
+      }
+   }
+
+   /**
+    * Converts the sub-pattern of a numeric format.
+    * @param pattern The sub-pattern
+    * @return TeX code
+    */ 
+   private String formatNumberSubPattern(String pattern)
+   {
+      if (pattern == null || "".equals(pattern))
+      {
+         return "";
+      }
+
+      // Is this currency?
+
+      Pattern p = Pattern.compile("(.*(?:[^'](?:'')+){0,1})(¤{1,2})(.*)");
+      Matcher m = p.matcher(pattern);
+
+      if (m.matches())
+      {
+         return formatCurrencyPattern(m.group(1), 
+           (m.group(2).length() == 2), m.group(3));
+      }
+
+      // Is this a percentage?
+
+      p = Pattern.compile("(.*(?:[^'](?:'')+){0,1})([%‰])(.*)");
+      m = p.matcher(pattern);
+
+      if (m.matches())
+      {
+         boolean percent = ("%".equals(m.group(2)));
+
+         return formatPercentagePattern(m.group(1), m.group(3),
+          percent ? "ppct" : "ppml", 
+          percent ? "spct" : "spml");
+      }
+
+      // must be a number
+
+      return formatNumericPattern(pattern);
+   }
+
+   /**
+    * Converts the currency format.
+    * @param pre The pre-symbol pattern
+    * @param international Determines if the international currency
+    * symbol should be used
+    * @param post The post-symbol pattern
+    * @return TeX code
+    */ 
+   private String formatCurrencyPattern(String pre, boolean international,
+      String post)
+   {
+      if (post == null || "".equals(post))
+      {
+         pre = formatNumericPattern(pre);
+
+         // currency symbol is a suffix
+         if (international)
+         {
+            return String.format("\\sicur{%s}{}", pre);
+         }
+         else
+         {
+            return String.format("\\scur{%s}{}", pre);
+         }
+      }
+      else if (pre == null || "".equals(pre))
+      {
+         // currency symbol is a prefix
+
+         post = formatNumericPattern(post);
+
+         if (international)
+         {
+            return String.format("\\picur{%s}{}", post);
+         }
+         else
+         {
+            return String.format("\\pcur{%s}{}", post);
+         }
+      }
+      else
+      {
+         // What do we do here? If pre contains '#' or '0' assume
+         // a suffix currency otherwise a prefix currency.
+
+         pre = formatNumericPattern(pre);
+         post = formatNumericPattern(post);
+
+         if (pre.matches(".*[0#].*"))
+         {
+            // suffix, pre is the number and post is trailing
+            // text
+            if (international)
+            {
+               return String.format("\\sicur{%s}{%s}", pre, post);
+            }
+            else
+            {
+               return String.format("\\scur{%s}{%s}", pre, post);
+            }
+         }
+         else
+         {
+            // prefix, post is the number and pre is leading
+            // text
+            if (international)
+            {
+               return String.format("\\picur{%s}{%s}", post, pre);
+            }
+            else
+            {
+               return String.format("\\pcur{%s}{%s}", post, pre);
+            }
+         }
+      }
+   }
+
+   /**
+    * Converts percentage format.
+    * @param pre The pre-symbol pattern
+    * @param post The post-symbol pattern
+    * @param prefixCs The control sequence to use if the symbol is a
+    * prefix
+    * @param suffixCs The control sequence to use if the symbol is a
+    * suffix
+    * @return TeX code
+    */ 
+   private String formatPercentagePattern(String pre, String post,
+     String prefixCs, String suffixCs)
+   {
+      if (post == null || "".equals(post))
+      {
+         pre = formatNumericPattern(pre);
+
+         // symbol is a suffix
+
+         return String.format("\\%s{%s}{}", suffixCs, pre);
+      }
+      else if (pre == null || "".equals(pre))
+      {
+         // symbol is a prefix
+
+         post = formatNumericPattern(post);
+
+         return String.format("\\%s{%s}{}", prefixCs, post);
+      }
+      else
+      {
+         pre = formatNumericPattern(pre);
+         post = formatNumericPattern(post);
+
+         if (pre.matches(".*[0#].*"))
+         {
+            // suffix, pre is the number and post is trailing
+            // text
+
+            return String.format("\\%s{%s}{%s}", suffixCs, pre, post);
+         }
+         else
+         {
+            // prefix, post is the number and pre is leading
+            // text
+
+            return String.format("\\%s{%s}{%s}", prefixCs, post, pre);
+         }
+      }
+   }
+
+   /**
+    * Converts the numeric format.
+    * @param pattern The sub-pattern
+    * @return TeX code
+    */ 
+   private String formatNumericPattern(String pattern)
+   {
+      if (pattern == null || "".equals(pattern))
+      {
+         return "";
+      }
+
+      // Split around exponent (if present)
+
+      Pattern p = Pattern.compile("(.*(?:[^'](?:'')+?){0,1})(E.*)?");
+      Matcher m = p.matcher(pattern);
+
+      if (!m.matches())
+      {
+         debug(String.format(
+             "Can't match number format sub-pattern '%s' against regexp \"%s\"",
+              pattern, p));
+         return "";
+      } 
+
+      String pre = m.group(1);
+      String post = m.group(2);
+
+      if (pre == null && post == null)
+      {
+         // empty pattern
+         return "";
+      }
+
+      if (post == null)
+      {
+         return formatDecimalPattern(pre);
+      }
+
+      return String.format("\\sinumfmt{%s}{%s}",
+        formatDecimalPattern(pre),
+        formatIntegerPattern(post, true));
+   }
+
+   /**
+    * Converts a decimal pattern.
+    * @param pattern The pattern
+    * @return TeX code
+    */ 
+   private String formatDecimalPattern(String pattern)
+   {
+      // split on the decimal point (if present)
+
+      Pattern p = Pattern.compile("(.*?(?:[^'](?:'')){0,1})(?:\\.(.*))?");
+
+      Matcher m = p.matcher(pattern);
+
+      if (!m.matches())
+      {
+         debug(String.format(
+             "Can't match decimal pattern '%s' against regexp \"%s\"",
+              pattern, p));
+         return "";
+      } 
+
+
+      String pre = m.group(1);
+      String post = m.group(2);
+
+      if (pre == null && post == null)
+      {
+         // empty pattern
+         return "";
+      }
+
+      if (post == null)
+      {
+         return formatIntegerPattern(pre, true);
+      }
+
+      return String.format("\\decfmt{%s}{%s}",
+        formatIntegerPattern(pre, true),
+        formatIntegerPattern(post, false));
+   }
+
+
+   /**
+    * Converts an integer pattern. The aim here is to have a number
+    * formatting command defined in TeX that will be passed a number
+    * with either leading or trailing zeros padded to 10 digits.
+    * TeX can't handle numbers higher than 2147483647, so any digits
+    * in the pattern beyond that are discarded. This means defining
+    * a command that effectively takes 10 arguments (with a bit of
+    * trickery to get around the 9-arg maximum). Each digit can then
+    * be rendered using either \dgt{n} (always display the nth digit)
+    * or \dgtnz{n} (only display the nth digit if it isn't zero).
+    * These short commands will be converted to longer ones that are
+    * less likely to cause conflict when \TeXOSQuery is used.
+    * @param pattern The pattern
+    * @param leadPadding Determines if leading padding needs taking
+    * into account
+    * @return TeX code
+    */ 
+   private String formatIntegerPattern(String pattern, boolean leadPadding)
+   {
+      boolean inString = false;
+
+      int digitCount = 0;
+
+      // count the number of digits
+
+      for (int i = 0, n = pattern.length(); i < n; i++)
+      {
+         char c = pattern.charAt(i);
+
+         if (inString)
+         {
+            if (c == '\'')
+            {
+               if (i == n-1 || pattern.charAt(i) != '\'')
+               {
+                  inString = false;
+                  i++;
+               }
+            }
+         }
+         else if (c == '\'')
+         {
+            inString = true;
+         }
+         else if (c == '#' || c == '0')
+         {
+            digitCount++;
+         }
+      }
+
+      // If this value is negative, then the pattern has too many digits.
+      // The excess will be discarded.
+
+      digitCount = MAX_DIGIT_FORMAT-digitCount;
+
+      inString = false;
+
+      StringBuilder builder = new StringBuilder();
+
+      for (int i = 0, n = pattern.length(); i < n; i++)
+      {
+         char c = pattern.charAt(i);
+
+         switch (c)
+         {
+            case '\'':
+
+              if (!inString)
+              {
+                 inString = true;
+
+                 builder.append("\\str{");
+              }
+              else if (i < n-1 && pattern.charAt(i+1) == '\'')
+              {
+                 builder.append("\\apo ");
+                 i++;
+              }
+              else
+              {
+                 builder.append("}");
+                 inString = false;
+              }
+            break;
+            case '0':
+              digitCount++;
+
+              if (digitCount > 0)
+              {
+                 builder.append(String.format("\\dgt{%d}", digitCount));
+              }
+            break;
+            case '#':
+              digitCount++;
+
+              if (digitCount > 0)
+              {
+                 builder.append(String.format("\\dgtnz{%d}", digitCount));
+              }
+            break;
+            case '-':
+              builder.append("\\msg ");
+            break;
+            case ',':
+              if (digitCount > 0)
+              {
+                 builder.append("\\ngp ");
+              }
+            break;
+            default:
+              builder.append(escapeFmtChar(c));
+         }
       }
 
       return builder.toString();
@@ -2019,12 +2514,14 @@ public class TeXOSQuery
     * Ninth group: standalone short week day names.
     * Tenth group: standalone month names.
     * Eleventh group: standalone short month names.
-    * Last group: number group separator,
+    * Twelfth group: number group separator,
     * decimal separator, exponent separator, grouping flag, ISO 4217 currency
     * identifier (e.g. GBP), region currency identifier (usually the same as
     * the ISO 4217 code, but may be an unofficial currency code, such as IMP),
     * currency symbol (e.g. £), TeX currency symbol, monetary decimal separator,
     * percent symbol, per mill symbol.
+    * Last group: number format, integer format, currency format,
+    * percent format.
     */
    public String getLocaleData(String localeTag)
    {
@@ -2153,11 +2650,23 @@ public class TeXOSQuery
              dateShortFormat.format(now),
              firstDay);
 
+       String dateFmtGroup = String.format("{%s}{%s}{%s}{%s}",
+         formatDateTimePattern(dateFullFormat),
+         formatDateTimePattern(dateLongFormat),
+         formatDateTimePattern(dateMediumFormat),
+         formatDateTimePattern(dateShortFormat));
+
        String timeGroup = String.format("{%s}{%s}{%s}{%s}",
              timeFullFormat.format(now),
              timeLongFormat.format(now),
              timeMediumFormat.format(now),
              timeShortFormat.format(now));
+
+       String timeFmtGroup = String.format("{%s}{%s}{%s}{%s}",
+         formatDateTimePattern(timeFullFormat),
+         formatDateTimePattern(timeLongFormat),
+         formatDateTimePattern(timeMediumFormat),
+         formatDateTimePattern(timeShortFormat));
 
        DateFormatSymbols dateFmtSyms = DateFormatSymbols.getInstance(locale);
 
@@ -2267,12 +2776,18 @@ public class TeXOSQuery
 
        String texCurrency = getTeXCurrency(currency);
 
+
+       NumberFormat numFormat = NumberFormat.getNumberInstance(locale);
+       NumberFormat intFormat = NumberFormat.getIntegerInstance(locale);
+       NumberFormat curFormat = NumberFormat.getCurrencyInstance(locale);
+       NumberFormat pcFormat = NumberFormat.getPercentInstance(locale);
+
        String numGroup = String.format(
          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
              escapeHash(fmtSyms.getGroupingSeparator()),
              escapeHash(fmtSyms.getDecimalSeparator()),
              escapeHash(fmtSyms.getExponentSeparator()), 
-             NumberFormat.getNumberInstance(locale).isGroupingUsed(),
+             numFormat.isGroupingUsed(),
              currencyCode,
              localeCurrencyCode,
              escapeHash(currency),
@@ -2281,11 +2796,19 @@ public class TeXOSQuery
              escapeHash(fmtSyms.getPercent()),
              escapeHash(fmtSyms.getPerMill()));
 
+       String numFmtGroup = String.format("{%s}{%s}{%s}{%s}",
+         formatNumberPattern(numFormat),
+         formatNumberPattern(intFormat),
+         formatNumberPattern(curFormat),
+         formatNumberPattern(pcFormat));
+
        return String.format(
-          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
              langRegionGroup,
              dateGroup,
+             dateFmtGroup,
              timeGroup,
+             timeFmtGroup,
              weekdayNamesGroup,
              shortWeekdayNamesGroup,
              monthNamesGroup,
@@ -2294,7 +2817,7 @@ public class TeXOSQuery
              getStandaloneShortWeekdays(cal, locale),
              getStandaloneMonths(cal, locale),
              getStandaloneShortMonths(cal, locale),
-             numGroup);
+             numGroup, numFmtGroup);
    }
 
     /**
@@ -2800,4 +3323,9 @@ public class TeXOSQuery
      * STDERR.)
      */
     private int debugLevel = 0;
+
+    // TeX can only go up to 2147483647, so set the maximum number
+    // of digits provided to the number formatter. 
+
+    private static final int MAX_DIGIT_FORMAT=10;
 }

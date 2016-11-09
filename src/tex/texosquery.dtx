@@ -48,7 +48,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{649}
+\CheckSum{785}
 
 \RecordChanges
 \PageIndex
@@ -401,7 +401,13 @@
 %\begin{verbatim}
 %{{en-GB}{English}{English}{United Kingdom}{United Kingdom}{}{}}
 %{{Saturday, 5 November 2016}{05 November 2016}{05-Nov-2016}{05/11/16}}{0}
+%{{\dtf{4}{E},\spc \dtf{1}{d}\spc \dtf{4}{M}\spc \dtf{4}{y}}
+%{\dtf{2}{d}\spc \dtf{4}{M}\spc \dtf{4}{y}}{\dtf{2}{d}-\dtf{3}{M}-\dtf{4}{y}}
+%{\dtf{2}{d}/\dtf{2}{M}/\dtf{2}{y}}}
 %{{23:58:25 o'clock GMT}{23:58:25 GMT}{23:58:25}{23:58}}
+%{{\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}\spc \str{o\apo clock}\spc \dtf{1}{z}}
+%{\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}\spc \dtf{1}{z}}%
+%{\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}}{\dtf{2}{H}:\dtf{2}{m}}}
 %{{Monday}{Tuesday}{Wednesday}{Thursday}{Friday}{Saturday}{Sunday}}
 %{{Mon}{Tue}{Wed}{Thu}{Fri}{Sat}{Sun}}
 %{{January}{February}{March}{April}{May}{June}{July}{August}{September}
@@ -413,6 +419,11 @@
 %{October}{November}{December}}
 %{{Jan}{Feb}{Mar}{Apr}{May}{Jun}{Jul}{Aug}{Sep}{Oct}{Nov}{Dec}}
 %{{,}{.}{E}{GBP}{GBP}{£}{\texosquerycurrencypound }{.}{%}{‰}}
+%{{\numfmt{\decfmt{\dgtnz{7}\ngp \dgtnz{8}\dgtnz{9}\dgt{10}}
+%{\dgtnz{8}\dgtnz{9}\dgtnz{10}}}}{\numfmt{\dgtnz{7}\ngp
+%\dgtnz{8}\dgtnz{9}\dgt{10}}}{\numfmt{\pcur{\decfmt{\dgtnz{7}\ngp
+%\dgtnz{8}\dgtnz{9}\dgt{10}}{\dgt{9}\dgt{10}}}{}}}{\numfmt{\spct{\dgtnz{7}\ngp
+%\dgtnz{8}\dgtnz{9}\dgt{10}}{}}}}
 %\end{verbatim}
 %(See section~\ref{sec:locales} for the difference in locale
 %providers.)
@@ -473,10 +484,20 @@
 %The final element of the groun \meta{first day} is the index of the
 %first day of the week.
 %
+%\item The pattern used to format the full date, long date, medium
+%date and short date. When used with \cs{TeXOSQuery}, the
+%short commands such as \cs{dtf} are internally converted.
+%They're not defined outside that scope.
+%
 %\item The current time provided in various formats suitable to the
 %given locale:
 %
 %\marg{full time}\marg{long time}\marg{medium time}\marg{short time}
+%
+%\item The pattern used to format the full time, long time, medium
+%time and short time. When used with \cs{TeXOSQuery}, the
+%short commands such as \cs{dtf} are internally converted.
+%They're not defined outside that scope.
 %
 %\item The week day names (starting with Monday for consistency with
 %\sty{pgfcalendar}).
@@ -529,6 +550,11 @@
 %simply the current label (usually the same as the \meta{xxx}
 %part).
 %\end{itemize}
+%
+%\item The patterns used to format decimals, integers, currency and
+%percentages. When used with \cs{TeXOSQuery}, the
+%short commands such as \cs{dgt} are internally converted.
+%They're not defined outside that scope.
 %\end{enumerate}
 %
 %\item[\shortarg{n} or \longarg{pdfnow}] Displays the current
@@ -1229,9 +1255,36 @@
     \begingroup
     \endlinechar=-1\relax
 %    \end{macrocode}
-%Locally redefine \cs{dtf} to expand to \cs{texosquerydtf}:
+%Locally redefine short commands used by \app{texosquery}
+%to longer commands:
 %    \begin{macrocode}
      \def\dtf{\noexpand\texosquerydtf}%
+     \def\pmnumfmt{\noexpand\texosqueryfmtplusminus}%
+     \def\numfmt{\noexpand\texosqueryfmtnum}%
+     \def\sinumfmt{\noexpand\texosqueryfmtsinum}%
+     \def\decfmt{\noexpand\texosqueryfmtdec}%
+     \def\intfmt{\noexpand\texosqueryfmtint}%
+     \def\pcur{\noexpand\texosqueryfmtprefixcurrency}%
+     \def\picur{\noexpand\texosqueryfmtprefixicurrency}%
+     \def\scur{\noexpand\texosqueryfmtsuffixcurrency}%
+     \def\sicur{\noexpand\texosqueryfmtsuffixicurrency}%
+     \def\str{\noexpand\texosqueryfmtstr}%
+     \def\apo{\noexpand\texosqueryfmtquote}%
+     \def\spc{\noexpand\texosqueryfmtspc}%
+     \def\dgt{\noexpand\texosqueryfmtdigit}%
+     \def\dgtnz{\noexpand\texosqueryfmtdigitnozero}%
+     \def\dpt{\noexpand\texosqueryfmtdecimalpoint}%
+     \def\msg{\noexpand\texosqueryfmtminus}%
+     \def\ngp{\noexpand\texosqueryfmtgroupsep}%
+     \def\ppct{\noexpand\texosqueryfmtprefixpercent}%
+     \def\spct{\noexpand\texosqueryfmtsuffixpercent}%
+     \def\ppml{\noexpand\texosqueryfmtprefixpermill}%
+     \def\spml{\noexpand\texosqueryfmtsuffixpermill}%
+%    \end{macrocode}
+%Literal backslash:
+%    \begin{macrocode}
+     \def\@gobble##1{}
+     \edef\bks{\expandafter\@gobble\string\\}
 %    \end{macrocode}
 %Just in case the result contains any awkward characters that have
 %some special meaning to \TeX. (Can't really protect against hash,
@@ -1822,7 +1875,7 @@
 %class}. The pattern interprets $\ge4$ as a single case, so this
 %will only produce a maximum of four characters.
 %    \begin{macrocode}
-\def\texosquerydiff#1#2{%
+\def\texosquerydtf#1#2{%
   \ifcase#1
   \or
    #2%
@@ -1834,6 +1887,125 @@
    #2#2#2#2%
   \fi
 }
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtstr}
+%Quoted string contained in number format.
+%    \begin{macrocode}
+\def\texosqueryfmtstr#1{'#1'}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtquote}
+%Literal quote contained in number format.
+%    \begin{macrocode}
+\def\texosqueryfmtquote{''}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtspc}
+%Literal space contained in number format.
+%    \begin{macrocode}
+\def\texosqueryfmtspc{ }
+%    \end{macrocode}
+%\end{macro}
+%Number format place holders.
+%\begin{macro}{\texosqueryfmtplusminus}
+%    \begin{macrocode}
+\def\texosqueryfmtplusminus#1#2{#1;#2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtnum}
+%    \begin{macrocode}
+\def\texosqueryfmtnum#1{#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtsinum}
+%    \begin{macrocode}
+\def\texosqueryfmtsinum#1#2{#1E#2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtdec}
+%    \begin{macrocode}
+\def\texosqueryfmtdec#1#2{#1.#2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtint}
+%    \begin{macrocode}
+\def\texosqueryfmtint#1{#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtprefixcurrency}
+%First argument is a number, the second is optional text before the
+%currency symbol.
+%    \begin{macrocode}
+\def\texosqueryfmtprefixcurrency#1#2{#2¤#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtprefixicurrency}
+%As above but use international currency symbol.
+%    \begin{macrocode}
+\def\texosqueryfmtprefixicurrency#1#2{#2¤¤#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtsuffixcurrency}
+%First argument is a number, the second is optional text after the
+%currency symbol.
+%    \begin{macrocode}
+\def\texosqueryfmtsuffixcurrency#1#2{#1¤#2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtsuffixicurrency}
+%As above but use international currency symbol.
+%    \begin{macrocode}
+\def\texosqueryfmtsuffixicurrency#1#2{#1¤¤#2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtdigit}
+%    \begin{macrocode}
+\def\texosqueryfmtdigit#1{0}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtdigitnozero}
+%    \begin{macrocode}
+\def\texosqueryfmtdigitnozero#1{\#}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtminus}
+%    \begin{macrocode}
+\def\texosqueryfmtminus{-}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtgroupsep}
+%    \begin{macrocode}
+\def\texosqueryfmtgroupsep{,}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtprefixpercent}
+%The first argument is the value, the second argument is optional
+%text before the percent symbol.
+%    \begin{macrocode}
+\def\texosqueryfmtprefixpercent#1#2{#2\%#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtsuffixpercent}
+%The first argument is the value, the second argument is optional
+%text after the percent symbol.
+%    \begin{macrocode}
+\def\texosqueryfmtsuffixpercent#1#2{#1\%#2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtprefixpermill}
+%The first argument is the value, the second argument is optional
+%text before the per-mill symbol.
+%    \begin{macrocode}
+\def\texosqueryfmtprefixpermill#1#2{#2‰#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosqueryfmtsuffixpermill}
+%The first argument is the value, the second argument is optional
+%text after the per-mill symbol.
+%    \begin{macrocode}
+\def\texosqueryfmtsuffixpermill#1#2{#1‰#2}
 %    \end{macrocode}
 %\end{macro}
 %
