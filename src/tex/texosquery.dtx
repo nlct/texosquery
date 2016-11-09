@@ -436,6 +436,11 @@
 %\app{texosquery} or \app{texosquery-jre5} and they simply reproduce
 %the date format names.
 %
+%The information supplied with this option is quite complex,
+%but it's used by the \sty{locale} package (currently pending)
+%to set up all the required information for each locale required in
+%the document.
+%
 %The groups are:
 %\begin{enumerate}
 %\item The language information in the form:
@@ -472,22 +477,28 @@
 %\sty{pgfcalendar}):
 %
 %\marg{full date}\marg{long date}\marg{medium date}\marg{short
-%date}{first day}
+%date}\marg{first day}
 %
 %The formats can vary from one locale to another. For example, the
-%\texttt{en-GB} uses the form \qt{06-Nov-2016} for the medium date,
+%\texttt{en-GB} locale uses the form \qt{06-Nov-2016} for the medium date,
 %but \texttt{de-CH-1996} uses a numerical form \qt{06.11.2006}.
 %The \meta{short date} is typically numeric. Some locales
 %have identical \meta{full date} and \meta{long date} or 
 %identical \meta{long date} and \meta{medium date}.
 %
-%The final element of the groun \meta{first day} is the index of the
+%The final element of the group \meta{first day} is the index of the
 %first day of the week.
 %
 %\item The pattern used to format the full date, long date, medium
-%date and short date. When used with \cs{TeXOSQuery}, the
-%short commands such as \cs{dtf} are internally converted.
-%They're not defined outside that scope.
+%date and short date.
+%
+%\marg{full date pattern}\marg{long date pattern}\marg{medium date
+%pattern}\marg{short date pattern}
+%
+%When used with \cs{TeXOSQuery}, the
+%short commands, such as \cs{dtf}, are internally converted
+%to longer commands, such as \cs{texosquerydtf}.
+%These short commands aren't defined outside that scope.
 %
 %\item The current time provided in various formats suitable to the
 %given locale:
@@ -495,8 +506,13 @@
 %\marg{full time}\marg{long time}\marg{medium time}\marg{short time}
 %
 %\item The pattern used to format the full time, long time, medium
-%time and short time. When used with \cs{TeXOSQuery}, the
-%short commands such as \cs{dtf} are internally converted.
+%time and short time.
+%
+%\marg{full time pattern}\marg{long time pattern}\marg{medium time
+%pattern}\marg{short time pattern}
+%
+%Again, when used with \cs{TeXOSQuery}, the short commands, such as
+%\cs{dtf}, are internally converted.
 %They're not defined outside that scope.
 %
 %\item The week day names (starting with Monday for consistency with
@@ -508,7 +524,7 @@
 %
 %\item The abbreviated month names.
 %
-%\item The numeric data similar to \longarg{numeric} but thereare
+%\item The numeric data similar to \longarg{numeric} but there are
 %some extra items:
 %
 %\marg{grp sep}\marg{dec sep}\marg{exp sep}\marg{grp flag}\marg{cur
@@ -539,21 +555,26 @@
 %
 %The \meta{TeX cur} part is obtained by substituting known Unicode
 %currency symbols occurring in \meta{cur sym} with commands in the
-%form \cs{texosquerycurrency\ldots} which are defined by
-%\file{texosquery.tex}. Since there are no generic \TeX\ commands
-%available for all these symbols, these commands will need to be
+%form \cs{texosquerycurrency}\meta{xxx} which are defined by
+%\file{texosquery.tex} (for example, \cs{texosquerycurrencypound}). Since there are no generic \TeX\ commands
+%available for all these symbols (except \$), these commands will need to be
 %redefined as appropriate but are provided in the event that there's
 %no UTF-8 support. There is a limited check for some known currency
 %commands, such as \cs{texteuro} or \cs{euro}, but if appropriate
-%currency command can be found, the
+%currency command can't be found, the
 %\cs{texosquerycurrency}\meta{xxx} commands will be defined to
-%simply the current label (usually the same as the \meta{xxx}
+%simply the currency label (usually the same as the \meta{xxx}
 %part).
 %\end{itemize}
 %
 %\item The patterns used to format decimals, integers, currency and
-%percentages. When used with \cs{TeXOSQuery}, the
-%short commands such as \cs{dgt} are internally converted.
+%percentages.
+%
+%\marg{decimal pattern}\marg{integer pattern}\marg{currency
+%pattern}\marg{percentages pattern}
+%
+%As with the date and time patterns, when used with \cs{TeXOSQuery}, the
+%short commands, such as \cs{dgt}, are internally converted.
 %They're not defined outside that scope.
 %\end{enumerate}
 %
