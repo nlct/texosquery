@@ -4,10 +4,10 @@ all	: test.pdf test-plain.pdf test-ltx.pdf test-xeltx.pdf \
 	  test-locale-data-xeltx.pdf
 
 texosquery.tex	: ../tex/texosquery.dtx ../tex/texosquery.ins
-		cd ../tex; latex texosquery.ins; mv texosquery.{tex,sty} ../tests
+		cd ../tex; latex -file-line-error texosquery.ins; mv texosquery.{tex,sty} ../tests
 
 texosquery.sty	: ../tex/texosquery.dtx ../tex/texosquery.ins
-		cd ../tex; latex texosquery.ins; mv texosquery.{tex,sty} ../tests
+		cd ../tex; latex -file-line-error texosquery.ins; mv texosquery.{tex,sty} ../tests
 
 test.pdf	: test.tex ../bin/texosquery.jar
 		arara test

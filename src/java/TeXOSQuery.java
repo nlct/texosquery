@@ -7,7 +7,9 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.DecimalFormatSymbols;
+import java.text.Format;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.text.DateFormatSymbols;
 import java.text.NumberFormat;
 import java.io.File;
@@ -1889,6 +1891,110 @@ public class TeXOSQuery
    }
 
    /**
+    * Converts date/time pattern to a form that's easier for TeX to
+    * parse. This replaces the placeholders with <tt>\dtf{n}{c}</tt> where c
+    * is the placeholder character and n is the number of occurrence
+    * of c in the placeholder. (For example, "<tt>dd-MMM-yyyy</tt>" is
+    * converted to <tt>\dtf{2}{d}-\dtf{3}{M}-\dtf{4}{y}</tt>). The 
+    * query command \TeXOSQuery in texosquery.tex will expand \dtf
+    * to the longer \texosquerydtf to avoid conflict. This can then be
+    * redefined as appropriate.
+    * @param localeFormat The date/time pattern
+    * @return TeX code
+    */ 
+   public String formatDateTimePattern(Format localeFormat)
+   {
+      SimpleDateFormat fmt = null;
+
+      try
+      {
+         fmt = (SimpleDateFormat)localeFormat;
+
+         if (fmt == null)
+         {
+            throw new NullPointerException();
+         }
+      }
+      catch (Exception e)
+      {
+         // this shouldn't happen
+         debug(String.format("invalid argument '%s'"), e);
+         return "";
+      }
+
+      String pattern = fmt.toPattern();
+
+      StringBuilder builder = new StringBuilder();
+
+      char prev = 0;
+      int fieldLen = 0;
+
+      System.out.println(pattern);
+
+      for (int i = 0, n = pattern.length(); i < n; i++)
+      {
+         char c = pattern.charAt(i);
+
+         if (c == prev)
+         {
+            fieldLen++;
+         }
+         else
+         {
+            switch (c)
+            {
+               case 'G': // era
+               case 'y': // year
+               case 'Y': // week year
+               case 'M': // month in year (context sensitive)
+               case 'L': // month in year (standalone)
+               case 'w': // week in year
+               case 'W': // week in month
+               case 'D': // day in year
+               case 'd': // day in month
+               case 'F': // day of week in month
+               case 'E': // day name in week
+               case 'u': // day number of week (1 = Mon)
+               case 'a': // am/pm marker
+               case 'H': // hour in day (0-23)
+               case 'k': // hour in day (1-24)
+               case 'K': // hour in am/pm (0-11)
+               case 'h': // hour in am/pm (1-12)
+               case 'm': // minute in hour
+               case 's': // second in minute
+               case 'S': // millisecond
+               case 'z': // time zone (locale)
+               case 'Z': // time zone (RFC 822)
+               case 'X': // time zone (ISO 8601)
+                 prev = c;
+                 fieldLen = 1;
+               break;
+               default:
+                 if (prev == 0)
+                 {
+                    builder.append(c);
+                 }
+                 else
+                 {
+                    builder.append(String.format(
+                     "\\dtf{%d}{%c}%c", fieldLen, prev, c));
+                 }
+                 prev = 0;
+                 fieldLen = 0;
+            }
+         }
+      }
+
+      if (prev != 0)
+      {
+         builder.append(String.format(
+           "\\dtf{%d}{%c}", fieldLen, prev));
+      }
+
+      return builder.toString();
+   }
+
+   /**
     * Gets all available for the given locale. If the
     * given locale tag is null, the default locale is used. The
     * information is returned with grouping to make it
@@ -2221,11 +2327,6 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("General:");
       System.out.println();
-      System.out.println("-L or --locale\t\tDisplay POSIX locale information");
-      System.out.println("-l or --locale-lcs\tAs --locale but codeset ");
-      System.out.println("\t\tconverted to lower case with hyphens stripped");
-      System.out.println("-C or --codeset-lcs\t\tlower case codeset");
-      System.out.println("-b or --bcp47\t\tDisplay locale as BCP47 tag");
       System.out.println("-c or --cwd\t\tDisplay current working directory");
       System.out.println("-m or --userhome\tDisplay user's home directory");
       System.out.println("-t or --tmpdir\t\tDisplay temporary directory");
@@ -2233,8 +2334,20 @@ public class TeXOSQuery
       System.out.println("-r or --osversion\tDisplay OS version");
       System.out.println("-a or --osarch\t\tDisplay OS architecture");
       System.out.println("-n or --pdfnow\t\tDisplay current date-time in PDF format");
+      System.out.println("-T or --datetime\t\tDisplay all the date and time fields for the current time");
+
+      System.out.println();
+      System.out.println("Locale Information:");
+      System.out.println();
+
+      System.out.println("-L or --locale\t\tDisplay POSIX locale information");
+      System.out.println("-l or --locale-lcs\tAs --locale but codeset ");
+      System.out.println("\t\t\tconverted to lower case with hyphens stripped");
+      System.out.println("-C or --codeset-lcs\tlower case codeset");
+      System.out.println("-b or --bcp47\t\tDisplay locale as BCP47 tag");
       System.out.println("-N [locale] or --numeric [locale]\tDisplay locale numeric information");
       System.out.println("-D [locale] or --locale-data [locale]\tDisplay all available locale information");
+
 
       System.out.println();
       System.out.println("File Queries:");

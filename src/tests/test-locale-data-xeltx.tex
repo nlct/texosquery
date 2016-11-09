@@ -3,9 +3,6 @@
 
 \usepackage{fontspec}
 \usepackage{texosquery}
-% Use texosquery-jre8 (this line should typically go in
-% texosquery.cfg to allow for user preference) 
-\def\TeXOSInvokerName{texosquery-jre8}
 
 \def\querydata#1{% empty #1 means use default locale
   \TeXOSQueryLocaleData{\result}{#1}% 
@@ -184,6 +181,8 @@
 }
 
 \begin{document}
+\TeXOSQuery{\result}{-b}
+BCP 47 tag: \result.
 
 \section{en-GB}
 

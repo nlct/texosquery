@@ -27,6 +27,7 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{etoolbox}
 \usepackage{textcomp}
 \usepackage{tgtermes}
 \usepackage{upquote}
@@ -47,7 +48,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{581}
+\CheckSum{649}
 
 \RecordChanges
 \PageIndex
@@ -102,20 +103,24 @@
 %\begin{important}
 %You will need \TeX's shell escape enabled,
 %and you will also need the Java Runtime Environment (JRE) 
-%installed to use \app{texosquery} (at least JRE~7).
-%If you have either JRE~5 or~6 and you're unable to upgrade to a
-%newer version, you can use \app{texosquery-jre5.jar} instead,
-%but it doesn't have proper language tag support. 
-%There is also \app{texosquery-jre8} which requires at least JRE~8.
-%This provides support for standalone month and week day names (see
-%the \longarg{locale-data} option, described later). The
-%\app{texosquery} version (JRE~7) is considered the default
-%application.
+%installed.
 %\end{important}
 %
-%If you want to rebuild the application, instructions for
-%compiling the source code (including the code for this document)
-%are in the accompanying \file{README.md} file.
+%There are three applications provided:
+%\begin{itemize}
+%\item \app{texosquery}: requires at least Java~7, medium locale
+%support;
+%\item \app{texosquery-jre8}: requires at least Java~8, best locale
+%support;
+%\item \app{texosquery-jre5}: requires at least Java~5, poor locale
+%support (language scripts not recognised).
+%\end{itemize}
+%The default is \app{texosquery}. Throughout this document
+%\app{texosquery} is used to reference the application, regardless
+%which of these three you've chosen to use. See
+%\cs{TeXOSInvokerName} in section~\ref{sec:tex} for further details.
+%See also the installation instructions in the accompanying
+%\file{README.md} file.
 %
 %\tableofcontents
 %
@@ -142,12 +147,13 @@
 %system, so the result can be used, for example, in \cs{input} or
 %\cs{includegraphics}.
 %
-%Note that the result will be returned using Java's native codeset.
-%(For example, UTF-8.) You will need to ensure that your \TeX\
+%Note that the result will be returned using the default input
+%encoding.  (For example, UTF-8.) You will need to ensure that your \TeX\
 %document uses the same encoding if you want to typeset any of the
 %results that may contain non-ASCII characters. You can determine
-%the default codeset with \texttt{texosquery \shortarg{L}}, which
-%will include the codeset after the language and region part.
+%the default codeset with \texttt{texosquery \shortarg{C}}, which is
+%formatted to match the options used by the \sty{inputenc} package.
+%(For example, \texttt{uft8} for UTF-8.)
 %You can change the default encoding by invoking the Java Virtual
 %Machine with the option \texttt{-Dfile.encoding=}\meta{codeset}.
 %For example, bash users can modify the \file{texosquery.sh} 
@@ -165,7 +171,17 @@
 %\begin{verbatim}
 %declare -x JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 %\end{verbatim}
-%Note that this will affect all your Java applications.
+%Note that, unlike the edit to the \file{.sh} file, this will 
+%affect all your Java applications.
+%An alternative is to create a batch file, \file{texosquery.bat},
+%that looks something like (untested):
+%\bgroup\appto\MacroFont{\scriptsize}
+%\begin{verbatim}
+%@ECHO OFF
+%FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar') DO SET JARPATH=%%I
+%START javaw -Dfile.encoding=UTF-8 -jar "%JARPATH%\texosquery.jar" %*
+%\end{verbatim}
+%\egroup
 %
 %\subsection{Accessing file information}
 %If an input file name is required (for example, with the
@@ -182,18 +198,18 @@
 %\end{verbatim}
 %(You can find the configuration files using \texttt{kpsewhich -a
 %texmf.cnf}) For example, suppose the file \file{/tmp/.test}
-%exists. If the \texttt{openin\_any} attribute is set to \texttt{a}
-%(any file), then (assuming the operating system allows read access
+%exists. If the \texttt{openin\_any} attribute is set to
+%\qt{\texttt{a}} (any file), then (assuming the operating system allows read-access
 %to that file) the \app{texosquery} file-reading operations will
 %be permitted. For example
 %\begin{verbatim}
 %texosquery --pdfdate /tmp/.test
 %\end{verbatim}
 %will return the file modification date in PDF format. However, if
-%\texttt{openin\_any} is set to \texttt{r} (restricted), the read
+%\texttt{openin\_any} is set to \qt{\texttt{r}} (restricted), the read
 %access will be denied because the file is considered hidden so an
 %empty result is returned. Similarly, if \texttt{openin\_any} is set
-%to \texttt{p} (paranoid), the read access will be denied again
+%to \qt{\texttt{p}} (paranoid), the read access will be denied again
 %because the file is hidden but also because the file has an
 %absolute path that isn't under \texttt{\$TEXMFOUTPUT} (assuming
 %that environment variable hasn't been set to \file{/tmp}).
@@ -201,36 +217,41 @@
 %\section{Locales}
 %\label{sec:locales}
 %The options that have a locale identifier as an argument need the
-%locale formatted as a regular IEFT BCP 47 language tag that uses
-%hyphens as separators. POSIX style locales are only used as a
-%return value in the \longarg{locale} and \longarg{locale-lcs}
-%options.
+%identifier formatted as a regular
+%\href{https://tools.ietf.org/html/bcp47}{IEFT BCP 47 language tag} that uses
+%hyphens as separators. POSIX style locales (with underscores
+%replaced by hyphens, for example \texttt{fr-BE.utf8@euro}) 
+%are only used as a return value in the \longarg{locale} and 
+%\longarg{locale-lcs} options.
 %
-%\textbf{Not all locales are supported by Java.}
+%\href{http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html}{\textbf{Not
+%all locales are supported by Java.}}
 %For example, Irish is supported but Scottish and Welsh 
-%aren't supported in JRE~8.
-%See
-%\url{http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html}
-%for the list of supported locales in JRE~8.
-%
-%The Unicode Consortium's Common Locale Data Repository is bundled
-%with JRE~8, but
+%aren't supported by the JRE.
+%The Unicode Consortium's Common Locale Data Repository (CLDR) can
+%be accessed with Java~8, but
 %\href{http://openjdk.java.net/jeps/252}{the CLDR isn't
 %enabled by default}. It can be turned on using the system property
 %\texttt{java.locale.providers}, which may provide additional
-%support.
+%support. For example, although Welsh isn't supported by the JRE,
+%it is supported with the CLDR, so both Java~8 and the CLDR 
+%locale provider are required for that language. The proposed
+%Java~9 should have the CLDR enabled by default.
 %
-%For example, if the environment variable
-%\texttt{JAVA\_TOOL\_OPTIONS} is set to
+%The bash script \file{texosquery-jre8.sh} automatically sets 
+%\texttt{java.locale.providers} to \texttt{CLDR,JRE}.
+%Alternatively, the environment variable
+%\texttt{JAVA\_TOOL\_OPTIONS} can be set to
 %\begin{verbatim}
-%-Djava.locale.providers=JRE,CLDR
+%-Djava.locale.providers=CLDR,JRE
 %\end{verbatim}
-%then additional locales may be available (but only with JRE~8).
-%The CLDR should be enabled by default with Java~9.
-%
-%Note that the bash script \file{texosquery-jre8.sh}
-%automatically sets \texttt{java.locale.providers} to 
-%\texttt{CLDR,JRE}.
+%which will enable it for all installed Java applications.
+%If you need to set multiple options, these can be combined
+%in the value of \texttt{JAVA\_TOOL\_OPTIONS}.
+%For example
+%\begin{verbatim}
+%-Djava.locale.providers=CLDR,JRE -Dfile.encoding=UTF-8
+%\end{verbatim}
 %
 %You may find that the results are different depending on the data
 %provider. For example with \texttt{java.locale.providers} set to 
@@ -244,17 +265,31 @@
 %then the long date is now in the form \qt{6 November 2016} and the 
 %medium date is in the form \qt{6 Nov 2016}.
 %
+%Note that \app{texosquery} can only access locale information
+%provided by Java. For example, Java currently doesn't
+%provide a format pattern for telephone numbers.
+%
 %\subsection{Command line invocation}
 %The syntax for the command line invocation of \app{texosquery}
 %is:
 %\begin{flushleft}\ttfamily
 %texosquery \meta{action} ...
 %\end{flushleft}
-%The syntax for \app{texosquery-jre5} is exactly the same except
+%or
+%\begin{flushleft}\ttfamily
+%texosquery.sh \meta{action} ...
+%\end{flushleft}
+%The syntax for \app{texosquery-jre8} is exactly the same except
 %for the application name:
 %\begin{flushleft}\ttfamily
-%texosquery-jre5 \meta{action} ...
+%texosquery-jre8 \meta{action} ...
 %\end{flushleft}
+%or
+%\begin{flushleft}\ttfamily
+%texosquery-jre8.sh \meta{action} ...
+%\end{flushleft}
+%Similarly for \app{texosquery-jre5}.
+%
 %Available actions (at least one required):
 %\begin{description}
 %\item[\shortarg{L} or \longarg{locale}] Display the locale
@@ -311,8 +346,7 @@
 %\url{http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html}
 %for further details. If you are using \app{texosquery-jre5},
 %only the language, region and variant elements will be recognised
-%since the language tag support was introduced to Java in version
-%1.7.
+%since the language tag support was introduced in Java~7.
 %
 %For example:
 %\begin{verbatim}
@@ -333,19 +367,24 @@
 %\begin{verbatim}
 %{,}{.}{E}{GBP}{GBP}{.}
 %\end{verbatim}
+%However, the \longarg{locale-data} option (described next),
+%will check the region code and return both the official
+%ISO 4217 code and, optionally, a local unofficial code, so
+%\begin{verbatim}
+%texosquery -D en-IM
+%\end{verbatim}
+%will include \verb|{GBP}{IMP}{M£}| in the result.
 %
 %\begin{important}
 %This option and the following (\longarg{locale-data}) are best used
-%with \XeTeX\ or \LuaTeX. Problems may occur if \sty{inputenc} has
-%been loaded before the query is performed.
+%with \XeTeX\ or \LuaTeX\ to deal with the non-ASCII characters. 
+%Make sure the file encoding used by Java matches the \TeX\ file.
 %\end{important}
 %
 %\item[\shortarg{D} \oarg{language tag} or \longarg{locale-data} \oarg{language tag}]
 %(New to v1.2.) This provides more
-%extensive information than \longarg{numeric}. Since TeX only
-%supports a maximum of nine arguments, the result has nested groups.
-%(Note that the month names are a special case with twelve
-%sub-groups.)
+%extensive information than \longarg{numeric}.
+%The result has nested groups to assist parsing.
 %Again the \meta{language tag} may be omitted. For example, 
 %\begin{verbatim}
 %texosquery --locale-data
@@ -605,6 +644,7 @@
 %rerunning the command with \longarg{debug} for further information.
 %
 %\section{texosquery.tex: generic \TeX\ code}
+%\label{sec:tex}
 %You can run \app{texosquery} directly from \TeX's shell escape.
 %For example:
 %\begin{verbatim}
@@ -647,58 +687,37 @@
 %where it might possibly occur in the result, but in general it's
 %best to avoid these characters in file names.)
 %
-%\DescribeMacro\TeXOSInvokerName
-%The above command uses \cs{TeXOSInvokerName} to reference the
-%application name. This defaults to \app{texosquery}. Bash users may
-%need to change this to \file{texosquery.sh}. For example:
+%If the command failed, \meta{cs} will be set to empty. It's best to
+%always test for success after using \cs{TeXOSQuery} (or one of the
+%shortcut commands described below). For example:
 %\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery.sh}
-%\end{verbatim}
-%If you need
-%to use \app{texosquery-jre5} instead, you can redefine it:
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery-jre5}
-%\end{verbatim}
-%or
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery-jre5.sh}
-%\end{verbatim}
-%This needs to be done before using \cs{TeXOSQuery} (or any of the
-%short cut commands). To avoid the hassle of doing this for every
-%document, you can create a file called \file{texosquery.cfg} that
-%contains the redefinition of \cs{TeXOSInvokerName} and place the
-%file somewhere on \TeX's path. If the configuration file is found
-%it will be automatically loaded. Since this file is input at the
-%end of \file{texosquery.tex}, you can also add your preferred
-%definitions of the currency commands to \file{texosquery.cfg}.
-%For example:
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery.sh}
-%\def\texosquerycurrencydollar{\textdollar}
-%\def\texosquerycurrencypound{\textstirling}
+%\TeXOSQuery{\result}{-b}
+%\ifx\result\empty
+% Failed!
+%\else
+% Result: \result.
+%\fi
 %\end{verbatim}
 %
-%There are some short cut commands that call \app{texosquery}
-%with a particular option for convenience, described below.
-%If any of these commands cause an error message in the form:
+%Failure can occur because the dry run mode is on, or it can occur
+%if the query was denied (for example, forbidden file access),
+%or if there's a syntax error in the system call. As from 
+%version 1.2, \app{texosquery} checks the \texttt{openin\_any}
+%setting, which may forbid read access. Java's security manager
+%or the filing system may also forbid read access.
+%
+%To determine the cause of the error, first inspect the log file 
+%check if the shell escape was used. In the above example, if 
+%the shell escape was permitted, then the log file should include
 %\begin{verbatim}
-%I can't find file `|texosquery'.
+%(|texosquery -b)
 %\end{verbatim}
-%then check that you have the shell escape on. If the error 
-%persists with the shell escape enabled
-%(and not restricted), check that \app{texosquery} is on 
-%your system's path. To do this, open a command prompt or terminal and
-%type \app{texosquery}. If it isn't installed correctly, there will be a
-%message like:
-%\begin{verbatim}
-%`texosquery' is not recognised
-%\end{verbatim}
-%or
-%\begin{verbatim}
-%texosquery: command not found
-%\end{verbatim}
-%If this happens, check the installation. (Instructions are
-%in the accompanying \file{README.md} file.)
+%Copy and paste the system call (\verb|texosquery -b| in 
+%the above case) into your
+%\href{http://www.dickimaw-books.com/latex/novices/html/terminal.html}{command prompt or terminal} and add 
+%the \longarg{debug} switch before pressing enter. This should help
+%determine whether it's a syntax error or a query forbidden by the
+%operating system.
 %
 %Dry run mode is determined by the conditional
 %\DescribeMacro\ifTeXOSQueryDryRun
@@ -711,10 +730,93 @@
 %TeXOSQuery:
 %\end{verbatim}
 %(the control sequence \meta{cs} will be set to empty).
-%This conditional will automatically be switched on unless
-%\cs{shellescape} or \cs{pdfshellescape} is 1. (If
-%\app{texosquery.jar} is later allowed on the restricted list,
-%newer versions may change this default.)
+%
+%\begin{important}
+%Remember that a query can still fail even if the dry run mode is
+%off.
+%\end{important}
+%
+%\DescribeMacro\TeXOSInvokerName
+%The \cs{TeXOSQuery} command uses \cs{TeXOSInvokerName} to reference the
+%application name. This defaults to \app{texosquery}. Bash users
+%will need to change this to \file{texosquery.sh}. For example:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery.sh}
+%\end{verbatim}
+%If you need
+%to use \app{texosquery-jre5} instead, you can redefine it:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre5}
+%\end{verbatim}
+%or
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre5.sh}
+%\end{verbatim}
+%Alternatively, if you have at least Java~8, then use:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre8}
+%\end{verbatim}
+%or
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre8.sh}
+%\end{verbatim}
+%This needs to be done before using \cs{TeXOSQuery} (or any of the
+%short cut commands). To avoid the hassle of doing this for every
+%document, there's a configuration file called
+%\file{texosquery.cfg} that contains the definition of 
+%\cs{TeXOSInvokerName}. This should be placed somewhere on \TeX's path. 
+%If the configuration file is found it will be automatically loaded. 
+%For example:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery.sh}
+%\end{verbatim}
+%Dry-run mode (no shell escape allowed) is automatically switched on unless
+%TeX is called with the unrestricted shell escape enabled. For
+%example, for a plain \TeX\ document \file{myfile.tex}:
+%\begin{verbatim}
+%pdftex -shell-escape myfile
+%\end{verbatim}
+%or for a \LaTeX\ document \file{myfile.tex}:
+%\begin{verbatim}
+%pdflatex -shell-escape myfile
+%\end{verbatim}
+%If \app{texosquery} is added to the restricted list, you can add
+%\begin{verbatim}
+%\TeXOSQueryAllowRestricted
+%\end{verbatim}
+%to the \file{texosquery.cfg} file. (This command can't be used
+%outside of that file.) If you use this command when the name
+%given in \cs{TeXOSInvokerName} isn't on the restricted list, you'll
+%get an error in the form:
+%\begin{verbatim}
+%runpopen command not allowed: texosquery-jre8
+%
+%! I can't find file `"|texosquery-jre8 -b"'.
+%\TeXOSQueryInvoker ...TeXOSInvokerName \space #1" 
+%                                                  
+%l.184 \TeXOSQuery{\result}{-b}
+%                              ^^M
+%(Press Enter to retry, or Control-D to exit)
+%Please type another input file name:
+%\end{verbatim}
+%if you try building the document in restricted mode.
+%
+%If you get this error, then:
+%\begin{itemize}
+%\item make sure you don't have
+%\cs{TeXOSQueryAllowRestricted} in your \file{texosquery.cfg}
+%file; 
+%\item make sure you run \TeX\ with the shell escape enabled;
+%\item check the definition of \cs{TeXOSInvokerName};
+%\item try using the application directly from the command prompt or
+%terminal. For example, in the above message, the bit between 
+%\verb+`"|+ and \verb|"'| (that is, \texttt{texosquery-jre8 -b})
+%shows the attempted system call. Copy and paste it directly
+%into your operating system's 
+%\href{http://www.dickimaw-books.com/latex/novices/html/terminal.html}{command
+%prompt or terminal} and to check the application has been installed
+%correctly.
+%\end{itemize}
 %
 %If multiple queries are required, it's more efficient to
 %perform them all in one go. For example:
@@ -958,6 +1060,26 @@
 (NLCT)}
 %    \end{macrocode}
 %
+%\begin{macro}{\@texosquery@warn}
+%Generate warning message.
+%    \begin{macrocode}
+\ifx\PackageWarning\undefined
+  \def\@texosquery@warn#1{%
+    {%
+      \newlinechar=`\^^J
+      \def\MessageBreak{^^J}%
+      \message{^^Jtexosquery Warning: #1 on line \the\inputlineno.^^J}%
+    }%
+  }
+\else
+  \def\@texosquery@warn#1{%
+      \PackageWarning{texosquery}{#1}%
+  }
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%
 %\begin{macro}{\TeXOSInvokerName}
 %The name of the \app{texosquery} application.
 %    \begin{macrocode}
@@ -979,26 +1101,96 @@
 %
 %\begin{macro}{\ifTeXOSQueryDryRun}
 %Provide a dry-run mode.
-%\changes{1.1}{2016-07-14}{dry run mode only false by default if with
-%unrestricted mode}
+%\changes{1.1}{2016-07-14}{dry run mode only false by default if
+%used in unrestricted mode}
 %    \begin{macrocode}
 \newif\ifTeXOSQueryDryRun
 \TeXOSQueryDryRuntrue
 %    \end{macrocode}
 %\end{macro}
 %
-%If shell escape is unrestricted, automatically switch off dry-run mode.
+%\begin{macro}{\TeXOSQueryAllowRestricted}
+%The default behaviour only switches off the dry-run mode if the
+%shell escape is unrestricted. The configuration file may override
+%this with \cs{TeXOSQueryAllowRestricted}, which will allow
+%the dry run mode to be switched off if restricted mode is detected. 
+%    \begin{macrocode}
+\def\TeXOSQueryAllowRestricted{%
+ \def\@texosquery@allowrestricted##1##2{##1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryDenyRestricted}
+%Switch it off. 
+%    \begin{macrocode}
+\def\TeXOSQueryDenyRestricted{%
+ \def\@texosquery@allowrestricted##1##2{##2}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@allowrestricted}
+%Initialise to prevent shell escape in restricted mode.
+%    \begin{macrocode}
+\def\@texosquery@allowrestricted#1#2{#2}%
+%    \end{macrocode}
+%\end{macro}
+%
+%Load the configuration file if it exists.
+%    \begin{macrocode}
+\openin0=texosquery.cfg
+\ifeof0\relax
+\else
+  \closein0\relax
+  \begingroup
+    \newlinechar=`\^^J
+    \message{^^JTeXOSQuery: reading configuration file^^J}%
+  \endgroup
+  \input texosquery.cfg
+\fi
+%    \end{macrocode}
+%Disable cfg-only commands:
+%    \begin{macrocode}
+\def\TeXOSQueryAllowRestricted{%
+  \@texosquery@warn{\string\TeXOSQueryAllowRestricted\space
+   ignored (only allowed in texosquery.cfg)}%
+}
+\def\TeXOSQueryDenyRestricted{%
+  \@texosquery@warn{\string\TeXOSQueryDenyRestricted\space
+   ignored (only allowed in texosquery.cfg)}%
+}
+%    \end{macrocode}
+%
+%If shell escape is unrestricted, automatically switch off dry-run
+%mode, unless the cfg file has allowed it.
 %    \begin{macrocode}
 \ifx\shellescape\undefined
   \ifx\pdfshellescape\undefined
   \else
     \ifnum\pdfshellescape=1\relax
       \TeXOSQueryDryRunfalse
+    \else
+      \@texosquery@allowrestricted
+      {%
+        \ifnum\pdfshellescape=2\relax
+          \TeXOSQueryDryRunfalse
+        \fi
+      }
+      {}
     \fi
   \fi
 \else
   \ifnum\shellescape=1\relax
     \TeXOSQueryDryRunfalse
+  \else
+    \@texosquery@allowrestricted
+    {%
+      \ifnum\shellescape=2\relax
+        \TeXOSQueryDryRunfalse
+      \fi
+    }
+    {}
   \fi
 \fi
 %    \end{macrocode}
@@ -1036,6 +1228,10 @@
   \else
     \begingroup
     \endlinechar=-1\relax
+%    \end{macrocode}
+%Locally redefine \cs{dtf} to expand to \cs{texosquerydtf}:
+%    \begin{macrocode}
+     \def\dtf{\noexpand\texosquerydtf}%
 %    \end{macrocode}
 %Just in case the result contains any awkward characters that have
 %some special meaning to \TeX. (Can't really protect against hash,
@@ -1616,19 +1812,31 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%Load the configuration file if it exists.
+%\begin{macro}{\texosquerydtf}
+%Date/time format placeholder. The second argument is the
+%placeholder character and the first argument is the number of
+%occurrences of that character in the placeholder. The default
+%definition just converts it back to pattern format used by
+%Java's
+%\href{http://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html}{SimpleDateFormat
+%class}. The pattern interprets $\ge4$ as a single case, so this
+%will only produce a maximum of four characters.
 %    \begin{macrocode}
-\openin0=texosquery.cfg
-\ifeof0\relax
-\else
-  \closein0\relax
-  \begingroup
-    \newlinechar=`\^^J
-    \message{^^JTeXOSQuery: reading configuration file^^J}%
-  \endgroup
-  \input texosquery.cfg
-\fi
+\def\texosquerydiff#1#2{%
+  \ifcase#1
+  \or
+   #2%
+  \or
+   #2#2%
+  \or
+   #2#2#2%
+  \else
+   #2#2#2#2%
+  \fi
+}
 %    \end{macrocode}
+%\end{macro}
+%
 %All done.
 %Restore the category code of \texttt{@}:
 %    \begin{macrocode}
@@ -1658,10 +1866,43 @@
 %    \begin{macrocode}
 \input{texosquery}
 %    \end{macrocode}
-%That's it!
 %\iffalse
 %    \begin{macrocode}
 %</texosquery.sty>
+%    \end{macrocode}
+%\fi
+%
+%\subsection{Configuration File (\file{texosquery.cfg})}
+%The configuration file. This will need to be edited as appropriate
+%to the system.
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery.cfg>
+%    \end{macrocode}
+%\fi
+%    \begin{macrocode}
+%If this configuration file is added to TeX's path, it can
+%be used to set up the texosquery defaults for the installation.
+
+%Default application (must be installed on the operating system's
+%path). Change as appropriate. Available options:
+%  - Unix-like systems:
+%     * texosquery-jre8.sh (at least Java 8 required)
+%     * texosquery.sh (at least Java 7 required)
+%     * texosquery-jre5.sh (at least Java 5 required)
+%  - Windows:
+%     * texosquery-jre8 (at least Java 8 required)
+%     * texosquery (at least Java 7 required)
+%     * texosquery-jre5 (at least Java 5 required)
+\def\TeXOSInvokerName{texosquery}
+
+% If the invoker name given above is on the restricted list,
+% allow it to be run in restricted mode:
+%\TeXOSQueryAllowRestricted
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery.cfg>
 %    \end{macrocode}
 %\fi
 %
