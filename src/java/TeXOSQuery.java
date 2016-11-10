@@ -2380,8 +2380,8 @@ public class TeXOSQuery
     * in the pattern beyond that are discarded. This means defining
     * a command that effectively takes 10 arguments (with a bit of
     * trickery to get around the 9-arg maximum). Each digit can then
-    * be rendered using either \dgt{n} (always display the nth digit)
-    * or \dgtnz{n} (only display the nth digit if it isn't zero).
+    * be rendered using either \dgt (always display the digit)
+    * or \dgtnz (only display the digit if it isn't zero).
     * These short commands will be converted to longer ones that are
     * less likely to cause conflict when \TeXOSQuery is used.
     * @param pattern The pattern
@@ -2422,10 +2422,7 @@ public class TeXOSQuery
          }
       }
 
-      // If this value is negative, then the pattern has too many digits.
-      // The excess will be discarded.
-
-      digitCount = MAX_DIGIT_FORMAT-digitCount;
+      int digitIndex = (leadPadding ? MAX_DIGIT_FORMAT : 0);
 
       inString = false;
 
@@ -2457,29 +2454,125 @@ public class TeXOSQuery
               }
             break;
             case '0':
-              digitCount++;
 
-              if (digitCount > 0)
+              if (leadPadding)
               {
-                 builder.append(String.format("\\dgt{%d}", digitCount));
+                 if (digitIndex > MAX_DIGIT_FORMAT)
+                 {
+                    // too many digit markers in the pattern,
+                    // discard
+                 }
+                 else if (digitIndex > digitCount)
+                 {
+                    // not enough digit markers in the pattern
+                    // pad with #
+
+                    for ( ; digitIndex > digitCount; digitIndex--)
+                    {
+                       builder.append("\\dgtnz ");
+                    }
+
+                    builder.append("\\dgt ");
+                 }
+                 else
+                 {
+                    builder.append("\\dgt ");
+                 }
+
+                 digitIndex--;
+              }
+              else
+              {
+                 digitIndex++;
+
+                 if (digitIndex > MAX_DIGIT_FORMAT)
+                 {
+                    // too many digit markers in the pattern,
+                    // discard
+                 }
+                 else if (digitIndex == digitCount)
+                 {
+                    builder.append("\\dgt ");
+
+                    // not enough digit markers in the pattern
+                    // pad with #
+
+                    for ( ; digitIndex < MAX_DIGIT_FORMAT; digitIndex++)
+                    {
+                       builder.append("\\dgtnz ");
+                    }
+                 }
+                 else
+                 {
+                    builder.append("\\dgt ");
+                 }
               }
             break;
             case '#':
-              digitCount++;
 
-              if (digitCount > 0)
+              if (leadPadding)
               {
-                 builder.append(String.format("\\dgtnz{%d}", digitCount));
+                 if (digitIndex > MAX_DIGIT_FORMAT)
+                 {
+                    // too many digit markers in the pattern,
+                    // discard
+                 }
+                 else if (digitIndex > digitCount)
+                 {
+                    // not enough digit markers in the pattern
+                    // pad with #
+
+                    for ( ; digitIndex > digitCount; digitIndex--)
+                    {
+                       builder.append("\\dgtnz ");
+                    }
+
+                    builder.append("\\dgtnz ");
+                 }
+                 else
+                 {
+                    builder.append("\\dgtnz ");
+                 }
+
+                 digitIndex--;
+              }
+              else
+              {
+                 digitIndex++;
+
+                 if (digitIndex > MAX_DIGIT_FORMAT)
+                 {
+                    // too many digit markers in the pattern,
+                    // discard
+                 }
+                 else if (digitIndex == digitCount)
+                 {
+                    builder.append("\\dgtnz ");
+
+                    // not enough digit markers in the pattern
+                    // pad with #
+
+                    for ( ; digitIndex < MAX_DIGIT_FORMAT; digitIndex++)
+                    {
+                       builder.append("\\dgtnz ");
+                    }
+                 }
+                 else
+                 {
+                    builder.append("\\dgtnz ");
+                 }
               }
             break;
             case '-':
               builder.append("\\msg ");
             break;
             case ',':
-              if (digitCount > 0)
+
+              if (digitIndex <= digitCount)
               {
                  builder.append("\\ngp ");
               }
+
             break;
             default:
               builder.append(escapeFmtChar(c));
