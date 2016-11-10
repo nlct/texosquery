@@ -48,7 +48,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{785}
+\CheckSum{839}
 
 \RecordChanges
 \PageIndex
@@ -91,13 +91,24 @@
 %\maketitle
 %
 %\begin{abstract}
-%\app{texosquery.jar} is a cross-platform Java application
-%to query certain OS information designed for use in \TeX's
-%shell escape mechanism.
-%The accompanying \TeX\ code provides a simple interface to the
-%\app{texosquery} Java application, which may be skipped
-%if you want to explicitly use \cs{input} (but take
-%care of any special characters appearing in the result).
+%The \sty{texosquery} bundle provides the \app{texosquery.jar} application (and
+%variations \app{texosquery-jre8.jar} and \app{texosquery-jre5.jar})
+%This is a cross-platform Java application to query certain
+%operating system (OS) and locale information. The application is
+%specifically designed for use within \TeX's shell escape mechanism, 
+%through the \cs{TeXOSQuery} command provided by the \sty{texosquery} package
+%(\file{texosquery.tex} and \file{texosquery.sty}).
+%
+%The \cs{TeXOSQuery} command performs more than a simple piped input as it 
+%first changes category codes of various problematic characters and locally 
+%defines some short control sequences that are used in the application's result.
+%These commands aren't defined outside of \cs{TeXOSQuery}, so a
+%direct piped input may cause undefined control sequences. If you
+%really want to use this direct method rather than using
+%\cs{TeXOSQuery}, then you will need to run \app{texosquery} in
+%backward compatibility mode~0 or~1 (using \texttt{\longarg{compatible} 1}).
+%The first two versions of \app{texosquery} didn't use those short
+%commands.
 %\end{abstract}
 %
 %\begin{important}
@@ -106,18 +117,20 @@
 %installed.
 %\end{important}
 %
-%There are three applications provided:
+%There are three variations of the \app{texosquery} application provided:
 %\begin{itemize}
-%\item \app{texosquery}: requires at least Java~7, medium locale
+%\item \file{texosquery.jar}: requires at least Java~7, medium locale
 %support;
-%\item \app{texosquery-jre8}: requires at least Java~8, best locale
+%\item \file{texosquery-jre8.jar}: requires at least Java~8, best locale
 %support;
-%\item \app{texosquery-jre5}: requires at least Java~5, poor locale
-%support (language scripts not recognised).
+%\item \file{texosquery-jre5.jar}: requires at least Java~5, poor locale
+%support (language scripts not recognised). Note that Java~5 and~6
+%are deprecated. Old deprecated versions are considered a security
+%risk.
 %\end{itemize}
-%The default is \app{texosquery}. Throughout this document
+%The default is \file{texosquery.jar}. Throughout this document
 %\app{texosquery} is used to reference the application, regardless
-%which of these three you've chosen to use. See
+%which of these three jar files you've chosen to use. See
 %\cs{TeXOSInvokerName} in section~\ref{sec:tex} for further details.
 %See also the installation instructions in the accompanying
 %\file{README.md} file.
@@ -140,7 +153,7 @@
 %
 %Since the application is designed to work with \TeX, each
 %function will display the result on a single line without
-%formatting. (For multiple results, each line is grouped 
+%formatting. (For multiple results, each line is grouped as
 %from v1.1.) A blank line (or empty group) will be displayed
 %if the information isn't available or is prohibited. A forward slash is always 
 %used as a directory divider, regardless of the operating 
@@ -354,8 +367,14 @@
 %\end{verbatim}
 %produces
 %\begin{verbatim}
-%{,}{.}{E}{GBP}{£}{.}
+%{,}{.}{E}{GBP}{\wrp{£}}{.}
 %\end{verbatim}
+%The \cs{wrp} command is used by \app{texosquery} to markup a
+%non-ASCII character. This command is one of the shorthands only
+%defined within \cs{TeXOSQuery}. In this case it's a shortcut for
+%the command \cs{texosquerynonasciiwrap}. By default this just does its
+%argument, but it may be redefined to perform some other action.
+%
 %If Java doesn't support the given locale, the currency code will
 %appear as \texttt{XXX} with the symbol \textcurrency\ (generic
 %currency sign). Note that Java only returns official ISO 4217
@@ -373,13 +392,16 @@
 %\begin{verbatim}
 %texosquery -D en-IM
 %\end{verbatim}
-%will include \verb|{GBP}{IMP}{M£}| in the result.
+%will include \verb|{GBP}{IMP}{M\wrp{£}}| in the result.
 %
 %\begin{important}
 %This option and the following (\longarg{locale-data}) are best used
 %with \XeTeX\ or \LuaTeX\ to deal with the non-ASCII characters. 
 %Make sure the file encoding used by Java matches the \TeX\ file.
 %\end{important}
+%
+%(See section~\ref{sec:locales} for the difference in locale
+%providers.)
 %
 %\item[\shortarg{D} \oarg{language tag} or \longarg{locale-data} \oarg{language tag}]
 %(New to v1.2.) This provides more
@@ -395,38 +417,10 @@
 %\end{verbatim}
 %for the locale identified by \texttt{en-GB}.
 %As with all the other actions, the result is written to STDOUT on a
-%single line. Since this is too long for this page width, below
-%shows the result from the above example with line breaks inserted 
-%for clarity:
-%\begin{verbatim}
-%{{en-GB}{English}{English}{United Kingdom}{United Kingdom}{}{}}
-%{{Saturday, 5 November 2016}{05 November 2016}{05-Nov-2016}{05/11/16}}{0}
-%{{\dtf{4}{E},\spc \dtf{1}{d}\spc \dtf{4}{M}\spc \dtf{4}{y}}
-%{\dtf{2}{d}\spc \dtf{4}{M}\spc \dtf{4}{y}}{\dtf{2}{d}-\dtf{3}{M}-\dtf{4}{y}}
-%{\dtf{2}{d}/\dtf{2}{M}/\dtf{2}{y}}}
-%{{23:58:25 o'clock GMT}{23:58:25 GMT}{23:58:25}{23:58}}
-%{{\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}\spc \str{o\apo clock}\spc \dtf{1}{z}}
-%{\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}\spc \dtf{1}{z}}%
-%{\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}}{\dtf{2}{H}:\dtf{2}{m}}}
-%{{Monday}{Tuesday}{Wednesday}{Thursday}{Friday}{Saturday}{Sunday}}
-%{{Mon}{Tue}{Wed}{Thu}{Fri}{Sat}{Sun}}
-%{{January}{February}{March}{April}{May}{June}{July}{August}{September}
-%{October}{November}{December}}
-%{{Jan}{Feb}{Mar}{Apr}{May}{Jun}{Jul}{Aug}{Sep}{Oct}{Nov}{Dec}}
-%{{Monday}{Tuesday}{Wednesday}{Thursday}{Friday}{Saturday}{Sunday}}
-%{{Mon}{Tue}{Wed}{Thu}{Fri}{Sat}{Sun}}
-%{{January}{February}{March}{April}{May}{June}{July}{August}{September}
-%{October}{November}{December}}
-%{{Jan}{Feb}{Mar}{Apr}{May}{Jun}{Jul}{Aug}{Sep}{Oct}{Nov}{Dec}}
-%{{,}{.}{E}{GBP}{GBP}{£}{\texosquerycurrencypound }{.}{%}{‰}}
-%{{\numfmt{\decfmt{\dgtnz{7}\ngp \dgtnz{8}\dgtnz{9}\dgt{10}}
-%{\dgtnz{8}\dgtnz{9}\dgtnz{10}}}}{\numfmt{\dgtnz{7}\ngp
-%\dgtnz{8}\dgtnz{9}\dgt{10}}}{\numfmt{\pcur{\decfmt{\dgtnz{7}\ngp
-%\dgtnz{8}\dgtnz{9}\dgt{10}}{\dgt{9}\dgt{10}}}{}}}{\numfmt{\spct{\dgtnz{7}\ngp
-%\dgtnz{8}\dgtnz{9}\dgt{10}}{}}}}
-%\end{verbatim}
-%(See section~\ref{sec:locales} for the difference in locale
-%providers.)
+%single line. Its overall length and the use of the shortcut
+%commands used by \app{texosquery} to markup certain elements mean
+%that it's not particularly human-readable, but it's designed to be
+%easy for \TeX\ to interpret.
 %
 %There may seem to be some repetition here with the month and week
 %day names, but with \app{texosquery-jre8}, the second set are the
@@ -647,6 +641,10 @@
 %written to STDERR. If \meta{n} $\geq 2$, any exceptions encountered
 %will additionally write the stack trace to STDERR. If \meta{n}
 %$\geq 3$ non-error informational messages are included.
+%\item[\longarg{compatible} \meta{n}] Set the compatibility mode.
+%The argument should be either a non-negative integer (0 for version
+%1.0, 1 for version 1.1, etc) or the keyword \texttt{latest} to
+%indicate the latest version (default).
 %\end{description}
 %
 %If multiple options are given, they will be processed in the
@@ -965,9 +963,7 @@
 %\end{flushleft}
 %This is provided for the benefit of users who don't have
 %\cs{pdfcreationdate} defined by their \TeX\ format (for example,
-%\XeTeX). As from v1.1, this ensures that the initial \texttt{D} has
-%category code 12 (which won't happen if \cs{TeXOSQuery} is used
-%explicitly).
+%\XeTeX).
 %
 %\begin{important}
 %The remaining commands all require extra arguments after the
@@ -1095,8 +1091,7 @@
 %    \end{macrocode}
 % Check if already loaded.
 %    \begin{macrocode}
-\ifx\TeXOSQuery\undefined
-\else
+\ifx\TeXOSQuery\undefined \else
   \@texosquery@restore@at
   \expandafter\endinput
 \fi
@@ -1151,8 +1146,7 @@
 %\changes{1.1}{2016-07-14}{dry run mode only false by default if
 %used in unrestricted mode}
 %    \begin{macrocode}
-\newif\ifTeXOSQueryDryRun
-\TeXOSQueryDryRuntrue
+\newif\ifTeXOSQueryDryRun \TeXOSQueryDryRuntrue
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1186,9 +1180,7 @@
 %
 %Load the configuration file if it exists.
 %    \begin{macrocode}
-\openin0=texosquery.cfg
-\ifeof0\relax
-\else
+\openin0=texosquery.cfg \ifeof0\relax \else
   \closein0\relax
   \begingroup
     \newlinechar=`\^^J
@@ -1260,25 +1252,112 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\TeXOSQuery}
-%Use \app{texosquery} with the option given in the second
-%argument and store the result in control sequence given in the
-%first argument.
+%Provide some utility commands. (Can't use \cs{@gobble} etc, as we
+%may not be using \LaTeX.)
+%\begin{macro}{\@texosquery@gobble}
 %    \begin{macrocode}
-\def\TeXOSQuery#1#2{%
-  \ifTeXOSQueryDryRun
-    \begingroup
-      \newlinechar=`\^^J
-      \message{^^JTeXOSQuery: \TeXOSInvokerName\space#2^^J}%
-    \endgroup
-    \def#1{}%
-  \else
-    \begingroup
-    \endlinechar=-1\relax
+\def\@texosquery@gobble#1{}
 %    \end{macrocode}
-%Locally redefine short commands used by \app{texosquery}
-%to longer commands:
+%\end{macro}
+%\begin{macro}{\@texosquery@firstofone}
 %    \begin{macrocode}
+\def\@texosquery@firstofone#1{#1}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerynonasciiwrap}
+%Allow a way to deal with non-ASCII characters returned by
+%\app{texosquery}. \cs{TeXOSQuery} locally defines \cs{wrp}
+%to this command. By default this just does its argument
+%but may be redefined to provide some protection.
+%    \begin{macrocode}
+\def\texosquerynonasciiwrap#1{#1}
+%    \end{macrocode}
+%\end{macro}
+%Commands used in \cs{TeXOSQuery} for various escaped characters.
+%
+%\begin{macro}{\@texosquery@backslash}
+%Literal backslash.
+%    \begin{macrocode}
+\edef\@texosquery@backslash{\expandafter\@texosquery@gobble\string\\}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@leftbrace}
+%Literal left brace.
+%    \begin{macrocode}
+\edef\@texosquery@leftbrace{\expandafter\@texosquery@gobble\string\{}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@rightbrace}
+%Literal right brace.
+%    \begin{macrocode}
+\edef\@texosquery@rightbrace{\expandafter\@texosquery@gobble\string\}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@hash}
+%Literal hash.
+%    \begin{macrocode}
+\edef\@texosquery@hash{\expandafter\@texosquery@gobble\string\#}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@grave}
+%Literal grave.
+%    \begin{macrocode}
+\edef\@texosquery@grave{\string`}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@closequote}
+%Unexpanded apostrophe.
+%    \begin{macrocode}
+\edef\@texosquery@closequote{\noexpand'}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@doublequote}
+%Unexpanded double-quote.
+%    \begin{macrocode}
+\def\@texosquery@doublequote{\noexpand"}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@openquote}
+%Unexpanded open quote.
+%    \begin{macrocode}
+\def\@texosquery@openquote{\noexpand`}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@space}
+%Unexpanded space.
+%    \begin{macrocode}
+\edef\@texosquery@space{\noexpand\space}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@literalspace}
+%Literal space.
+%    \begin{macrocode}
+\edef\@texosquery@literalspace{\expandafter\string\space}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@D}
+%The \verb|D| identifier in PDF date-time formats need to have
+%category code 12.
+%    \begin{macrocode}
+\edef\@texosquery@D{\string D}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@enableshortcs}
+%Enable shortcut commands.
+%    \begin{macrocode}
+\def\@texosquery@enableshortcs{%
      \def\dtf{\noexpand\texosquerydtf}%
      \def\pmnumfmt{\noexpand\texosqueryfmtplusminus}%
      \def\numfmt{\noexpand\texosqueryfmtnum}%
@@ -1302,15 +1381,52 @@
      \def\ppml{\noexpand\texosqueryfmtprefixpermill}%
      \def\spml{\noexpand\texosqueryfmtsuffixpermill}%
 %    \end{macrocode}
-%Literal backslash:
+%Hook to adjust the processing of non-ASCII characters.
 %    \begin{macrocode}
-     \def\@gobble##1{}
-     \edef\bks{\expandafter\@gobble\string\\}
+     \def\wrp{\texosquerynonasciiwrap}%
+%    \end{macrocode}
+%Locally redefine some more commands that may occur in 
+%\app{texosquery}'s return value (via the \texttt{escapeSpChars}
+%method in \file{TeXOSQuery.java}).
+%    \begin{macrocode}
+     \let\bks\@texosquery@backslash
+     \let\lbr\@texosquery@leftbrace
+     \let\rbr\@texosquery@rightbrace
+     \let\hsh\@texosquery@hash
+     \let\grv\@texosquery@grave
+     \let\csq\@texosquery@closequote
+     \let\dqt\@texosquery@doublequote
+     \let\osq\@texosquery@openquote
+     \let\spc\@texosquery@space
+     \let\lspc\@texosquery@literalspace
+     \let\pdfd\@texosquery@D
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQuery}
+%Use \app{texosquery} with the option given in the second
+%argument and store the result in control sequence given in the
+%first argument.
+%    \begin{macrocode}
+\def\TeXOSQuery#1#2{%
+  \ifTeXOSQueryDryRun
+    \begingroup
+      \newlinechar=`\^^J
+      \message{^^JTeXOSQuery: \TeXOSInvokerName\space#2^^J}%
+    \endgroup
+    \def#1{}%
+  \else
+    \begingroup
+    \endlinechar=-1\relax
+%    \end{macrocode}
+%Locally redefine short commands used by \app{texosquery}
+%to longer commands:
+%    \begin{macrocode}
+    \@texosquery@enableshortcs
 %    \end{macrocode}
 %Just in case the result contains any awkward characters that have
-%some special meaning to \TeX. (Can't really protect against hash,
-%backslash or curly braces, but they're unlikely to occur unless
-%the user has a very wacky and inappropriate file naming scheme.)
+%some special meaning to \TeX.
 %    \begin{macrocode}
     \catcode`\-=12\relax
     \catcode`\_=12\relax
@@ -1318,11 +1434,11 @@
     \catcode`\~=12\relax
     \catcode`\$=12\relax
     \catcode`\&=12\relax
-    \catcode`\"=12\relax
-    \catcode`\'=12\relax
     \catcode`\.=12\relax
     \catcode`\/=12\relax
     \catcode`\:=12\relax
+    \catcode`\"=12\relax
+    \catcode`\'=12\relax
     \catcode`\;=12\relax
     \catcode`\%=12\relax
     \everyeof{\noexpand}\relax
@@ -1779,22 +1895,16 @@
 %
 %\begin{macro}{\TeXOSQueryNow}
 %\changes{1.1}{2016-07-14}{changed catcode of D to 12}
+%\changes{1.2}{??}{catcode of D now dealt with by the Java code}
 %Query the current time stamp.
 %    \begin{macrocode}
 \def\TeXOSQueryNow#1{%
 %    \end{macrocode}
-% The \texttt{D} needs category code 12. (Don't need to worry about
-% \texttt{Z} as \app{texosquery.jar} uses \texttt{+00'00'} for
-% UTC+0.) This change can't be done with the other catcode changes
-% in \cs{TeXOSQuery}, as this is only appropriate for the PDF dates.
-% Save and restore the catcode rather than fiddle around with
-% scoping.
+% The \texttt{D} needs category code 12. 
+% No longer need to worry about this as \app{texosquery} now uses
+% \cs{pdfd}, which is set in \cs{TeXOSQuery}.
 %    \begin{macrocode}
-  \edef\@texosquery@restore@D{%
-    \noexpand\catcode`\noexpand\D=\the\catcode`\D\relax}%
-  \catcode`\D=12\relax
   \TeXOSQuery{#1}{\string-n}%
-  \@texosquery@restore@D
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1818,14 +1928,11 @@
 %
 %\begin{macro}{\TeXOSQueryFileDate}
 %\changes{1.1}{2016-07-14}{changed catcode of D to 12}
+%\changes{1.2}{??}{catcode of D now dealt with by the Java code}
 %Query the time stamp of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileDate#1#2{%
-  \edef\@texosquery@restore@D{%
-    \noexpand\catcode`\noexpand\D=\the\catcode`\D\relax}%
-  \catcode`\D=12\relax
   \TeXOSQuery{#1}{\string-d \string'\texosquerystripquotes{#2}\string'}%
-  \@texosquery@restore@D
 }
 %    \end{macrocode}
 %\end{macro}
@@ -2052,8 +2159,8 @@
 %\fi
 %Identify package:
 %    \begin{macrocode}
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2016/11/06 v1.2 (NLCT)]
+\NeedsTeXFormat{LaTeX2e} \ProvidesPackage{texosquery}[2016/11/06
+v1.2 (NLCT)]
 %    \end{macrocode}
 %Load \file{texosquery.tex}:
 %    \begin{macrocode}

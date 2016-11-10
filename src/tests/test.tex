@@ -1,18 +1,20 @@
 % arara: pdflatex: {shell: on}
 \documentclass{article}
 
+\usepackage{texosquery}
+
 \begin{document}
 Test document.
 
 \ttfamily
-\input{|"texosquery --locale"}
+\TeXOSQuery{\result}{--locale}\result
 
-\input{|"texosquery --pdfnow"}
+\TeXOSQuery{\result}{--pdfnow}\result
 
-\input{|"texosquery --pdfdate \jobname.tex"}
+\TeXOSQuery{\result}{--pdfdate \jobname.tex}\result
 
-\input{|"texosquery --cwd"}
+\TeXOSQuery{\result}{--cwd}\result
 
-\input{|"texosquery --filesize \jobname.tex"}
+\TeXOSQuery{\result}{--filesize \jobname.tex}\result
 
 \end{document}

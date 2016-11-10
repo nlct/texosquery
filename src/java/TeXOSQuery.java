@@ -390,25 +390,125 @@ public class TeXOSQuery
    }
 
     /**
-     * Escapes hash from input string.
+     * Escapes problematic characters from input string.
      * Exception for the hash, TeX's special characters shouldn't need escaping.
-     * The definition of \TeXOSQuery in texosquery.tex changes the category
+     * The definition of \\TeXOSQuery in texosquery.tex changes the category
      * code for the standard special characters (and a few others) except 
      * hash, curly braces and backslash. 
+     * 
+     * Some of the methods in this class return TeX code. Those
+     * returned values shouldn't be escaped as it would interfere
+     * with the code, so just use this method on information
+     * directly obtained from Java.
      *
-     * Any instance of { } or \ returned by any of the methods in this
-     * class are considered to be intentional begin-group,
-     * end-group or escape characters for processing by TeX.
-     * They shouldn't occur with literal intent in any string returned 
-     * by texosquery. (Directory dividers in paths returned by texosquery
-     * use TeX's / notation.)
+     * \\TeXOSQuery locally defines \\bks (literal backslash), 
+     * \\lbr (literal left brace), \\rbr (literal right brace), 
+     * \\hsh (literal hash), \\grv (literal grave), \\lspc (literal
+     * space), \\spc (regular space), \\csq (close single quote),
+     * \\dqt (double quote) and \\osq (open single quote).
      *
-     * Therefore the only TeX special character that needs escaping is the 
-     * hash. (It may be contained in the OS version or an eccentric file name.)
-     * This assumes the user isn't using an insane file naming
-     * scheme with { } or \ as literal characters in any file names.
-     * Is this a safe assumption? Is it possible that an OS name,
-     * arch or version may contain these characters?
+     * This should take care of any insane file-naming schemes, such
+     * as "<tt>bad file name#1.tex</tt>", "<tt>stupid {file} name.tex</tt>",
+     * "<tt>spaced    out  file #2.tex</tt>", "<tt>file's stupid name.tex</tt>"
+     *
+     * The regular space \\spc guards against a space occurring after
+     * a character that needs to be converted to a control sequence.
+     *
+     * To help protect against input encoding problems, non-ASCII
+     * characters are wrapped in \\wrp. \\TeXOSQuery locally redefines
+     * this to \\@texosquery@nonascii@wrap which may be used to
+     * provide some protection or conversion, if required.
+     *
+     * @param string Input string.
+     * @param isRegularText true if the string represents text, set to
+     * false if string is a file name etc
+     */
+   public String escapeSpChars(String string, boolean isRegularText)
+   {
+      if (compatible < 2)
+      {
+         return escapeHash(string);
+      }
+
+      StringBuilder builder = new StringBuilder();
+
+      for (int i = 0, n = string.length(); i < n; )
+      {
+         int codepoint = string.codePointAt(i);
+         i += Character.charCount(codepoint);
+
+         builder.append(escapeSpChars(codepoint, isRegularText));
+      }
+
+      return builder.toString();
+   }
+
+    /**
+     * Escapes file name. This should already have had the directory
+     * divider change to a forward slash where necessary.
+     * @param filename Input string.
+     * @return String with characters escaped.
+     */
+   public String escapeFileName(String filename)
+   {
+      return escapeSpChars(filename, false);
+   }
+
+    /**
+     * Escapes regular text.
+     * @param string Input string.
+     * @return String with characters escaped.
+     */
+   public String escapeText(String string)
+   {
+      return escapeSpChars(string, true);
+   }
+
+    /**
+     * Escapes regular text.
+     * @param codepoint Input Unicode character.
+     * @return String with characters escaped.
+     */
+   public String escapeText(int codepoint)
+   {
+      return escapeSpChars(codepoint, true);
+   }
+
+    /**
+     * Escapes character include punctuation.
+     * \\TeXOSQuery sets the catcode to 12 for the following:
+     * - _ ^ ~ $ &amp; . / : " ' ; and % 
+     * @param codePoint Input code point.
+     * @return String with character escaped.
+     */
+   public String escapeSpChars(int codepoint, boolean isRegularText)
+   {
+      switch (codepoint)
+      {
+         case '\\': return "\\bks ";
+         case '{': return "\\lbr ";
+         case '}': return "\\rbr ";
+         case '#': return isRegularText ? "\\#" : "\\hsh ";
+         case '_': return isRegularText ? "\\_" : "_";
+         case '\'': return isRegularText ? "\\csq " : "'";
+         case '`': return isRegularText ? "\\osq " : "\\grv ";
+         case '"': return isRegularText ? "\\dqt " : "\"";
+         case ' ': return isRegularText ? "\\spc " : "\\lspc ";
+         default:
+
+           if (codepoint >= 32 && codepoint <= 126)
+           {
+              return String.format("%c", codepoint);
+           }
+           else
+           {
+              return String.format("\\wrp{%c}", codepoint);
+           }
+      }
+   }
+
+    /**
+     * Escapes any hashes in input string.
      * @param string Input string.
      * @return String with hash escaped.
      */
@@ -508,7 +608,7 @@ public class TeXOSQuery
          filename = filename.replaceAll("\\\\", "/");
       }
 
-      path = escapeHash(filename);
+      path = escapeFileName(filename);
         
       return path;
    }
@@ -657,8 +757,12 @@ public class TeXOSQuery
    public String pdfDate(Calendar calendar)
    {
        String tz = String.format("%1$tz", calendar);
+
+       // Need to ensure "D" has category code 12
+
        return String.format(
-               "D:%1$tY%1$tm%1td%1$tH%1$tM%1$tS%2$s'%3$s'",
+               "%s:%2$tY%2$tm%2td%2$tH%2$tM%2$tS%3$s'%4$s'",
+               compatible < 2 ? "D" : "\\pdfd ",
                calendar,
                tz.substring(0, 3),
                tz.substring(3)
@@ -829,11 +933,11 @@ public class TeXOSQuery
 
                if (list[i].contains(separator))
                {
-                  builder.append(String.format("{%s}", escapeHash(list[i])));
+                  builder.append(String.format("{%s}", escapeFileName(list[i])));
                }
                else
                {
-                  builder.append(escapeHash(list[i]));
+                  builder.append(escapeFileName(list[i]));
                }
             }
          }
@@ -925,11 +1029,11 @@ public class TeXOSQuery
                             
                if (list[i].contains(separator))
                {
-                  builder.append(String.format("{%s}", escapeHash(list[i])));
+                  builder.append(String.format("{%s}", escapeFileName(list[i])));
                }
                else
                {
-                  builder.append(escapeHash(list[i]));
+                  builder.append(escapeFileName(list[i]));
                }
             }
                         
@@ -1618,13 +1722,16 @@ public class TeXOSQuery
        DecimalFormatSymbols fmtSyms 
                = DecimalFormatSymbols.getInstance(locale);
 
+       // Don't escape punctuation. For example, de-CH uses ' as
+       // number grouping separator.
+
        return String.format("{%s}{%s}{%s}{%s}{%s}{%s}",
-             escapeHash(fmtSyms.getGroupingSeparator()),
-             escapeHash(fmtSyms.getDecimalSeparator()),
-             escapeHash(fmtSyms.getExponentSeparator()), 
-             escapeHash(fmtSyms.getInternationalCurrencySymbol()),
-             escapeHash(fmtSyms.getCurrencySymbol()),
-             escapeHash(fmtSyms.getMonetaryDecimalSeparator()));
+             escapeText(fmtSyms.getGroupingSeparator()),
+             escapeText(fmtSyms.getDecimalSeparator()),
+             escapeText(fmtSyms.getExponentSeparator()), 
+             escapeText(fmtSyms.getInternationalCurrencySymbol()),
+             escapeText(fmtSyms.getCurrencySymbol()),
+             escapeText(fmtSyms.getMonetaryDecimalSeparator()));
    }
 
    /**
@@ -1784,7 +1891,7 @@ public class TeXOSQuery
          }
          else
          {
-            builder.appendCodePoint(codepoint);
+            builder.append(escapeText(codepoint));
          }
       }
 
@@ -1810,7 +1917,7 @@ public class TeXOSQuery
 
       for (int i = 0; i < 12; i++)
       {
-         monthNamesGroup.append(String.format("{%s}", names[i]));
+         monthNamesGroup.append(String.format("{%s}", escapeText(names[i])));
       }
 
       return monthNamesGroup.toString();
@@ -1927,19 +2034,23 @@ public class TeXOSQuery
 
       StringBuilder builder = new StringBuilder();
 
-      char prev = 0;
+      int prev = 0;
       int fieldLen = 0;
       boolean inString = false;
 
-      for (int i = 0, n = pattern.length(); i < n; i++)
+      for (int i = 0, n = pattern.length(), offset=1; i < n; i = i+offset)
       {
-         char c = pattern.charAt(i);
+         int codepoint = pattern.codePointAt(i);
+         offset = Character.charCount(codepoint);
+
+         int nextIndex = i+offset;
+         int nextCodePoint = (nextIndex < n ? pattern.codePointAt(nextIndex):0);
 
          if (inString)
          {
-            if (c == '\'')
+            if (codepoint == '\'')
             {
-               if (i == n-1 || pattern.charAt(i+1) != '\'')
+               if (nextCodePoint != '\'')
                {
                   // reached the end of the string
                   builder.append('}');
@@ -1955,16 +2066,16 @@ public class TeXOSQuery
             else
             {
                // still inside the string
-               builder.append(escapeFmtChar(c));
+               builder.append(escapeText(codepoint));
             }
          }
-         else if (c == prev)
+         else if (codepoint == prev)
          {
             fieldLen++;
          }
          else
          {
-            switch (c)
+            switch (codepoint)
             {
                case '\'': // quote
 
@@ -2004,7 +2115,7 @@ public class TeXOSQuery
                case 'z': // time zone (locale)
                case 'Z': // time zone (RFC 822)
                case 'X': // time zone (ISO 8601)
-                 prev = c;
+                 prev = codepoint;
                  fieldLen = 1;
                break;
                default:
@@ -2013,12 +2124,13 @@ public class TeXOSQuery
 
                  if (prev == 0)
                  {
-                     builder.append(escapeFmtChar(c));
+                     builder.append(escapeText(codepoint));
                  }
                  else
                  {
                      builder.append(String.format(
-                       "\\dtf{%d}{%c}%s", fieldLen, prev, escapeFmtChar(c)));
+                       "\\dtf{%d}{%c}%s", fieldLen, prev, 
+                       escapeText(codepoint)));
                  }
                  prev = 0;
                  fieldLen = 0;
@@ -2033,31 +2145,6 @@ public class TeXOSQuery
       }
 
       return builder.toString();
-   }
-
-   /**
-    * Processes a literal character. This escapes the hash # and
-    * the backslash, but also a space in case it follows a control
-    * sequence.
-    * @param c the character to be treated literally
-    * @return TeX code
-    */ 
-   private String escapeFmtChar(char c)
-   {
-      if (c == '\\')
-      {
-         // convert backslash
-         return "\\bks ";
-      }
-      else if (c == ' ')
-      {
-         // convert space
-         return "\\spc ";
-      }
-      else
-      {
-         return escapeHash(c);
-      }
    }
 
    /**
@@ -2397,26 +2484,30 @@ public class TeXOSQuery
 
       // count the number of digits
 
-      for (int i = 0, n = pattern.length(); i < n; i++)
+      for (int i = 0, n = pattern.length(), offset=1; i < n; i = i+offset)
       {
-         char c = pattern.charAt(i);
+         int codepoint = pattern.codePointAt(i);
+         offset = Character.charCount(codepoint);
+
+         int nextIndex = i+offset;
+         int nextCodePoint = (nextIndex < n ? pattern.codePointAt(nextIndex):0);
 
          if (inString)
          {
-            if (c == '\'')
+            if (codepoint == '\'')
             {
-               if (i == n-1 || pattern.charAt(i) != '\'')
+               if (nextCodePoint != '\'')
                {
                   inString = false;
                   i++;
                }
             }
          }
-         else if (c == '\'')
+         else if (codepoint == '\'')
          {
             inString = true;
          }
-         else if (c == '#' || c == '0')
+         else if (codepoint == '#' || codepoint == '0')
          {
             digitCount++;
          }
@@ -2428,11 +2519,15 @@ public class TeXOSQuery
 
       StringBuilder builder = new StringBuilder();
 
-      for (int i = 0, n = pattern.length(); i < n; i++)
+      for (int i = 0, n = pattern.length(), offset=1; i < n; i = i+offset)
       {
-         char c = pattern.charAt(i);
+         int codepoint = pattern.codePointAt(i);
+         offset = Character.charCount(codepoint);
 
-         switch (c)
+         int nextIndex = i+offset;
+         int nextCodePoint = (nextIndex < n ? pattern.codePointAt(nextIndex):0);
+
+         switch (codepoint)
          {
             case '\'':
 
@@ -2442,7 +2537,7 @@ public class TeXOSQuery
 
                  builder.append("\\str{");
               }
-              else if (i < n-1 && pattern.charAt(i+1) == '\'')
+              else if (nextCodePoint == '\'')
               {
                  builder.append("\\apo ");
                  i++;
@@ -2575,7 +2670,7 @@ public class TeXOSQuery
 
             break;
             default:
-              builder.append(escapeFmtChar(c));
+              builder.append(escapeText(codepoint));
          }
       }
 
@@ -2673,12 +2768,12 @@ public class TeXOSQuery
 
        String langRegionGroup = String.format("{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
              getLanguageTag(locale),
-             languageName,
-             localeLanguageName,
-             countryName,
-             localeCountryName,
-             escapeHash(variantName),
-             escapeHash(localeVariantName));
+             escapeText(languageName),
+             escapeText(localeLanguageName),
+             escapeText(countryName),
+             escapeText(localeCountryName),
+             escapeText(variantName),
+             escapeText(localeVariantName));
 
        DateFormat dateFullFormat = DateFormat.getDateInstance(
         DateFormat.FULL, locale);
@@ -2737,10 +2832,10 @@ public class TeXOSQuery
        }
 
        String dateGroup = String.format("{%s}{%s}{%s}{%s}{%d}",
-             dateFullFormat.format(now),
-             dateLongFormat.format(now),
-             dateMediumFormat.format(now),
-             dateShortFormat.format(now),
+             escapeText(dateFullFormat.format(now)),
+             escapeText(dateLongFormat.format(now)),
+             escapeText(dateMediumFormat.format(now)),
+             escapeText(dateShortFormat.format(now)),
              firstDay);
 
        String dateFmtGroup = String.format("{%s}{%s}{%s}{%s}",
@@ -2750,10 +2845,10 @@ public class TeXOSQuery
          formatDateTimePattern(dateShortFormat));
 
        String timeGroup = String.format("{%s}{%s}{%s}{%s}",
-             timeFullFormat.format(now),
-             timeLongFormat.format(now),
-             timeMediumFormat.format(now),
-             timeShortFormat.format(now));
+             escapeText(timeFullFormat.format(now)),
+             escapeText(timeLongFormat.format(now)),
+             escapeText(timeMediumFormat.format(now)),
+             escapeText(timeShortFormat.format(now)));
 
        String timeFmtGroup = String.format("{%s}{%s}{%s}{%s}",
          formatDateTimePattern(timeFullFormat),
@@ -2769,25 +2864,25 @@ public class TeXOSQuery
 
        String weekdayNamesGroup = String.format(
           "{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
-           names[Calendar.MONDAY],
-           names[Calendar.TUESDAY],
-           names[Calendar.WEDNESDAY],
-           names[Calendar.THURSDAY],
-           names[Calendar.FRIDAY],
-           names[Calendar.SATURDAY],
-           names[Calendar.SUNDAY]);
+           escapeText(names[Calendar.MONDAY]),
+           escapeText(names[Calendar.TUESDAY]),
+           escapeText(names[Calendar.WEDNESDAY]),
+           escapeText(names[Calendar.THURSDAY]),
+           escapeText(names[Calendar.FRIDAY]),
+           escapeText(names[Calendar.SATURDAY]),
+           escapeText(names[Calendar.SUNDAY]));
 
        names = dateFmtSyms.getShortWeekdays();
 
        String shortWeekdayNamesGroup = String.format(
           "{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
-           names[Calendar.MONDAY],
-           names[Calendar.TUESDAY],
-           names[Calendar.WEDNESDAY],
-           names[Calendar.THURSDAY],
-           names[Calendar.FRIDAY],
-           names[Calendar.SATURDAY],
-           names[Calendar.SUNDAY]);
+           escapeText(names[Calendar.MONDAY]),
+           escapeText(names[Calendar.TUESDAY]),
+           escapeText(names[Calendar.WEDNESDAY]),
+           escapeText(names[Calendar.THURSDAY]),
+           escapeText(names[Calendar.FRIDAY]),
+           escapeText(names[Calendar.SATURDAY]),
+           escapeText(names[Calendar.SUNDAY]));
 
        StringBuilder monthNamesGroup = new StringBuilder();
 
@@ -2796,7 +2891,7 @@ public class TeXOSQuery
        for (int i = 0; i < 12; i++)
        {
           // skip 13th month (Calendar.UNDECIMBER)
-          monthNamesGroup.append(String.format("{%s}", names[i]));
+          monthNamesGroup.append(String.format("{%s}", escapeText(names[i])));
        }
 
        StringBuilder shortMonthNamesGroup = new StringBuilder();
@@ -2805,7 +2900,8 @@ public class TeXOSQuery
 
        for (int i = 0; i < 12; i++)
        {
-          shortMonthNamesGroup.append(String.format("{%s}", names[i]));
+          shortMonthNamesGroup.append(String.format("{%s}", 
+            escapeText(names[i])));
        }
 
        // Get numerical data (as with getNumericalInfo)
@@ -2869,7 +2965,6 @@ public class TeXOSQuery
 
        String texCurrency = getTeXCurrency(currency);
 
-
        NumberFormat numFormat = NumberFormat.getNumberInstance(locale);
        NumberFormat intFormat = NumberFormat.getIntegerInstance(locale);
        NumberFormat curFormat = NumberFormat.getCurrencyInstance(locale);
@@ -2877,17 +2972,17 @@ public class TeXOSQuery
 
        String numGroup = String.format(
          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
-             escapeHash(fmtSyms.getGroupingSeparator()),
-             escapeHash(fmtSyms.getDecimalSeparator()),
-             escapeHash(fmtSyms.getExponentSeparator()), 
-             numFormat.isGroupingUsed(),
-             currencyCode,
-             localeCurrencyCode,
-             escapeHash(currency),
-             texCurrency,
-             escapeHash(fmtSyms.getMonetaryDecimalSeparator()),
-             escapeHash(fmtSyms.getPercent()),
-             escapeHash(fmtSyms.getPerMill()));
+             escapeText(fmtSyms.getGroupingSeparator()),
+             escapeText(fmtSyms.getDecimalSeparator()),
+             escapeText(fmtSyms.getExponentSeparator()), 
+             numFormat.isGroupingUsed(),// "true" or "false"
+             escapeText(currencyCode),
+             escapeText(localeCurrencyCode),
+             escapeText(currency),
+             texCurrency,// already escaped
+             escapeText(fmtSyms.getMonetaryDecimalSeparator()),
+             escapeText(fmtSyms.getPercent()),
+             escapeText(fmtSyms.getPerMill()));
 
        String numFmtGroup = String.format("{%s}{%s}{%s}{%s}",
          formatNumberPattern(numFormat),
@@ -3010,15 +3105,40 @@ public class TeXOSQuery
      */ 
    protected void print(boolean group, String info)
    {
-      if (group)
+      if (compatible == 0)
       {
-         System.out.println(String.format("{%s}", info));
+         // version 1.0 didn't use grouping
+         System.out.println(info);
       }
       else
       {
-         System.out.println(info);
+         if (group)
+         {
+            System.out.println(String.format("{%s}", info));
+         }
+         else
+         {
+            System.out.println(info);
+         }
       }
    }
+
+   /**
+    * Generate error for option not available in compatibility mode
+    * and exit.
+    * @param minLevel Minimum compatibility level
+    * @param option Option name
+    */ 
+   private void optionNotAvailable(int minLevel, String option)
+   {
+      System.err.println(String.format(
+        "'%s' option not available in compatibility mode %d.",
+        option, compatible));
+      System.err.println(String.format(
+       "Requires compatibility level %d or above (at least v1.%d)",
+        minLevel, minLevel));
+      System.exit(1);
+   } 
 
     /**
      * Process command line arguments.
@@ -3082,6 +3202,35 @@ public class TeXOSQuery
                }
             }
          }
+         else if (args[i].equals("--compatible"))
+         {
+            if (i == args.length-1)
+            {
+               System.err.println("--compatible <level> expected");
+               System.exit(1);
+            }
+
+            i++;
+
+            if (args[i].equals("latest"))
+            {
+               compatible = DEFAULT_COMPATIBLE;
+            }
+            else
+            {
+               try
+               {
+                  compatible = Integer.parseInt(args[i]);
+               }
+               catch (NumberFormatException e)
+               {
+                  System.err.println(String.format(
+                   "Invalid --compatible argument '%s'. (\"latest\" or %d to %d required)",
+                   args[i], 0, DEFAULT_COMPATIBLE));
+                  System.exit(1);
+               }
+            }
+         }
          else if (args[i].startsWith("-"))
          {
             actions++;
@@ -3104,43 +3253,71 @@ public class TeXOSQuery
          }
          else if (args[i].equals("-C") || args[i].equals("--codeset-lcs"))
          {
-            print(group, getCodeSet(true));
-         }
-         else if (args[i].equals("-b") || args[i].equals("--bcp47"))
-         {
-            // BCP47 language tag
-            print(group, getLanguageTag(null));
-         }
-         else if (args[i].equals("-N") || args[i].equals("--numeric"))
-         {
-            // Get the numeric information for the default or given
-            // locale (separators, currency symbol etc).
-
-            if (i == n || args[i+1].startsWith("-"))
+            if (compatible < 2)
             {
-               // Either at end of argument list or the next argument
-               // is a switch so use default locale.
-               print(group, getNumericalInfo(null));
+               optionNotAvailable(2, args[i]);
             }
             else
             {
-               print(group, getNumericalInfo(args[++i]));
+               print(group, getCodeSet(true));
+            }
+         }
+         else if (args[i].equals("-b") || args[i].equals("--bcp47"))
+         {
+            if (compatible < 2)
+            {
+               optionNotAvailable(2, args[i]);
+            }
+            else
+            {
+               // BCP47 language tag
+               print(group, getLanguageTag(null));
+            }
+         }
+         else if (args[i].equals("-N") || args[i].equals("--numeric"))
+         {
+            if (compatible < 2)
+            {
+               optionNotAvailable(2, args[i]);
+            }
+            else
+            {
+               // Get the numeric information for the default or given
+               // locale (separators, currency symbol etc).
+
+               if (i == n || args[i+1].startsWith("-"))
+               {
+                  // Either at end of argument list or the next argument
+                  // is a switch so use default locale.
+                  print(group, getNumericalInfo(null));
+               }
+               else
+               {
+                  print(group, getNumericalInfo(args[++i]));
+               }
             }
          }
          else if (args[i].equals("-D") || args[i].equals("--locale-data"))
          {
-            // Get the all available locale information for the default or given
-            // locale.
-
-            if (i == n || args[i+1].startsWith("-"))
+            if (compatible < 2)
             {
-               // Either at end of argument list or the next argument
-               // is a switch so use default locale.
-               print(group, getLocaleData(null));
+               optionNotAvailable(2, args[i]);
             }
             else
             {
-               print(group, getLocaleData(args[++i]));
+               // Get the all available locale information for the default or given
+               // locale.
+
+               if (i == n || args[i+1].startsWith("-"))
+               {
+                  // Either at end of argument list or the next argument
+                  // is a switch so use default locale.
+                  print(group, getLocaleData(null));
+               }
+               else
+               {
+                  print(group, getLocaleData(args[++i]));
+               }
             }
          }
          else if (args[i].equals("-c") || args[i].equals("--cwd"))
@@ -3378,6 +3555,10 @@ public class TeXOSQuery
                i++;
             }
          }
+         else if (args[i].equals("--compatible"))
+         {
+            i++;
+         }
          else
          {
              System.err.println(String.format("unknown option '%s'", args[i]));
@@ -3386,39 +3567,47 @@ public class TeXOSQuery
       }
    }
 
-    private String name;
+   private String name;
     
-    private static final String VERSION_NUMBER = "1.2";
-    private static final String VERSION_DATE = "2016-11-06";
-    private static final char BACKSLASH = '\\';
-    private static final long ZERO = 0L;
+   private static final int DEFAULT_COMPATIBLE=2;
+   private static final String VERSION_NUMBER = "1.2";
+   private static final String VERSION_DATE = "2016-11-10";
+   private static final char BACKSLASH = '\\';
+   private static final long ZERO = 0L;
 
-    /**
-     * Initialise current date-time for consistency.
-     */ 
+   /**
+    * Initialise current date-time for consistency.
+    */ 
 
-    private Date now = new Date();
+   private Date now = new Date();
 
-    /**
-     * openin_any settings
-     */
-    private static final char OPENIN_UNSET=0; // unset
-    private static final char OPENIN_A='a'; // any
-    private static final char OPENIN_R='r'; // restricted
-    private static final char OPENIN_P='p'; // paranoid
+   /**
+    * openin_any settings
+    */
+   private static final char OPENIN_UNSET=0; // unset
+   private static final char OPENIN_A='a'; // any
+   private static final char OPENIN_R='r'; // restricted
+   private static final char OPENIN_P='p'; // paranoid
 
-    private char openin = OPENIN_UNSET;
+   private char openin = OPENIN_UNSET;
 
-    private File texmfoutput = null;
+   private File texmfoutput = null;
 
-    /**
-     * Debug level. (0 = no debugging, 1 or more print messages to
-     * STDERR.)
-     */
-    private int debugLevel = 0;
+   /**
+    * Debug level. (0 = no debugging, 1 or more print messages to
+    * STDERR.)
+    */
+   private int debugLevel = 0;
 
-    // TeX can only go up to 2147483647, so set the maximum number
-    // of digits provided to the number formatter. 
+   /**
+    * Compatibility mode. Version 1.2 replaces escapeHash with
+    * escapeSpChars, which switches to using \\hsh etc. Provide a
+    * mode to restore the previous behaviour.
+    */ 
+   private int compatible = DEFAULT_COMPATIBLE;
 
-    private static final int MAX_DIGIT_FORMAT=10;
+   // TeX can only go up to 2147483647, so set the maximum number
+   // of digits provided to the number formatter. 
+
+   private static final int MAX_DIGIT_FORMAT=10;
 }
