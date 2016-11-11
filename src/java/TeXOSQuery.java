@@ -699,15 +699,22 @@ public class TeXOSQuery
    }
 
     /**
-     * Gets the current working directory. (Does this need to check
-     * if read is permitted here?) Doesn't seem to make much sense
-     * to bar the current working directory.
+     * Gets the current working directory.
      * @return The current working directory.
      */
    public String getCwd()
    {
-      // The result path needs to be converted to a TeX path.
-      return toTeXPath(getSystemProperty("user.dir", "."));
+      File dir = new File(getSystemProperty("user.dir", "."));
+
+      if (!isReadPermitted(dir))
+      {
+         // perhaps the current directory is hidden?
+         debug("read access not permitted for the current directory");
+         return "";
+      }
+
+      // The resulting path needs to be converted to a TeX path.
+      return toTeXPath(dir.getAbsolutePath());
    }
 
     /**
@@ -874,87 +881,17 @@ public class TeXOSQuery
    }
 
     /**
-     * Gets the list of files from a directory.
+     * Gets the list of files from a directory. This uses
+     * getFilterFileList to filter out files prohibited by the
+     * openin_any setting.
      * @param separator Separator.
      * @param directory Directory.
      * @return List as a string.
      */
    public String getFileList(String separator, File directory)
    {
-      if (directory == null)
-      {
-         // shouldn't happen, but just in case...
-
-         debug("Unable to list contents (null directory)");
-         return "";
-      }
-
-      if (!directory.exists())
-      {
-         debug(String.format(
-               "Unable to list contents of '%s' (no such directory)",
-               directory.toString()));
-         return "";
-      }
-
-      if (!directory.isDirectory())
-      {
-         debug(String.format(
-               "Unable to list contents of '%s' (not a directory)",
-               directory.toString()));
-         return "";
-      }
-
-      if (!isReadPermitted(directory))
-      {
-         debug(String.format("No read access for '%s'", directory));
-         return "";
-      }
-        
-      try
-      {
-         StringBuilder builder = new StringBuilder();
-
-         String[] list = directory.list();
-
-         if (list != null)
-         {
-            for (int i = 0; i < list.length; i++)
-            {
-               if (i > 0)
-               {
-                  builder.append(separator);
-               }
-                        
-               // Don't need toTeXPath as the path isn't included.
-               // Just the base file name.
-               // If the file name includes the list separator (who 
-               // would do that?) group the name.
-
-               if (list[i].contains(separator))
-               {
-                  builder.append(String.format("{%s}", escapeFileName(list[i])));
-               }
-               else
-               {
-                  builder.append(escapeFileName(list[i]));
-               }
-            }
-         }
-                
-         return builder.toString();
-      }
-      catch (Exception exception)
-      {
-         // Catch all possible exceptions
-         debug(String.format("Unable to list contents of '%s'",
-               directory.toString()),
-               exception);
-      }
-
-      // Unsuccessful
-      return "";
-    }
+      return getFilterFileList(separator, ".*", directory);
+   }
 
     /**
      * Gets a filtered list of files from directory.
@@ -1000,8 +937,9 @@ public class TeXOSQuery
         
       if ((regex == null) || ("".equals(regex)))
       {
-         // null or empty regular expression so just list all files
-         return getFileList(separator, directory);
+         // null or empty regular expression forbidden
+         debug("Null or empty regular expression in getFilterFileList");
+         return "";
       }
 
       StringBuilder builder = new StringBuilder();
@@ -1014,6 +952,14 @@ public class TeXOSQuery
                @Override
                public boolean accept(File dir, String name)
                {
+                  File file = new File(dir, name);
+ 
+                  if (!isReadPermitted(file))
+                  {
+                     debug(String.format("No read access for '%s'", file));
+                     return false;
+                  }
+
                   return name.matches(regex);
                }
             });
@@ -3013,19 +2959,20 @@ public class TeXOSQuery
      */
    protected void syntax()
    {
-      System.out.println(String.format("Usage: %s <option>...", name));
+      System.out.println(String.format("Usage: %s [<options>] <actions>", name));
 
       System.out.println();
       System.out.println("Cross-platform OS query application");
       System.out.println("for use with TeX's shell escape.");
       System.out.println();
       System.out.println("Each query displays the result in a single line.");
-      System.out.println("A blank line is printed if the requested");
+      System.out.println("An empty string is printed if the requested");
       System.out.println("information is unavailable or not permitted.");
-      System.out.println();
-      System.out.println("TeX's openin_any setting is checked before attempting");
-      System.out.println("to access file information.");
+      System.out.println("Multiple actions group the results.");
+      System.out.println("See the manual (texdoc texosquery) for further details.");
 
+      System.out.println();
+      System.out.println("Options:");
       System.out.println();
       System.out.println("-h or --help\tDisplay this help message and exit");
       System.out.println("-v or --version\tDisplay version information and exit");
@@ -3035,8 +2982,11 @@ public class TeXOSQuery
       System.out.println("\t0: no debugging (same as --nodebug)");
       System.out.println("\t1: basic debugging messages");
       System.out.println("\t2: additionally display stack trace.");
+      System.out.println("--compatible <n>\tCompatibility setting.");
+      System.out.println("\t\t<n> should be an integer (0 for version 1.0, 1 for version 1.1 etc) or \"latest\" for current version");
+
       System.out.println();
-      System.out.println("General:");
+      System.out.println("General actions:");
       System.out.println();
       System.out.println("-c or --cwd\t\tDisplay current working directory");
       System.out.println("-m or --userhome\tDisplay user's home directory");
@@ -3048,7 +2998,7 @@ public class TeXOSQuery
       System.out.println("-T or --datetime\t\tDisplay all the date and time fields for the current time");
 
       System.out.println();
-      System.out.println("Locale Information:");
+      System.out.println("Locale actions:");
       System.out.println();
 
       System.out.println("-L or --locale\t\tDisplay POSIX locale information");
@@ -3061,10 +3011,13 @@ public class TeXOSQuery
 
 
       System.out.println();
-      System.out.println("File Queries:");
+      System.out.println("File actions:");
       System.out.println();
+      System.out.println("TeX's openin_any setting is checked before attempting");
+      System.out.println("to access file information.");
       System.out.println("Paths should use / for the directory divider.");
       System.out.println();
+
       System.out.println("-d <file> or --pdfdate <file>");
       System.out.println("  Display date stamp of <file> in PDF format");
       System.out.println();
@@ -3401,78 +3354,61 @@ public class TeXOSQuery
          }
          else if (args[i].equals("-i") || args[i].equals("--list"))
          {
-            i++;
-
-            if (i >= args.length)
-            {
-               System.err.println(String.format(
-                  "separator and directory name expected after %s",
-                  args[i - 1]));
-               System.exit(1);
-            }
-
-            i++;
-
-            if (i >= args.length)
+            if (i+2 >= args.length)
             {
                System.err.println(
-                  String.format("directory name expected after %s %s",
-                  args[i - 2], args[i - 1]));
+                  String.format(
+                     "<separator> <directory> expected after %s",
+                     args[i]));
                System.exit(1);
             }
 
-            if ("".equals(args[i]))
+            String separator = args[++i];
+            String dir = args[++i];
+
+            if ("".equals(dir))
             {
+               debug(String.format("invalid empty directory name in %s", args[i-2]));
                print(group, "");
             }
             else
             {
-               print(group, getFileList(args[i - 1],
-                            new File(fromTeXPath(args[i]))));
+               print(group, getFileList(separator,
+                            new File(fromTeXPath(dir))));
             }
          }
          else if (args[i].equals("-f") || args[i].equals("--filterlist"))
          {
             // Filtered directory listing
-            i++;
 
-            if (i >= args.length)
+            if (i+3 >= args.length)
             {
                System.err.println(
                   String.format(
-                     "separator, regex and directory name expected after %s",
-                     args[i - 1]));
+                     "<separator> <regex> <directory> expected after %s",
+                     args[i]));
                System.exit(1);
             }
 
-            i++;
+            String separator = args[++i];
+            String regex = args[++i];
 
-            if (i >= args.length)
+            if ("".equals(regex))
             {
-               System.err.println(
-                  String.format("regex and directory name expected after %s %s",
-                  args[i - 2], args[i - 1]));
-               System.exit(1);
+               regex = ".*";
             }
 
-            i++;
+            String dir = args[++i];
 
-            if (i >= args.length)
+            if ("".equals(dir))
             {
-               System.err.println(
-                 String.format("directory name expected after %s %s",
-                 args[i - 3], args[i - 2], args[i - 1]));
-               System.exit(1);
-            }
-
-            if ("".equals(args[i]))
-            {
+               debug(String.format("invalid empty directory name in %s", args[i-3]));
                print(group, "");
             }
             else
             {
                print(group, getFilterFileList(
-                  args[i - 2], args[i - 1], new File(fromTeXPath(args[i]))));
+                  separator, regex, new File(fromTeXPath(dir))));
             }
          }
          else if (args[i].equals("-u") || args[i].equals("--uri"))
