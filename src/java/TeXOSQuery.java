@@ -2970,22 +2970,41 @@ public class TeXOSQuery
       System.out.println("An empty string is printed if the requested");
       System.out.println("information is unavailable or not permitted.");
       System.out.println("Multiple actions group the results.");
+      System.out.println();
       System.out.println("See the manual (texdoc texosquery) for further details.");
 
       System.out.println();
       System.out.println("Options:");
       System.out.println();
 
-      System.out.println("-h or --help\tDisplay this help message and exit");
-      System.out.println("-v or --version\tDisplay version information and exit");
-      System.out.println("--nodebug\tNo debugging messages (default)");
-      System.out.println("--debug <n>\tDisplay debugging messages on STDOUT.");
+      System.out.println("-h or --help");
+      System.out.println("\tDisplay this help message and exit.");
+      System.out.println();
+
+      System.out.println("-v or --version");
+      System.out.println("\tDisplay version information and exit.");
+      System.out.println();
+
+      System.out.println("--nodebug");
+      System.out.println("\tNo debugging messages (default)");
+      System.out.println();
+
+      System.out.println("--debug <n>");
+      System.out.println("\tDisplay debugging messages on STDOUT.");
       System.out.println("\t<n> should be an integer:");
       System.out.println("\t0: no debugging (same as --nodebug)");
       System.out.println("\t1: basic debugging messages");
       System.out.println("\t2: additionally display stack trace.");
-      System.out.println("--compatible <n>\tCompatibility setting.");
-      System.out.println("\t\t<n> should be an integer (0 for version 1.0, 1 for version 1.1 etc) or \"latest\" for current version");
+      System.out.println();
+
+      System.out.println("--compatible <n>");
+      System.out.println("\tCompatibility setting.");
+      System.out.println("\t<n> should be \"latest\" (default) or an integer:");
+
+      for (int i = 0; i < DEFAULT_COMPATIBLE; i++)
+      {
+         System.out.println(String.format("\t%d: version 1.%d", i, i));
+      }
 
       System.out.println();
       System.out.println("General actions:");
@@ -3014,9 +3033,9 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("File actions:");
       System.out.println();
+      System.out.println("Paths should use / for the directory divider.");
       System.out.println("TeX's openin_any setting is checked before attempting");
       System.out.println("to access file information.");
-      System.out.println("Paths should use / for the directory divider.");
       System.out.println();
 
       for (QueryAction action : availableActions)
@@ -3279,7 +3298,7 @@ public class TeXOSQuery
       public int parseArgs(String[] args, int index)
       throws IllegalArgumentException
       {
-         invokedName = args[index];
+         invokedName = args[index++];
 
          optionalProvided = 0;
 
@@ -3296,7 +3315,7 @@ public class TeXOSQuery
                break;
             }
 
-            optionalArgs[optionalProvided++] = args[++index];
+            optionalArgs[optionalProvided++] = args[index++];
          }
 
          if (required > 0)
@@ -3313,9 +3332,7 @@ public class TeXOSQuery
                  invokedName, getUsage(invokedName)));
             }
 
-            requiredArgs[i] = args[index];
-
-            index++;
+            requiredArgs[i] = args[index++];
          }
 
          return index;
@@ -3366,7 +3383,11 @@ public class TeXOSQuery
               getUsage(longName));
          }
 
-         return String.format("%s\t%s", usage, description);
+         int n = usage.length();
+
+         // This could do with a bit of neatening. Some of the
+         // descriptions need line wrapping.
+         return String.format("%s%n\t%s.%n", usage, description);
       }
 
       public String doAction() throws IllegalArgumentException
