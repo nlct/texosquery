@@ -3053,10 +3053,10 @@ public class TeXOSQuery
 
     /**
      * Prints the information with optional grouping.
-     * @param group Determines whether to add grouping
+     * @param numActions Add grouping if actions &gt; 1
      * @param info Information to print
      */ 
-   protected void print(boolean group, String info)
+   protected void print(int numActions, String info)
    {
       if (compatible == 0)
       {
@@ -3065,7 +3065,7 @@ public class TeXOSQuery
       }
       else
       {
-         if (group)
+         if (numActions > 1)
          {
             System.out.println(String.format("{%s}", info));
          }
@@ -3093,6 +3093,13 @@ public class TeXOSQuery
       System.exit(1);
    } 
 
+   private void optionTooLate(String option)
+   {
+      System.err.println(String.format(
+       "option '%s' must come before actions", option));
+      System.exit(1);
+   }
+
     /**
      * Process command line arguments.
      * @param args Command line arguments.
@@ -3106,103 +3113,19 @@ public class TeXOSQuery
          System.exit(1);
       }
 
-      // search for --help, --version, --debug and --nodebug before
-      // processing actions.
-
       int actions = 0;
-
-      for (int i = 0; i < args.length; i++)
-      {
-         if (args[i].equals("-h") || args[i].equals("--help"))
-         {
-            syntax();
-            System.exit(0);
-         }
-         else if (args[i].equals("-v") || args[i].equals("--version"))
-         {
-            version();
-            System.exit(0);
-         }
-         else if (args[i].equals("--nodebug"))
-         {
-            debugLevel = 0;
-         }
-         else if (args[i].equals("--debug"))
-         {
-            if (i == args.length-1)
-            {
-               debugLevel = 1;
-            }
-            else if (args[i+1].startsWith("-"))
-            {
-               // Negative level not permitted, so next argument
-               // must be a switch.
-               debugLevel = 1;
-            }
-            else
-            {
-               i++;
-
-               try
-               {
-                  debugLevel = Integer.parseInt(args[i]);
-               }
-               catch (NumberFormatException e)
-               {
-                  System.err.println(String.format(
-                    "Debug level '%s' not recognised", args[i]));
-                  System.exit(1);
-               }
-            }
-         }
-         else if (args[i].equals("--compatible"))
-         {
-            if (i == args.length-1)
-            {
-               System.err.println("--compatible <level> expected");
-               System.exit(1);
-            }
-
-            i++;
-
-            if (args[i].equals("latest"))
-            {
-               compatible = DEFAULT_COMPATIBLE;
-            }
-            else
-            {
-               try
-               {
-                  compatible = Integer.parseInt(args[i]);
-               }
-               catch (NumberFormatException e)
-               {
-                  System.err.println(String.format(
-                   "Invalid --compatible argument '%s'. (\"latest\" or %d to %d required)",
-                   args[i], 0, DEFAULT_COMPATIBLE));
-                  System.exit(1);
-               }
-            }
-         }
-         else if (args[i].startsWith("-"))
-         {
-            actions++;
-         }
-      }
-
-      boolean group = (actions > 1);
 
       for (int i = 0, n=args.length-1; i < args.length; i++)
       {
          if (args[i].equals("-L") || args[i].equals("--locale"))
          {
             // POSIX style locale with unconverted codeset.
-            print(group, getLocale(Locale.getDefault()));
+            print(++actions, getLocale(Locale.getDefault()));
          }
          else if (args[i].equals("-l") || args[i].equals("--locale-lcs"))
          {
             // POSIX style locale with converted codeset.
-            print(group, getLocale(Locale.getDefault(), true));
+            print(++actions, getLocale(Locale.getDefault(), true));
          }
          else if (args[i].equals("-C") || args[i].equals("--codeset-lcs"))
          {
@@ -3212,7 +3135,7 @@ public class TeXOSQuery
             }
             else
             {
-               print(group, getCodeSet(true));
+               print(++actions, getCodeSet(true));
             }
          }
          else if (args[i].equals("-b") || args[i].equals("--bcp47"))
@@ -3224,7 +3147,7 @@ public class TeXOSQuery
             else
             {
                // BCP47 language tag
-               print(group, getLanguageTag(null));
+               print(++actions, getLanguageTag(null));
             }
          }
          else if (args[i].equals("-N") || args[i].equals("--numeric"))
@@ -3242,11 +3165,11 @@ public class TeXOSQuery
                {
                   // Either at end of argument list or the next argument
                   // is a switch so use default locale.
-                  print(group, getNumericalInfo(null));
+                  print(++actions, getNumericalInfo(null));
                }
                else
                {
-                  print(group, getNumericalInfo(args[++i]));
+                  print(++actions, getNumericalInfo(args[++i]));
                }
             }
          }
@@ -3265,48 +3188,48 @@ public class TeXOSQuery
                {
                   // Either at end of argument list or the next argument
                   // is a switch so use default locale.
-                  print(group, getLocaleData(null));
+                  print(++actions, getLocaleData(null));
                }
                else
                {
-                  print(group, getLocaleData(args[++i]));
+                  print(++actions, getLocaleData(args[++i]));
                }
             }
          }
          else if (args[i].equals("-c") || args[i].equals("--cwd"))
          {
             // current working directory
-            print(group, getCwd());
+            print(++actions, getCwd());
          } 
          else if (args[i].equals("-m") || args[i].equals("--userhome"))
          {
             // user's home directory
-            print(group, getUserHome());
+            print(++actions, getUserHome());
          }
          else if (args[i].equals("-t") || args[i].equals("--tmpdir"))
          {
             // temporary directory
-            print(group, getTmpDir());
+            print(++actions, getTmpDir());
          }
          else if (args[i].equals("-r") || args[i].equals("--osversion"))
          {
             // OS version
-            print(group, getOSversion());
+            print(++actions, getOSversion());
          } 
          else if (args[i].equals("-a") || args[i].equals("--osarch"))
          {
             // OS architecture
-            print(group, getOSarch());
+            print(++actions, getOSarch());
          }
          else if (args[i].equals("-o") || args[i].equals("--osname"))
          {
             // OS name
-            print(group, getOSname());
+            print(++actions, getOSname());
          }
          else if (args[i].equals("-n") || args[i].equals("--pdfnow"))
          {
             // current date time in PDF format
-            print(group, pdfnow());
+            print(++actions, pdfnow());
          }
          else if (args[i].equals("-d") || args[i].equals("--pdfdate"))
          {
@@ -3325,11 +3248,12 @@ public class TeXOSQuery
                // empty file name (perhaps user has done something
                // like \TeXOSQuery{-d "\filename"} where \filename
                // is empty?)
-               print(group, "");
+               debug(String.format("Empty file name in %s", args[i-2]));
+               print(++actions, "");
             }
             else
             {
-               print(group, pdfDate(fileFromTeXPath(args[i])));
+               print(++actions, pdfDate(fileFromTeXPath(args[i])));
             }
          }
          else if (args[i].equals("-s") || args[i].equals("--filesize"))
@@ -3345,11 +3269,12 @@ public class TeXOSQuery
 
             if ("".equals(args[i]))
             {
-               print(group, "");
+               debug(String.format("Empty file name in %s", args[i-2]));
+               print(++actions, "");
             }
             else
             {
-               print(group, getFileLength(fileFromTeXPath(args[i])));
+               print(++actions, getFileLength(fileFromTeXPath(args[i])));
             }
          }
          else if (args[i].equals("-i") || args[i].equals("--list"))
@@ -3368,12 +3293,12 @@ public class TeXOSQuery
 
             if ("".equals(dir))
             {
-               debug(String.format("invalid empty directory name in %s", args[i-2]));
-               print(group, "");
+               debug(String.format("Empty directory name in %s", args[i-2]));
+               print(++actions, "");
             }
             else
             {
-               print(group, getFileList(separator,
+               print(++actions, getFileList(separator,
                             new File(fromTeXPath(dir))));
             }
          }
@@ -3402,12 +3327,12 @@ public class TeXOSQuery
 
             if ("".equals(dir))
             {
-               debug(String.format("invalid empty directory name in %s", args[i-3]));
-               print(group, "");
+               debug(String.format("Empty directory name in %s", args[i-3]));
+               print(++actions, "");
             }
             else
             {
-               print(group, getFilterFileList(
+               print(++actions, getFilterFileList(
                   separator, regex, new File(fromTeXPath(dir))));
             }
          }
@@ -3419,17 +3344,18 @@ public class TeXOSQuery
             if (i >= args.length)
             {
                System.err.println(
-                 String.format("filename expected after %s", args[i - 1]));
+                 String.format("Filename expected after %s", args[i - 1]));
                System.exit(1);
             }
 
             if ("".equals(args[i]))
             {
-               print(group, "");
+               debug(String.format("Empty file name in %s action", args[i-1]));
+               print(++actions, "");
             }
             else
             {
-               print(group, fileURI(fileFromTeXPath(args[i])));
+               print(++actions, fileURI(fileFromTeXPath(args[i])));
             }
          }
          else if (args[i].equals("-p") || args[i].equals("--path"))
@@ -3440,17 +3366,18 @@ public class TeXOSQuery
             if (i >= args.length)
             {
                System.err.println(
-                 String.format("filename expected after %s", args[i - 1]));
+                 String.format("Filename expected after %s", args[i - 1]));
                System.exit(1);
             }
 
             if ("".equals(args[i]))
             {
-               print(group, "");
+               debug(String.format("Empty file name in %s action", args[i-1]));
+               print(++actions, "");
             }
             else
             {
-               print(group, filePath(fileFromTeXPath(args[i])));
+               print(++actions, filePath(fileFromTeXPath(args[i])));
             }
          }
          else if (args[i].equals("-e") || args[i].equals("--dirname"))
@@ -3461,46 +3388,121 @@ public class TeXOSQuery
             if (i >= args.length)
             {
                System.err.println(
-                 String.format("filename expected after %s", args[i - 1]));
+                 String.format("Filename expected after %s", args[i - 1]));
                System.exit(1);
             }
 
             if ("".equals(args[i]))
             {
-               print(group, "");
+               debug(String.format("Empty file name in %s action", args[i-1]));
+               print(++actions, "");
             }
             else
             {
-               print(group, 
-               parentPath(fileFromTeXPath(args[i])));
+               print(++actions, parentPath(fileFromTeXPath(args[i])));
             }
          }
-         else if (args[i].equals("-h") || args[i].equals("--help")
-                || args[i].equals("-v") || args[i].equals("--version")
-                || args[i].equals("--nodebug"))
+         else if (args[i].equals("-h") || args[i].equals("--help"))
          {
-            // already dealt with these
+            syntax();
+            System.exit(0);
+         }
+         else if (args[i].equals("-v") || args[i].equals("--version"))
+         {
+            version();
+            System.exit(0);
+         }
+         else if (args[i].equals("--nodebug"))
+         {
+            if (actions > 0)
+            {
+               optionTooLate(args[i]);
+            }
+
+            debugLevel = 0;
          }
          else if (args[i].equals("--debug"))
          {
-            // already dealt with this but need to increment loop
-            // variable if there's an argument.
+            if (actions > 0)
+            {
+               optionTooLate(args[i]);
+            }
 
-            if (i < n && !args[i+1].startsWith("-"))
+            if (i == args.length-1)
+            {
+               debugLevel = 1;
+            }
+            else if (args[i+1].startsWith("-"))
+            {
+               // Negative level not permitted, so next argument
+               // must be a switch.
+               debugLevel = 1;
+            }
+            else
             {
                i++;
+
+               try
+               {
+                  debugLevel = Integer.parseInt(args[i]);
+               }
+               catch (NumberFormatException e)
+               {
+                  System.err.println(String.format(
+                    "Debug level '%s' not recognised", args[i]));
+                  System.exit(1);
+               }
             }
          }
          else if (args[i].equals("--compatible"))
          {
+            if (actions > 0)
+            {
+               optionTooLate(args[i]);
+            }
+
+            if (i == args.length-1)
+            {
+               System.err.println("--compatible <level> expected");
+               System.exit(1);
+            }
+
             i++;
+
+            if (args[i].equals("latest"))
+            {
+               compatible = DEFAULT_COMPATIBLE;
+            }
+            else
+            {
+               try
+               {
+                  compatible = Integer.parseInt(args[i]);
+               }
+               catch (NumberFormatException e)
+               {
+                  System.err.println(String.format(
+                   "Invalid --compatible argument '%s'. (\"latest\" or %d to %d required)",
+                   args[i], 0, DEFAULT_COMPATIBLE));
+                  System.exit(1);
+               }
+            }
          }
          else
          {
-             System.err.println(String.format("unknown option '%s'", args[i]));
+             System.err.println(String.format(
+               "Unknown option '%s'. Try %s --help", args[i], name));
              System.exit(1);
          }
       }
+
+      if (actions == 0)
+      {
+         System.err.println(String.format(
+           "One or more actions required. Try %s --help", name));
+         System.exit(1);
+      }
+
    }
 
    private String name;
