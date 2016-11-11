@@ -48,7 +48,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{839}
+\CheckSum{842}
 
 \RecordChanges
 \PageIndex
@@ -74,6 +74,10 @@
 \newenvironment{important}
  {\begin{quote}\textbf{Important Note:}}
  {\end{quote}}
+
+\setcounter{secnumdepth}{2}
+
+\pdfstringdefDisableCommands{\renewcommand\meta[1]{#1}}
 
 \begin{document}
 \DocInput{texosquery.dtx}
@@ -227,7 +231,7 @@
 %absolute path that isn't under \texttt{\$TEXMFOUTPUT} (assuming
 %that environment variable hasn't been set to \file{/tmp}).
 %
-%\section{Locales}
+%\subsection{Locales}
 %\label{sec:locales}
 %The options that have a locale identifier as an argument need the
 %identifier formatted as a regular
@@ -286,27 +290,115 @@
 %The syntax for the command line invocation of \app{texosquery}
 %is:
 %\begin{flushleft}\ttfamily
-%texosquery \meta{action} ...
+%texosquery \oarg{options} \meta{action} ...
 %\end{flushleft}
 %or
 %\begin{flushleft}\ttfamily
-%texosquery.sh \meta{action} ...
+%texosquery.sh \oarg{options} \meta{action} ...
 %\end{flushleft}
 %The syntax for \app{texosquery-jre8} is exactly the same except
 %for the application name:
 %\begin{flushleft}\ttfamily
-%texosquery-jre8 \meta{action} ...
+%texosquery-jre8 \oarg{options} \meta{action} ...
 %\end{flushleft}
 %or
 %\begin{flushleft}\ttfamily
-%texosquery-jre8.sh \meta{action} ...
+%texosquery-jre8.sh \oarg{options} \meta{action} ...
 %\end{flushleft}
-%Similarly for \app{texosquery-jre5}.
+%Similarly for \app{texosquery-jre5}. Available actions are
+%described below. At least one action is required.
 %
-%Available actions (at least one required):
+%Available options (must come before actions):
 %\begin{description}
-%\item[\shortarg{L} or \longarg{locale}] Display the locale
-%information in the form
+%\item[\shortarg{h} or \longarg{help}] Displays help message and
+%exits.
+%\item[\shortarg{v} or \longarg{version}] Displays version
+%information and exits.
+%\item[\longarg{nodebug}] No debugging information. Only command
+%line syntax errors are written to STDERR. (Default.)
+%\item[\longarg{debug} \oarg{n}] Set the debugging level, where
+%\meta{n} is a non-negative integer.
+%If \meta{n} is omitted, 1 is assumed. If \meta{n} is 0, then
+%debugging information is suppressed (equivalent to
+%\longarg{nodebug}). If \meta{n} $\geq 1$, error messages are
+%written to STDERR. If \meta{n} $\geq 2$, any exceptions encountered
+%will additionally write the stack trace to STDERR. If \meta{n}
+%$\geq 3$ non-error informational messages are included.
+%\item[\longarg{compatible} \meta{n}] Set the compatibility mode.
+%The argument should be either a non-negative integer (0 for version
+%1.0, 1 for version 1.1, etc) or the keyword \texttt{latest} to
+%indicate the latest version (default). Note that the compatibility
+%mode on affects the available actions and the display style of the
+%result. For example, the check for the \texttt{openin\_any} setting
+%was only introduced to version 1.2, but this is still checked even
+%if the compatibility mode is set to 0 or 1 since this is a security
+%feature.
+%\end{description}
+%
+%If multiple actions are given, they will be processed in the
+%order specified in the command line invocation. Each result will
+%be displayed on a separate line. As from v1.1, if there are
+%multiple actions, each result will be grouped. This makes it easier
+%to process the results in \TeX. For example:
+%\begin{verbatim}
+%texosquery -l
+%\end{verbatim}
+%This just produces (for me):
+%\begin{verbatim}
+%en-GB.utf8
+%\end{verbatim}
+%whereas
+%\begin{verbatim}
+%texosquery -l -n
+%\end{verbatim}
+%produces:
+%\begin{verbatim}
+%{en-GB.utf8}
+%{D:20160714112732+01'00'}
+%\end{verbatim}
+%To reproduce the v1.0 display use \longarg{compatible}\texttt{ 0}.
+%
+%Note that unavailable information will produce an empty group.
+%For example (assuming \file{nofile} doesn't exist):
+%\begin{verbatim}
+%texosquery -l -d nofile -n
+%\end{verbatim}
+%produces:
+%\begin{verbatim}
+%{en-GB.utf8}
+%{}
+%{D:20160714112732+01'00'}
+%\end{verbatim}
+%whereas 
+%\begin{verbatim}
+%texosquery -d nofile
+%\end{verbatim}
+%just displays an empty line.
+%
+%If you're puzzled as to why an empty line has been returned, try
+%rerunning the command with \longarg{debug} for further information.
+%Available actions are listed below.
+%
+%\subsubsection{Action \shortarg{b} or \longarg{bcp47}}
+%(New to version 1.2.) This action displays the BCP~47 language tag.
+%For example, my locale is \texttt{en-GB} (English in the United
+%Kingdom), so
+%\begin{verbatim}
+%texosquery -b
+%\end{verbatim}
+%Simply returns:
+%\begin{verbatim}
+%en-GB
+%\end{verbatim}
+%whereas a user whose default locale is set to Swiss German with the
+%new orthography would get:
+%\begin{verbatim}
+%de-CH-1996
+%\end{verbatim}
+%
+%\subsubsection{Action \shortarg{L} or \longarg{locale}}
+%
+%This action displays the locale information in the POSIX form
 %\begin{flushleft}\ttfamily
 %\meta{lang}-\meta{region}.\meta{codeset}@\meta{modifier}
 %\end{flushleft}
@@ -318,33 +410,196 @@
 % if unavailable. For example, \texttt{en-GB.UTF-8} has the
 % \meta{modifier} omitted, and \texttt{en} has all but the language
 % omitted.
-%\item[\shortarg{l} or \longarg{locale-lcs}] As the above but the
-%codeset is converted to lower case and any hyphens are
-%stripped. For example, if \longargfmt{locale} returns
-%\texttt{en-GB.UTF-8}, then \longargfmt{locale-lcs} would return
-%\texttt{en-GB.utf8}.
-%\item[\shortarg{C} or \longarg{codeset-lcs}] (New to version 1.2.)
-%Obtains just the codeset converted to lower case with hyphens stripped.
-%\item[\shortarg{b} or \longarg{bcp47}] (New to version 1.2.)
-%Displays the BCP~47 language tag.
 %
-%\item[\shortarg{c} or \longarg{cwd}] Displays the current working
-%directory.
-%\item[\shortarg{m} or \longarg{userhome}] Displays the user's home
-%directory.
-%\item[\shortarg{t} or \longarg{tmpdir}] Displays the temporary
-%directory.
-%\item[\shortarg{o} or \longarg{osname}] Displays the operating
-%system name.
-%\item[\shortarg{r} or \longarg{osversion}] Displays the operating
-%system version.
-%\item[\shortarg{a} or \longarg{osarch}] Displays the operating
-%system architecture.
-%\item[\shortarg{N} \oarg{language tag} or \longarg{numeric}
-%\oarg{language tag}]
-%(New to v1.2.) Displays \marg{grp sep}\marg{dec sep}\marg{exp
-%sep}\marg{cur code}\marg{cur sym}\marg{cur sep} for the 
-%\meta{language tag} given in the optional argument. If omitted, the
+%\subsubsection{Action \shortarg{l} or \longarg{locale-lcs}}
+%
+%This action is similar to \longarg{locale}, but the codeset is converted to 
+%lower case and any hyphens are stripped. For example, if \longargfmt{locale} 
+%returns \texttt{en-GB.UTF-8}, then \longargfmt{locale-lcs} would return
+%\texttt{en-GB.utf8}.
+%
+%\subsubsection{Action \shortarg{C} or \longarg{codeset-lcs}}
+%
+%(New to version 1.2.)
+%This action returns just the codeset converted to lower case with hyphens 
+%stripped.  For example, my default file encoding is UTF-8, so 
+%\begin{verbatim}
+%texosquery -C
+%\end{verbatim}
+%returns
+%\begin{verbatim}
+%utf8
+%\end{verbatim}
+%This action is used by the \sty{locale} package to determine the
+%option to use when it needs to automatically load the
+%\sty{inputenc} package.
+%
+%\subsubsection{Action \shortarg{o} or \longarg{osname}}
+%
+%This action displays the operating system name. For example, for me this
+%produces:
+%\begin{verbatim}
+%Linux
+%\end{verbatim}
+%
+%\subsubsection{Action \shortarg{r} or \longarg{osversion}}
+%
+%This action displays the operating system version. For example, for me this
+%produces:
+%\begin{verbatim}
+%4.1.13-100.fc21.x86_64
+%\end{verbatim}
+%Note that \cs{TeXOSQuery} locally changes the category code of the
+%underscore character \verb|_| to 12.
+%
+%\subsubsection{Action \shortarg{a} or \longarg{osarch}}
+%
+%This action displays the operating system architecture. For example, for me 
+%this produces:
+%\begin{verbatim}
+%amd64
+%\end{verbatim}
+%
+%\subsubsection{Action \shortarg{n} or \longarg{pdfnow}}
+%
+%This action displays the current date and time in PDF format. For example 
+%\begin{verbatim}
+%\pdfd :20160704131006+01'00'
+%\end{verbatim}
+%This uses a shorthand tag \cs{pdfd} that's locally redefined by
+%\cs{TeXOSQuery} to produce a \texttt{D} with the category code set
+%to 12 to make it consistent with \cs{pdfcreationdate}.
+%
+%Some, but not all, \TeX\ formats provide
+%\cs{pdfcreationdate}, which is more efficient than using the shell
+%escape, but this can be used
+%as a fallback method for those that don't (for example, \XeTeX).
+%
+%Note that versions 1.0 and 1.1 didn't use \cs{pdfd} but simply used
+%the letter \texttt{D}. For example:
+%\begin{verbatim}
+%D:20160704131006+01'00'
+%\end{verbatim}
+%If you want to reproduce this format, use the \longarg{compatible}
+%with level set to 0 or 1.
+%
+%\subsubsection{Action \shortarg{d} \meta{file} or \longarg{pdfdate}
+%\meta{file}}
+%
+%This action displays the last modified time stamp of the given file in PDF format or a blank line
+% if the file doesn't exist or the file permissions prohibit this
+% action.
+%Again some, but not all, \TeX\ formats provide
+%\cs{pdffilemoddate}\marg{file}, which is more efficient than using
+%the shell escape.
+%
+%As with \longarg{pdfnow} this now uses \cs{pdfd} which is converted
+%by \cs{TeXOSQuery} to \texttt{D} with the category code set to 12.
+%
+%This action obeys the \texttt{openin\_any} setting, so if access to
+%\meta{file} is forbidden by this setting, the result will be empty.
+%
+%\subsubsection{Action \shortarg{s} \meta{file} or \longarg{filesize}
+%\meta{file}}
+%
+%This action displays the size in bytes of the given file or an
+%empty string if the file doesn't exist or the file permissions prohibit this
+%action. Some, but not all, \TeX\ formats provide
+%\cs{pdffilesize}\marg{file}, which is more efficient than using
+%the shell escape.
+%
+%This action obeys the \texttt{openin\_any} setting, so if access to
+%\meta{file} is forbidden by this setting, the result will be empty.
+%
+%\subsubsection{Action \shortarg{c} or \longarg{cwd}}
+%
+%This action displays the current working directory. This obeys the
+%\texttt{openin\_any} setting, so this action will return an empty
+%string if this file information is forbidden by that setting.
+%
+%\subsubsection{Action \shortarg{m} or \longarg{userhome}}
+%
+%This action displays the user's home directory. This obeys the
+%\texttt{openin\_any} setting, so this action will return an empty
+%string if this file information is forbidden by that setting.
+%
+%\subsubsection{Action \shortarg{t} or \longarg{tmpdir}}
+%
+%This action displays the temporary directory. This obeys the
+%\texttt{openin\_any} setting, so this action will return an empty
+%string if this file information is forbidden by that setting.
+%
+%\subsubsection{Action \shortarg{i} \meta{sep} \meta{dir} or \longarg{list}
+%\meta{sep} \meta{dir}}
+%
+%This action lists all files in the given directory with the output on a single
+%line using \meta{sep} as the separator between entries. Note that
+%the list doesn't include the full path, just the file names.
+%
+%This action obeys the \texttt{openin\_any} setting, so if access to
+%any file in the list is forbidden, the element within the list will
+%be empty. For example, if the \texttt{openin\_any} setting
+%disallows read access to hidden files, any hidden files in the list
+%will be skipped.
+%
+%\subsubsection{Action \shortarg{f} \meta{sep} \meta{regex} \meta{dir} or
+%\longarg{filterlist} \meta{sep} \meta{regex} \meta{dir}}
+%
+%This action is like \longarg{list} but only lists those files whose name 
+%matches the regular expression given in \meta{regex}. Note that
+%since this uses Java's \texttt{String.matches} method this tests for a
+%\emph{complete} match on the file name (not including directory path). For example,
+%if \meta{regexp} is \texttt{foo.*}, it will only match files whose
+%name starts with \texttt{foo} (for example, \texttt{foobar} will
+%match but \texttt{barfoo} won't). Use \texttt{.*foo.*} to match all
+%files that contain \texttt{foo} in the name (so \texttt{foobar} and
+%\texttt{barfoo} will both match).
+%
+%This action obeys the \texttt{openin\_any} setting, so if access to
+%any file in the list is forbidden, the element within the list will
+%be empty. For example, if the \texttt{openin\_any} setting
+%disallows read access to hidden files, any hidden files will be
+%skipped.
+%
+%\subsubsection{Action \shortarg{u} \meta{file} or \longarg{uri}
+%\meta{file}}
+%
+%This action displays the URI of the given file or an empty string if the file
+%doesn't exist or if the file permissions or the
+%\texttt{openin\_any} setting prohibit read access.
+%Note that this may include in a percent character in the result. The \TeX\ 
+%command \cs{TeXOSQuery} protects against this by changing the
+%category code of \verb|%| to 12, but if you explicitly call \app{texosquery}
+%using the shell escape, you'll need to be careful of this.
+%
+%\subsubsection{Action \shortarg{p} \meta{file} or \longarg{path}
+%\meta{file}}
+%
+%This action displays the canonical path of the given file or an
+%empty string if the file doesn't exist or if the file permissions
+%or the \texttt{openin\_any} setting prohibit this action.
+%
+%\subsubsection{Action \shortarg{e} \meta{file} or \longarg{dirname}
+%\meta{file}}
+%
+%(New to v1.1.)
+%This action displays the canonical path of the given file's parent (that is, the
+%directory containing \meta{file}) or an empty string if
+%the file doesn't exist or if the file permissions or the
+%\texttt{openin\_any} setting prohibits this
+%action. Note that this is different to the Unix-like 
+%\app{dirname} command, which will return a relative path if
+%\meta{file} isn't an absolute path.
+%
+%
+%\subsubsection{Action \shortarg{N} \oarg{language tag} or \longarg{numeric}
+%\oarg{language tag}}
+%
+%(New to v1.2.) This action displays:
+%
+%\marg{grp sep}\marg{dec sep}\marg{exp sep}\marg{cur code}\marg{cur sym}\marg{cur sep} 
+%
+%for the \meta{language tag} given in the optional argument. If omitted, the
 %default locale is assumed. The returned values are:
 %\begin{itemize}
 %\item \meta{grp sep} the numeric group separator.
@@ -403,8 +658,10 @@
 %(See section~\ref{sec:locales} for the difference in locale
 %providers.)
 %
-%\item[\shortarg{D} \oarg{language tag} or \longarg{locale-data} \oarg{language tag}]
-%(New to v1.2.) This provides more
+%\subsubsection{Action \shortarg{D} \oarg{language tag} or
+%\longarg{locale-data} \oarg{language tag}}
+%
+%(New to v1.2.) This action provides more
 %extensive information than \longarg{numeric}.
 %The result has nested groups to assist parsing.
 %Again the \meta{language tag} may be omitted. For example, 
@@ -420,7 +677,17 @@
 %single line. Its overall length and the use of the shortcut
 %commands used by \app{texosquery} to markup certain elements mean
 %that it's not particularly human-readable, but it's designed to be
-%easy for \TeX\ to interpret.
+%easy for \TeX\ to interpret. The information is returned in the
+%following format:
+%
+%\marg{locale block}\marg{current date block}\marg{date pattern
+%block}\marg{current time block}\allowbreak\marg{time pattern block}\marg{days
+%of the week block}\marg{abbreviated dates of the week
+%block}\marg{month names block}\marg{abbreviated month names
+%block}\marg{standalone days of the week block}\marg{abbreviated
+%standalone days of the week block}\marg{standalone month names
+%block}\marg{abbreviated standalone month names block}\marg{numeric
+%block}\marg{numeric patterns block}
 %
 %There may seem to be some repetition here with the month and week
 %day names, but with \app{texosquery-jre8}, the second set are the
@@ -428,76 +695,176 @@
 %languages, these may be different from the names used in the date
 %format. Since this is new to Java 8, it's not supported in
 %\app{texosquery} or \app{texosquery-jre5} and they simply reproduce
-%the date format names.
+%the non-standalone names.
 %
 %The information supplied with this option is quite complex,
-%but it's used by the \sty{locale} package (currently pending)
-%to set up all the required information for each locale required in
-%the document.
+%but it's used by the \sty{locale} package\footnote{currently
+%pending} to set up all the required information for each locale
+%used in the document. Any non-ASCII characters are marked up with \cs{wrp},
+%which is locally defined by \cs{TeXOSQuery} to expand to
+%\cs{texosquerynonasciiwrap}.
 %
-%The groups are:
-%\begin{enumerate}
-%\item The language information in the form:
+%The blocks are:
+%\begin{description}
+%\item \meta{locale block}
+%
+%The locale information in the form:
 %
 %\marg{tag}\marg{language name}\marg{locale language
 %name}\marg{region name}\marg{locale region name}\marg{variant
 %name}\marg{locale variant name}
 %
-%The \meta{tag} is the language tag (as \longarg{bcp47}).
-%The \meta{language name} is the language name in the default
-%language. The \meta{locale language name} is the language name in
-%the locale's language. In the above example, I used \texttt{en-GB}
-%as the argument to \longarg{locale-data} but as my default language
-%is set to English, both \meta{language name} and \meta{locale
-%language name} are \qt{English}. If, instead, I have looked up the
-%locale data for \texttt{fr-BE}, the \meta{language name} would be
-%listed as \qt{French} whereas the \meta{locale language name}
-%would be listed as \qt{fran\c{c}ais}. Note the non-ASCII character.
-%If you want to use this result in your \TeX\ document you'll need
-%support for the encoding (which can be identified with the
-%\longarg{locale} or \longarg{locale-lcs} options).
-%Similarly the \meta{region name} is the name of the
-%region using the default language (in the case of \qt{fr-BE}, this
-%would be \qt{Belgium} for me) and \meta{locale region name} is the
-%name of the region in the locale language (\qt{Belgique}).
-%The \meta{variant name} is the name of the variant using the
-%default language and \meta{locale variant name} is the name of the
-%variant in the locale's language. In both the \texttt{en-GB} and
-%\texttt{fr-BE} examples, these are both empty.
+%The \meta{tag} is the language tag (the same format as \longarg{bcp47}).
 %
-%\item The current date provided various formats suitable to
-%the given locale and also the index of the first day of the week
-%(starting with 0 for Monday, in order to be compatible with
-%\sty{pgfcalendar}):
+%The \meta{language name} is the language name in the operating
+%system's default locale.
+%
+%The \meta{locale language name} is the language name in
+%the locale's language.
+%
+%For example, my locale is \texttt{en-GB}, so if I use
+%\begin{verbatim}
+%texosquery -D en-GB
+%\end{verbatim}
+%then both \meta{language name} and \meta{locale language name} will
+%be \texttt{English}, but if I use:
+%\begin{verbatim}
+%texosquery -D fr-GB
+%\end{verbatim}
+%then \meta{language name} will be \texttt{French} and the \meta{locale
+%language name} will be \verb|fran\wrp{ç}ais| (note the non-ASCII
+%character has been marked up). The locale tag \verb|fr-GB|
+%indicates that I'm writing in French but I'm in the United Kingdom
+%(so the currency should be GBP).
+%
+%The \meta{region name} is the region's name in the operating
+%system's default language.
+%
+%The \meta{locale region name} is the region's name in the operating
+%system's default language.
+%
+%So for me with \texttt{-D en-GB} I get
+%\verb|United\spc Kingdom| for both \meta{region name} and
+%\meta{locale region name}. This illustrates another of the
+%shorthand commands that \app{texosquery} uses that's only locally
+%defined within \cs{TeXOSQuery}. In this case, \cs{spc} just expands
+%to a space. This is used to avoid accidentally discarding any
+%intentional spaces that might follow a command name or any
+%intentional consecutive spaces.
+%
+%If, however, I use \texttt{-D fr-GB} I still get 
+%\verb|United\spc Kingdom| in \meta{region name}, but \meta{locale
+%region name} is now \verb|Royaume-Uni|.
+%
+%The \meta{variant name} is the language's variant. For example,
+%with \verb|de-CH-1996| (Swiss German using the new orthography),
+%the variant is 1996. There's no variant in \verb|en-GB| so this
+%value is empty for me.
+%
+%The \meta{locale variant name} is the variant in the locale's
+%language. In the case of \verb|de-CH-1996| this is still 1996.
+%
+%\item \meta{current date block}
+%
+%This returns the current date in four different formats and also an
+%integer that indicates the first day of the week in the given
+%locale:
 %
 %\marg{full date}\marg{long date}\marg{medium date}\marg{short
 %date}\marg{first day}
 %
-%The formats can vary from one locale to another. For example, the
-%\texttt{en-GB} locale uses the form \qt{06-Nov-2016} for the medium date,
-%but \texttt{de-CH-1996} uses a numerical form \qt{06.11.2006}.
-%The \meta{short date} is typically numeric. Some locales
-%have identical \meta{full date} and \meta{long date} or 
-%identical \meta{long date} and \meta{medium date}.
+%The actual date formats depend on the locale. For example, with
+%\texttt{en-GB} the \meta{full date} is (assuming today is
+%2016-11-08):
+%\begin{verbatim}
+%Tuesday,\spc 8\spc November\spc 2016
+%\end{verbatim}
+%The \meta{long date} is 
+%\begin{verbatim}
+%08\spc November\spc 2016
+%\end{verbatim}
+%The \meta{medium date} is
+%\begin{verbatim}
+%08-Nov-2016
+%\end{verbatim}
+%The \meta{short date} is
+%\begin{verbatim}
+%08/11/16
+%\end{verbatim}
+%Note that there's a difference between using the CLDR locale data
+%and the JRE data. If I'm using the Java~7 compatible
+%\app{texosquery.jar} which only uses JRE locale data, then I get
+%the above results, but if I use \file{texosquery-jre8.sh} which
+%sets \texttt{java.locale.providers} to \texttt{CLDR,JRE} then I get
+%a slightly different result. The \meta{long date} is
+%\begin{verbatim}
+%8\spc November\spc 2016
+%\end{verbatim}
+%and the \meta{medium date} is
+%\begin{verbatim}
+%8\spc Nov\spc 2016
+%\end{verbatim}
+%So the \meta{medium date} may be numeric or may be an abbreviated
+%form of \meta{long date}, depending on the language and the locale
+%provider. Some languages aren't supported by JRE but are supported
+%by CLDR. (Some aren't supported by either, but there's a 
+%chance that those languages will eventually be added to the CLDR.)
+%For example, if I use \texttt{-D cy-GB} with the JRE as the locale
+%provider I just get the \texttt{en-GB} dates, but if I use the CLDR
+%provider I get Welsh dates. 
 %
-%The final element of the group \meta{first day} is the index of the
-%first day of the week.
+%Note that the proposed Java~9 should automatically use the CLDR as
+%the locale provider, which is being increasingly adopted by
+%applications as a common data repository.
 %
-%\item The pattern used to format the full date, long date, medium
-%date and short date.
+%The first day of the week index is zero-based starting with Monday.
+%This is done in order to be compatible with \sty{pgfcalendar}. For
+%example, with \texttt{-D en-GB} \meta{first day} is 0 (Monday), but
+%with \texttt{pt-BR} \meta{first day} is 6 (Sunday). The
+%\sty{locale} package provides a way of converting the index to
+%Monday=1 or Sunday=1 indexing.
 %
-%\marg{full date pattern}\marg{long date pattern}\marg{medium date
-%pattern}\marg{short date pattern}
+%\item \meta{date pattern block}
 %
-%When used with \cs{TeXOSQuery}, the
-%short commands, such as \cs{dtf}, are internally converted
-%to longer commands, such as \cs{texosquerydtf}.
-%These short commands aren't defined outside that scope.
+%The pattern used to format the full date, long date, medium
+%date and short date. This is in the form:
 %
-%\item The current time provided in various formats suitable to the
+%\marg{full pattern}\marg{long pattern}\marg{medium
+%pattern}\marg{short pattern}
+%
+%Each pattern uses shorthand mark-up that's only locally defined
+%within \cs{TeXOSQuery}. These short commands are expanded to longer
+%commands provided by \file{texosquery.tex} to avoid name clashing
+%with other packages. When used directly in the document text, these
+%expand to reproduce the pattern.
+%
+%For example, with \texttt{-D en-GB} I get the following 
+%pattern for the short date:
+%\begin{verbatim}
+%\dtf{2}{d}/\dtf{2}{M}/\dtf{2}{y}
+%\end{verbatim}
+%When parsed by \cs{TeXOSQuery}, this is internally converted to
+%\begin{verbatim}
+%\texosquerydtf{2}{d}/\texosquerydtf{2}{M}/\texosquerydtf{2}{y}
+%\end{verbatim}
+%But default this simply expands to \texttt{dd-MM-yy}.
+%
+%\item \meta{current time block}
+%
+%The current time provided in various formats suitable to the
 %given locale:
 %
 %\marg{full time}\marg{long time}\marg{medium time}\marg{short time}
+%
+%As with the current date, the actual format depends on the locale
+%and the locale provider. For example, with \texttt{en-GB} I get:
+%\begin{verbatim}
+%{15:59:41\spc o\csq clock\spc GMT}{15:59:41\spc GMT}{15:59:41}{15:59}
+%\end{verbatim}
+%with the JRE. If I switch to CLDR (\file{texosquery-jre8.sh}) I get:
+%\begin{verbatim}
+%{16:00:51\spc Greenwich\spc Mean\spc Time}{16:00:51\spc GMT}{16:00:51}{16:00}
+%\end{verbatim}
 %
 %\item The pattern used to format the full time, long time, medium
 %time and short time.
@@ -570,123 +937,7 @@
 %As with the date and time patterns, when used with \cs{TeXOSQuery}, the
 %short commands, such as \cs{dgt}, are internally converted.
 %They're not defined outside that scope.
-%\end{enumerate}
-%
-%\item[\shortarg{n} or \longarg{pdfnow}] Displays the current
-% date and time in PDF format. For example 
-%\begin{verbatim}
-%D:20160704131006+01'00'
-%\end{verbatim}
-%Note that some, but not all, \TeX\ formats provide
-%\cs{pdfcreationdate}, which is more efficient than using the shell
-%escape, but this can be used
-%as a fallback method for those that don't (for example, \XeTeX).
-%\item[\shortarg{d} \meta{file} or \longarg{pdfdate} \meta{file}]
-% Displays the last modified time stamp of the given file in PDF format or a blank line
-% if the file doesn't exist or the file permissions prohibit this
-% action.
-%Again some, but not all, \TeX\ formats provide
-%\cs{pdffilemoddate}\marg{file}, which is more efficient than using
-%the shell escape.
-%\item[\shortarg{s} \meta{file} or \longarg{filesize} \meta{file}]
-% Displays the size in bytes of the given file or a blank line
-% if the file doesn't exist or the file permissions prohibit this
-% action.
-%Some, but not all, \TeX\ formats provide
-%\cs{pdffilesize}\marg{file}, which is more efficient than using
-%the shell escape.
-%\item[\shortarg{i} \meta{sep} \meta{dir} or \longarg{list}
-%\meta{sep} \meta{dir}]
-%List all files in the given directory with the output on a single
-%line using \meta{sep} as the separator between entries. Note that
-%the list doesn't include the full path, just the file names.
-%\item[\shortarg{f} \meta{sep} \meta{regex} \meta{dir} or
-%\longarg{filterlist} \meta{sep} \meta{regex} \meta{dir}]
-%Like the above but only lists those files whose name matches the
-%regular expression given in \meta{regex}. Note that this tests for a
-%complete match on the file name (not including path). For example,
-%if \meta{regexp} is \texttt{foo.*}, it will only match files whose
-%name starts with \texttt{foo} (for example, \texttt{foobar} will
-%match but \texttt{barfoo} won't).
-%\item[\shortarg{u} \meta{file} or \longarg{uri} \meta{file}]
-%Displays the URI of the given file or a blank line if the file
-%doesn't exist or the file permissions prohibit this action.
-%Note that this may include in a percent character in the result. The \TeX\ 
-%command \cs{TeXOSQuery} protects against this by changing the
-%category code, but if you explicitly call \app{texosquery}
-%using the shell escape, you'll need to be careful of this.
-%\item[\shortarg{p} \meta{file} or \longarg{path} \meta{file}]
-%Displays the canonical path of the given file or a blank line if
-%the file doesn't exist or the file permissions prohibit this
-%action.
-%\item[\shortarg{e} \meta{file} or \longarg{dirname} \meta{file}]
-%(New to v1.1.)
-%Displays the canonical path of the given file's parent (that is, the
-%directory containing \meta{file}) or a blank line if
-%the file doesn't exist or the file permissions prohibit this
-%action. Note that this is different to the Unix-like 
-%\app{dirname} command, which will return a relative path if
-%\meta{file} isn't an absolute path.
-%\item[\shortarg{h} or \longarg{help}] Displays help message and
-%exits.
-%\item[\shortarg{v} or \longarg{version}] Displays version
-%information and exits.
-%\item[\longarg{nodebug}] No debugging information. Only command
-%line syntax errors are written to STDERR. (Default.)
-%\item[\longarg{debug} \oarg{n}] Set the debugging level, where
-%\meta{n} is a non-negative integer.
-%If \meta{n} is omitted, 1 is assumed. If \meta{n} is 0, then
-%debugging information is suppressed (equivalent to
-%\longarg{nodebug}). If \meta{n} $\geq 1$, error messages are
-%written to STDERR. If \meta{n} $\geq 2$, any exceptions encountered
-%will additionally write the stack trace to STDERR. If \meta{n}
-%$\geq 3$ non-error informational messages are included.
-%\item[\longarg{compatible} \meta{n}] Set the compatibility mode.
-%The argument should be either a non-negative integer (0 for version
-%1.0, 1 for version 1.1, etc) or the keyword \texttt{latest} to
-%indicate the latest version (default).
 %\end{description}
-%
-%If multiple options are given, they will be processed in the
-%order specified in the command line invocation. Each result will
-%be displayed on a separate line. As from v1.1, if there are
-%multiple actions, each result will be grouped. This makes it easier
-%to process the results in \TeX. For example:
-%\begin{verbatim}
-%texosquery -l
-%\end{verbatim}
-%This just produces (for me):
-%\begin{verbatim}
-%en-GB.utf8
-%\end{verbatim}
-%whereas
-%\begin{verbatim}
-%texosquery -l -n
-%\end{verbatim}
-%produces:
-%\begin{verbatim}
-%{en-GB.utf8}
-%{D:20160714112732+01'00'}
-%\end{verbatim}
-%Note that unavailable information will produce an empty group.
-%For example (assuming \file{nofile} doesn't exist):
-%\begin{verbatim}
-%texosquery -l -d nofile -n
-%\end{verbatim}
-%produces:
-%\begin{verbatim}
-%{en-GB.utf8}
-%{}
-%{D:20160714112732+01'00'}
-%\end{verbatim}
-%whereas 
-%\begin{verbatim}
-%texosquery -d nofile
-%\end{verbatim}
-%just displays an empty line.
-%
-%If you're puzzled as to why an empty line has been returned, try
-%rerunning the command with \longarg{debug} for further information.
 %
 %\section{texosquery.tex: generic \TeX\ code}
 %\label{sec:tex}
