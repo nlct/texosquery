@@ -308,7 +308,7 @@
 %Similarly for \app{texosquery-jre5}. Available actions are
 %described below. At least one action is required.
 %
-%Available options (must come before actions):
+%Available options:
 %\begin{description}
 %\item[\shortarg{h} or \longarg{help}] Displays help message and
 %exits.
@@ -328,7 +328,7 @@
 %The argument should be either a non-negative integer (0 for version
 %1.0, 1 for version 1.1, etc) or the keyword \texttt{latest} to
 %indicate the latest version (default). Note that the compatibility
-%mode on affects the available actions and the display style of the
+%mode only affects the available actions and the display style of the
 %result. For example, the check for the \texttt{openin\_any} setting
 %was only introduced to version 1.2, but this is still checked even
 %if the compatibility mode is set to 0 or 1 since this is a security
@@ -349,25 +349,24 @@
 %\end{verbatim}
 %whereas
 %\begin{verbatim}
-%texosquery -l -n
+%texosquery -l -o
 %\end{verbatim}
 %produces:
 %\begin{verbatim}
 %{en-GB.utf8}
-%{D:20160714112732+01'00'}
+%{Linux}
 %\end{verbatim}
 %To reproduce the v1.0 display use \longarg{compatible}\texttt{ 0}.
 %
 %Note that unavailable information will produce an empty group.
 %For example (assuming \file{nofile} doesn't exist):
 %\begin{verbatim}
-%texosquery -l -d nofile -n
+%texosquery -l -d nofile
 %\end{verbatim}
 %produces:
 %\begin{verbatim}
 %{en-GB.utf8}
 %{}
-%{D:20160714112732+01'00'}
 %\end{verbatim}
 %whereas 
 %\begin{verbatim}

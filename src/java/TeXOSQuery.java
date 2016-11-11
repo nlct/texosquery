@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.util.Locale;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.DecimalFormatSymbols;
@@ -2974,6 +2975,7 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("Options:");
       System.out.println();
+
       System.out.println("-h or --help\tDisplay this help message and exit");
       System.out.println("-v or --version\tDisplay version information and exit");
       System.out.println("--nodebug\tNo debugging messages (default)");
@@ -2988,27 +2990,26 @@ public class TeXOSQuery
       System.out.println();
       System.out.println("General actions:");
       System.out.println();
-      System.out.println("-c or --cwd\t\tDisplay current working directory");
-      System.out.println("-m or --userhome\tDisplay user's home directory");
-      System.out.println("-t or --tmpdir\t\tDisplay temporary directory");
-      System.out.println("-o or --osname\t\tDisplay OS name");
-      System.out.println("-r or --osversion\tDisplay OS version");
-      System.out.println("-a or --osarch\t\tDisplay OS architecture");
-      System.out.println("-n or --pdfnow\t\tDisplay current date-time in PDF format");
-      System.out.println("-T or --datetime\t\tDisplay all the date and time fields for the current time");
+
+      for (QueryAction action : availableActions)
+      {
+         if (action.getType() == QueryActionType.GENERAL_ACTION)
+         {
+            System.out.println(action.help());
+         }
+      }
 
       System.out.println();
       System.out.println("Locale actions:");
       System.out.println();
 
-      System.out.println("-L or --locale\t\tDisplay POSIX locale information");
-      System.out.println("-l or --locale-lcs\tAs --locale but codeset ");
-      System.out.println("\t\t\tconverted to lower case with hyphens stripped");
-      System.out.println("-C or --codeset-lcs\tlower case codeset");
-      System.out.println("-b or --bcp47\t\tDisplay locale as BCP47 tag");
-      System.out.println("-N [locale] or --numeric [locale]\tDisplay locale numeric information");
-      System.out.println("-D [locale] or --locale-data [locale]\tDisplay all available locale information");
-
+      for (QueryAction action : availableActions)
+      {
+         if (action.getType() == QueryActionType.LOCALE_ACTION)
+         {
+            System.out.println(action.help());
+         }
+      }
 
       System.out.println();
       System.out.println("File actions:");
@@ -3018,26 +3019,13 @@ public class TeXOSQuery
       System.out.println("Paths should use / for the directory divider.");
       System.out.println();
 
-      System.out.println("-d <file> or --pdfdate <file>");
-      System.out.println("  Display date stamp of <file> in PDF format");
-      System.out.println();
-      System.out.println("-s <file> or --filesize <file>");
-      System.out.println("  Display size of <file> in bytes");
-      System.out.println();
-      System.out.println("-i <sep> <dir> or --list <sep> <dir>");
-      System.out.println("  Display list of all files in <dir> separated by <sep>");
-      System.out.println();
-      System.out.println("-f <sep> <regex> <dir> or --filterlist <sep> <regex> <dir>");
-      System.out.println("  Display list of files in <dir> that match <regex> separated by <sep>");
-      System.out.println();
-      System.out.println("-u <file> or --uri <file>");
-      System.out.println("  Display the URI of <file>");
-      System.out.println();
-      System.out.println("-p <file> or --path <file>");
-      System.out.println("  Display the canonical path of <file>");
-      System.out.println();
-      System.out.println("-e <file> or --dirname <file>");
-      System.out.println("  Display the canonical path of the parent of <file>");
+      for (QueryAction action : availableActions)
+      {
+         if (action.getType() == QueryActionType.FILE_ACTION)
+         {
+            System.out.println(action.help());
+         }
+      }
    }
 
     /**
@@ -3076,28 +3064,17 @@ public class TeXOSQuery
       }
    }
 
-   /**
-    * Generate error for option not available in compatibility mode
-    * and exit.
-    * @param minLevel Minimum compatibility level
-    * @param option Option name
-    */ 
-   private void optionNotAvailable(int minLevel, String option)
+   private QueryAction getAction(String name)
    {
-      System.err.println(String.format(
-        "'%s' option not available in compatibility mode %d.",
-        option, compatible));
-      System.err.println(String.format(
-       "Requires compatibility level %d or above (at least v1.%d)",
-        minLevel, minLevel));
-      System.exit(1);
-   } 
+      for (int i = 0; i < availableActions.length; i++)
+      {
+         if (availableActions[i].isAction(name))
+         {
+            return availableActions[i];
+         }
+      }
 
-   private void optionTooLate(String option)
-   {
-      System.err.println(String.format(
-       "option '%s' must come before actions", option));
-      System.exit(1);
+      return null;
    }
 
     /**
@@ -3106,300 +3083,25 @@ public class TeXOSQuery
      */
    public void processArgs(String[] args)
    {
-      if (args.length == 0)
+      Vector<QueryAction> actions = new Vector<QueryAction>();
+
+      for (int i = 0; i < args.length; i++)
       {
-         System.err.println(String.format(
-           "Missing argument. Try %s --help", name));
-         System.exit(1);
-      }
+         QueryAction action = getAction(args[i]);
 
-      int actions = 0;
+         if (action != null)
+         {
+            try
+            {
+               i = action.parseArgs(args, i);
 
-      for (int i = 0, n=args.length-1; i < args.length; i++)
-      {
-         if (args[i].equals("-L") || args[i].equals("--locale"))
-         {
-            // POSIX style locale with unconverted codeset.
-            print(++actions, getLocale(Locale.getDefault()));
-         }
-         else if (args[i].equals("-l") || args[i].equals("--locale-lcs"))
-         {
-            // POSIX style locale with converted codeset.
-            print(++actions, getLocale(Locale.getDefault(), true));
-         }
-         else if (args[i].equals("-C") || args[i].equals("--codeset-lcs"))
-         {
-            if (compatible < 2)
-            {
-               optionNotAvailable(2, args[i]);
+               actions.add(action);
             }
-            else
+            catch (Throwable e)
             {
-               print(++actions, getCodeSet(true));
-            }
-         }
-         else if (args[i].equals("-b") || args[i].equals("--bcp47"))
-         {
-            if (compatible < 2)
-            {
-               optionNotAvailable(2, args[i]);
-            }
-            else
-            {
-               // BCP47 language tag
-               print(++actions, getLanguageTag(null));
-            }
-         }
-         else if (args[i].equals("-N") || args[i].equals("--numeric"))
-         {
-            if (compatible < 2)
-            {
-               optionNotAvailable(2, args[i]);
-            }
-            else
-            {
-               // Get the numeric information for the default or given
-               // locale (separators, currency symbol etc).
-
-               if (i == n || args[i+1].startsWith("-"))
-               {
-                  // Either at end of argument list or the next argument
-                  // is a switch so use default locale.
-                  print(++actions, getNumericalInfo(null));
-               }
-               else
-               {
-                  print(++actions, getNumericalInfo(args[++i]));
-               }
-            }
-         }
-         else if (args[i].equals("-D") || args[i].equals("--locale-data"))
-         {
-            if (compatible < 2)
-            {
-               optionNotAvailable(2, args[i]);
-            }
-            else
-            {
-               // Get the all available locale information for the default or given
-               // locale.
-
-               if (i == n || args[i+1].startsWith("-"))
-               {
-                  // Either at end of argument list or the next argument
-                  // is a switch so use default locale.
-                  print(++actions, getLocaleData(null));
-               }
-               else
-               {
-                  print(++actions, getLocaleData(args[++i]));
-               }
-            }
-         }
-         else if (args[i].equals("-c") || args[i].equals("--cwd"))
-         {
-            // current working directory
-            print(++actions, getCwd());
-         } 
-         else if (args[i].equals("-m") || args[i].equals("--userhome"))
-         {
-            // user's home directory
-            print(++actions, getUserHome());
-         }
-         else if (args[i].equals("-t") || args[i].equals("--tmpdir"))
-         {
-            // temporary directory
-            print(++actions, getTmpDir());
-         }
-         else if (args[i].equals("-r") || args[i].equals("--osversion"))
-         {
-            // OS version
-            print(++actions, getOSversion());
-         } 
-         else if (args[i].equals("-a") || args[i].equals("--osarch"))
-         {
-            // OS architecture
-            print(++actions, getOSarch());
-         }
-         else if (args[i].equals("-o") || args[i].equals("--osname"))
-         {
-            // OS name
-            print(++actions, getOSname());
-         }
-         else if (args[i].equals("-n") || args[i].equals("--pdfnow"))
-         {
-            // current date time in PDF format
-            print(++actions, pdfnow());
-         }
-         else if (args[i].equals("-d") || args[i].equals("--pdfdate"))
-         {
-            // time stamp in PDF format for given file
-            i++;
-
-            if (i > n)
-            {
-               System.err.println(
-                 String.format("filename expected after %s", args[i - 1]));
+               System.err.println(e.getMessage());
+               debug(e.getMessage(), e);
                System.exit(1);
-            }
-
-            if ("".equals(args[i]))
-            {
-               // empty file name (perhaps user has done something
-               // like \TeXOSQuery{-d "\filename"} where \filename
-               // is empty?)
-               debug(String.format("Empty file name in %s", args[i-2]));
-               print(++actions, "");
-            }
-            else
-            {
-               print(++actions, pdfDate(fileFromTeXPath(args[i])));
-            }
-         }
-         else if (args[i].equals("-s") || args[i].equals("--filesize"))
-         {
-            i++;
-
-            if (i >= args.length)
-            {
-               System.err.println(
-                 String.format("filename expected after %s", args[i - 1]));
-               System.exit(1);
-            }
-
-            if ("".equals(args[i]))
-            {
-               debug(String.format("Empty file name in %s", args[i-2]));
-               print(++actions, "");
-            }
-            else
-            {
-               print(++actions, getFileLength(fileFromTeXPath(args[i])));
-            }
-         }
-         else if (args[i].equals("-i") || args[i].equals("--list"))
-         {
-            if (i+2 >= args.length)
-            {
-               System.err.println(
-                  String.format(
-                     "<separator> <directory> expected after %s",
-                     args[i]));
-               System.exit(1);
-            }
-
-            String separator = args[++i];
-            String dir = args[++i];
-
-            if ("".equals(dir))
-            {
-               debug(String.format("Empty directory name in %s", args[i-2]));
-               print(++actions, "");
-            }
-            else
-            {
-               print(++actions, getFileList(separator,
-                            new File(fromTeXPath(dir))));
-            }
-         }
-         else if (args[i].equals("-f") || args[i].equals("--filterlist"))
-         {
-            // Filtered directory listing
-
-            if (i+3 >= args.length)
-            {
-               System.err.println(
-                  String.format(
-                     "<separator> <regex> <directory> expected after %s",
-                     args[i]));
-               System.exit(1);
-            }
-
-            String separator = args[++i];
-            String regex = args[++i];
-
-            if ("".equals(regex))
-            {
-               regex = ".*";
-            }
-
-            String dir = args[++i];
-
-            if ("".equals(dir))
-            {
-               debug(String.format("Empty directory name in %s", args[i-3]));
-               print(++actions, "");
-            }
-            else
-            {
-               print(++actions, getFilterFileList(
-                  separator, regex, new File(fromTeXPath(dir))));
-            }
-         }
-         else if (args[i].equals("-u") || args[i].equals("--uri"))
-         {
-            // URI of file name
-            i++;
-
-            if (i >= args.length)
-            {
-               System.err.println(
-                 String.format("Filename expected after %s", args[i - 1]));
-               System.exit(1);
-            }
-
-            if ("".equals(args[i]))
-            {
-               debug(String.format("Empty file name in %s action", args[i-1]));
-               print(++actions, "");
-            }
-            else
-            {
-               print(++actions, fileURI(fileFromTeXPath(args[i])));
-            }
-         }
-         else if (args[i].equals("-p") || args[i].equals("--path"))
-         {
-            // Canonical path
-            i++;
-
-            if (i >= args.length)
-            {
-               System.err.println(
-                 String.format("Filename expected after %s", args[i - 1]));
-               System.exit(1);
-            }
-
-            if ("".equals(args[i]))
-            {
-               debug(String.format("Empty file name in %s action", args[i-1]));
-               print(++actions, "");
-            }
-            else
-            {
-               print(++actions, filePath(fileFromTeXPath(args[i])));
-            }
-         }
-         else if (args[i].equals("-e") || args[i].equals("--dirname"))
-         {
-            // parent directory of given file
-            i++;
-
-            if (i >= args.length)
-            {
-               System.err.println(
-                 String.format("Filename expected after %s", args[i - 1]));
-               System.exit(1);
-            }
-
-            if ("".equals(args[i]))
-            {
-               debug(String.format("Empty file name in %s action", args[i-1]));
-               print(++actions, "");
-            }
-            else
-            {
-               print(++actions, parentPath(fileFromTeXPath(args[i])));
             }
          }
          else if (args[i].equals("-h") || args[i].equals("--help"))
@@ -3414,20 +3116,10 @@ public class TeXOSQuery
          }
          else if (args[i].equals("--nodebug"))
          {
-            if (actions > 0)
-            {
-               optionTooLate(args[i]);
-            }
-
             debugLevel = 0;
          }
          else if (args[i].equals("--debug"))
          {
-            if (actions > 0)
-            {
-               optionTooLate(args[i]);
-            }
-
             if (i == args.length-1)
             {
                debugLevel = 1;
@@ -3456,11 +3148,6 @@ public class TeXOSQuery
          }
          else if (args[i].equals("--compatible"))
          {
-            if (actions > 0)
-            {
-               optionTooLate(args[i]);
-            }
-
             if (i == args.length-1)
             {
                System.err.println("--compatible <level> expected");
@@ -3496,14 +3183,399 @@ public class TeXOSQuery
          }
       }
 
-      if (actions == 0)
+      int numActions = actions.size();
+
+      if (numActions == 0)
       {
          System.err.println(String.format(
            "One or more actions required. Try %s --help", name));
          System.exit(1);
       }
 
+      for (QueryAction action : actions)
+      {
+         try
+         {
+            print(numActions, action.doAction());
+         }
+         catch (Throwable e)
+         {
+            System.err.println(e.getMessage());
+            debug(String.format("Action '%s' failed", action.getInvokedName()),
+              e);
+            System.exit(1);
+         }
+      }
    }
+
+   private abstract class QueryAction
+   {
+      public QueryAction(String longForm, QueryActionType type,
+         String description)
+      {
+         this(longForm, null, 0, 0, "", type, description);
+      }
+
+      public QueryAction(String longForm, QueryActionType type,
+         String description, int minCompat)
+      {
+         this(longForm, null, 0, 0, "", type, description, minCompat);
+      }
+
+      public QueryAction(String longForm, String shortForm, 
+        QueryActionType type, String description)
+      {
+         this(longForm, shortForm, 0, 0, "", type, description);
+      }
+
+      public QueryAction(String longForm, String shortForm, 
+        QueryActionType type, String description, int minCompat)
+      {
+         this(longForm, shortForm, 0, 0, "", type, description, minCompat);
+      }
+
+      public QueryAction(String longForm, String shortForm, String syntax, 
+         QueryActionType type, String description)
+      {
+         this(longForm, shortForm, 0, 0, syntax, type, description);
+      }
+
+      public QueryAction(String longForm, String shortForm,
+        int numOptional, int numRequired, String syntax, 
+        QueryActionType type, String description)
+      {
+         this(longForm, shortForm, numOptional, numRequired, 
+              syntax, type, description, DEFAULT_COMPATIBLE);
+      }
+
+      public QueryAction(String longForm, String shortForm,
+        int numOptional, int numRequired, String syntax, 
+        QueryActionType type, String description, int minCompat)
+      {
+         if (longForm != null)
+         {
+            longName = "--"+longForm;
+         }
+
+         if (shortForm != null)
+         {
+            shortName = "-"+shortForm;
+         }
+
+         optional = numOptional;
+         required = numRequired;
+
+         this.syntax = syntax;
+         this.type = type;
+         this.description = description;
+         this.minCompatibility = minCompat;
+      }
+
+      public boolean isAction(String name)
+      {
+         return (name.equals(longName) || name.equals(shortName));
+      }
+
+      public int parseArgs(String[] args, int index)
+      throws IllegalArgumentException
+      {
+         invokedName = args[index];
+
+         optionalProvided = 0;
+
+         if (optional > 0)
+         {
+            optionalArgs = new String[optional];
+         }
+
+         for (int i = 0; i < optional; i++)
+         {
+            if (index >= args.length-1 || args[index+1].startsWith("-"))
+            {
+               // no optional arguments, skip
+               break;
+            }
+
+            optionalArgs[optionalProvided++] = args[++index];
+         }
+
+         if (required > 0)
+         {
+            requiredArgs = new String[required];
+         }
+
+         for (int i = 0; i < required; i++)
+         {
+            if (index >= args.length-1)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "Invalid syntax for action '%s'.%nExpected: %s",
+                 invokedName, getUsage(invokedName)));
+            }
+
+            requiredArgs[i] = args[index];
+
+            index++;
+         }
+
+         return index;
+      }
+
+      public int providedOptionCount()
+      {
+         return optionalProvided;
+      }
+
+      public String getOptionalArgument(int index)
+      {
+         return index < optionalArgs.length ? optionalArgs[index] : null;
+      }
+
+      public String getRequiredArgument(int index)
+      {
+         return requiredArgs[index];
+      }
+
+      public String getInvokedName()
+      {
+         return invokedName;
+      }
+
+      public QueryActionType getType()
+      {
+         return type;
+      }
+
+      public String getUsage(String name)
+      {
+         return String.format("%s%s",
+           name, syntax == null || "".equals(syntax) ? "" : " "+syntax);
+      }
+
+      public String help()
+      {
+         String usage;
+
+         if (shortName == null)
+         {
+            usage = getUsage(longName);
+         }
+         else
+         {
+            usage = String.format("%s or %s", getUsage(shortName),
+              getUsage(longName));
+         }
+
+         return String.format("%s\t%s", usage, description);
+      }
+
+      public String doAction() throws IllegalArgumentException
+      {
+         if (compatible < minCompatibility)
+         {
+            throw new IllegalArgumentException(String.format(
+            "'%s' option not available in compatibility mode %d",
+            invokedName, compatible));
+         }
+
+         return action();
+      }
+
+      protected abstract String action();
+
+      private String longName=null;
+      private String shortName=null;
+      private String invokedName=null;
+      private String syntax="";
+      private int optional=0;
+      private int optionalProvided=0;
+      private int required=0;
+      private String[] requiredArgs=null;
+      private String[] optionalArgs=null;
+      private QueryActionType type;
+      private String description;
+      private int minCompatibility;
+   }
+
+   private enum QueryActionType
+   {
+      FILE_ACTION, LOCALE_ACTION, GENERAL_ACTION
+   }
+
+   private QueryAction[] availableActions = new QueryAction[]
+   {
+      new QueryAction("cwd", "c", QueryActionType.FILE_ACTION, 
+        "Display current working directory")
+      {
+         public String action()
+         {
+            return getCwd();
+         }
+      },
+      new QueryAction("userhome", "m", QueryActionType.FILE_ACTION,
+         "Display user's home directory")
+      {
+         public String action()
+         {
+            return getUserHome();
+         }
+      },
+      new QueryAction("tmpdir", "t", QueryActionType.FILE_ACTION,
+         "Display temporary directory")
+      {
+         public String action()
+         {
+            return getTmpDir();
+         }
+      },
+      new QueryAction("osname", "o", QueryActionType.GENERAL_ACTION,
+        "Display OS name")
+      {
+         public String action()
+         {
+            return getOSname();
+         }
+      },
+      new QueryAction("osversion", "r", QueryActionType.GENERAL_ACTION, 
+        "Display OS version")
+      {
+         public String action()
+         {
+            return getOSversion();
+         }
+      },
+      new QueryAction("osarch", "a", QueryActionType.GENERAL_ACTION, 
+        "Display OS architecture")
+      {
+         public String action()
+         {
+            return getOSarch();
+         }
+      },
+      new QueryAction("pdfnow", "n", QueryActionType.GENERAL_ACTION, 
+        "Display current date-time in PDF format")
+      {
+         public String action()
+         {
+            return pdfnow();
+         }
+      },
+      new QueryAction("locale", "L", QueryActionType.LOCALE_ACTION,
+         "Display POSIX locale information")
+      {
+         public String action()
+         {
+            return getLocale(Locale.getDefault());
+         }
+      },
+      new QueryAction("locale-lcs", "l", QueryActionType.LOCALE_ACTION,
+         "Display POSIX style locale information with lower case codeset")
+      {
+         public String action()
+         {
+            return getLocale(Locale.getDefault(), true);
+         }
+      },
+      new QueryAction("codeset-lcs", "C", QueryActionType.GENERAL_ACTION, 
+         "Lower case codeset with hyphens stripped", 2)
+      {
+         public String action()
+         {
+            return getCodeSet(true);
+         }
+      },
+      new QueryAction("bcp47", "b", QueryActionType.LOCALE_ACTION,
+         "Display locale as BCP47 tag", 2)
+      {
+         public String action()
+         {
+            return getLanguageTag(null);
+         }
+      },
+      new QueryAction("numeric", "N", 1, 0, "[locale]",
+          QueryActionType.LOCALE_ACTION,
+          "Display locale numeric information", 2)
+      {
+         public String action()
+         {
+            return getNumericalInfo(getOptionalArgument(0));
+         }
+      },
+      new QueryAction("locale-data", "D", 1, 0, "[locale]",
+         QueryActionType.LOCALE_ACTION,
+         "Display all available locale information", 2)
+      {
+         public String action()
+         {
+            return getLocaleData(getOptionalArgument(0));
+         }
+      },
+      new QueryAction("pdfdate", "d", 0, 1, "<file>",
+         QueryActionType.FILE_ACTION, 
+         "Display date stamp of <file> in PDF format")
+      {
+         public String action()
+         {
+            return pdfDate(fileFromTeXPath(getRequiredArgument(0)));
+         }
+      },
+      new QueryAction("filesize", "s", 0, 1, "<file>",
+         QueryActionType.FILE_ACTION,
+         "Display size of <file> in bytes")
+      {
+         public String action()
+         {
+            return getFileLength(fileFromTeXPath(getRequiredArgument(0)));
+         }
+      },
+      new QueryAction("list", "i", 0, 2, "<sep> <dir>",
+         QueryActionType.FILE_ACTION,
+         "Display list of all files in <dir> separated by <sep>")
+      {
+         public String action()
+         {
+            return getFileList(getRequiredArgument(0),
+              new File(fromTeXPath(getRequiredArgument(1))));
+         }
+      },
+      new QueryAction("filterlist", "f", 0, 3, "<sep> <regex> <dir>",
+         QueryActionType.FILE_ACTION, 
+         "Display list of files in <dir> that fully match <regex> separated by <sep>")
+      {
+         public String action()
+         {
+            return getFilterFileList(
+                  getRequiredArgument(0), 
+                  getRequiredArgument(1), 
+                  new File(fromTeXPath(getRequiredArgument(2))));
+         }
+      },
+      new QueryAction("uri", "u", 0, 1, "<file>",
+         QueryActionType.FILE_ACTION, "Display the URI of <file>")
+      {
+         public String action()
+         {
+            return fileURI(fileFromTeXPath(getRequiredArgument(0)));
+         }
+      },
+      new QueryAction("path", "p", 0, 1, "<file>",
+         QueryActionType.FILE_ACTION, "Display the canonical path of <file>")
+      {
+         public String action()
+         {
+            return filePath(fileFromTeXPath(getRequiredArgument(0)));
+         }
+      },
+      new QueryAction("dirname", "e", 0, 1, "<file>",
+         QueryActionType.FILE_ACTION,
+         "Display the canonical path of the parent of <file>")
+      {
+         public String action()
+         {
+            return parentPath(fileFromTeXPath(getRequiredArgument(0)));
+         }
+      }
+   };
 
    private String name;
     
