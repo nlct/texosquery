@@ -680,7 +680,8 @@
 %following format:
 %
 %\marg{locale block}\marg{current date block}\marg{date pattern
-%block}\marg{current time block}\allowbreak\marg{time pattern block}\marg{days
+%block}\marg{current time block}\allowbreak\marg{time pattern
+%block}\marg{current date time block}\marg{date time pattern block}\marg{days
 %of the week block}\marg{abbreviated dates of the week
 %block}\marg{month names block}\marg{abbreviated month names
 %block}\marg{standalone days of the week block}\marg{abbreviated
@@ -865,7 +866,9 @@
 %{16:00:51\spc Greenwich\spc Mean\spc Time}{16:00:51\spc GMT}{16:00:51}{16:00}
 %\end{verbatim}
 %
-%\item The pattern used to format the full time, long time, medium
+%\item \meta{time pattern block}
+%
+%The pattern used to format the full time, long time, medium
 %time and short time.
 %
 %\marg{full time pattern}\marg{long time pattern}\marg{medium time
@@ -874,6 +877,22 @@
 %Again, when used with \cs{TeXOSQuery}, the short commands, such as
 %\cs{dtf}, are internally converted.
 %They're not defined outside that scope.
+%
+%\item \meta{current date time block}
+%
+%The current date and time provided in various formats suitable to the
+%given locale:
+%
+%\marg{full date time}\marg{long date time}\marg{medium date
+%time}\marg{short date time}
+%
+%\item \meta{date time pattern block}
+%
+%The pattern used to format the full date time, long date time, medium
+%date time and short date time.
+%
+%\marg{full date time pattern}\marg{long date time
+%pattern}\marg{medium date time pattern}\marg{short date time pattern}
 %
 %\item The week day names (starting with Monday for consistency with
 %\sty{pgfcalendar}).

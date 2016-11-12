@@ -73,7 +73,7 @@
 \long\def\parsetimefmtblock#1{%
   \parsetimefmt#1% lose outer braces
   \par
-  \parsedayblock
+  \parsedatetimeblock
 }
 
 \def\parsetimefmt#1#2#3#4{%
@@ -82,6 +82,33 @@
   Medium time format: #3.
   Short time format: #4.
 }
+
+\long\def\parsedatetimeblock#1{%
+  \parsedatetime#1% lose outer braces
+  \par
+  \parsedatetimefmtblock
+}
+
+\def\parsedatetime#1#2#3#4{%
+  Full date time: #1.
+  Long date time: #2.
+  Medium date time: #3.
+  Short date time: #4.
+}
+
+\long\def\parsedatetimefmtblock#1{%
+  \parsedatetimefmt#1% lose outer braces
+  \par
+  \parsedayblock
+}
+
+\def\parsedatetimefmt#1#2#3#4{%
+  Full date time format: #1.
+  Long date time format: #2.
+  Medium date time format: #3.
+  Short date time format: #4.
+}
+
 
 \long\def\parsedayblock#1{%
   \parsedaynames#1% lose outer block

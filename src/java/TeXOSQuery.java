@@ -2634,29 +2634,33 @@ public class TeXOSQuery
     * to Java 8, so we can't use it for earlier versions.
     * @param localeTag the language tag identifying the locale or null for
     * the default locale
-    * @return locale data. First group:
-    * language tag, language name, language name in given locale,
+    * @return locale data in grouped blocks:
+    * <ol>
+    * <li>language tag, language name, language name in given locale,
     * country name, country name in given locale, variant name,
     * variant name in given locale.
-    * Second group: full date, long date, medium date, short date,
+    * <li> full date, long date, medium date, short date,
     * first day of the week index.
-    * Third group: full time, long time, medium time, short time.
-    * Fourth group: weekday names.
-    * Fifth group: short weekday names.
-    * Sixth group: month names
-    * Seventh group: short month names.
-    * Eighth group: standalone week day names.
-    * Ninth group: standalone short week day names.
-    * Tenth group: standalone month names.
-    * Eleventh group: standalone short month names.
-    * Twelfth group: number group separator,
+    * <li> full date, long date, medium date, short date patterns.
+    * <li> full time, long time, medium time, short time.
+    * <li> full time, long time, medium time, short time patterns.
+    * <li> weekday names.
+    * <li> short weekday names.
+    * <li> month names
+    * <li> short month names.
+    * <li> standalone week day names.
+    * <li> standalone short week day names.
+    * <li> standalone month names.
+    * <li> standalone short month names.
+    * <li> number group separator,
     * decimal separator, exponent separator, grouping flag, ISO 4217 currency
     * identifier (e.g. GBP), region currency identifier (usually the same as
     * the ISO 4217 code, but may be an unofficial currency code, such as IMP),
     * currency symbol (e.g. £), TeX currency symbol, monetary decimal separator,
     * percent symbol, per mill symbol.
-    * Last group: number format, integer format, currency format,
+    * <li> number format, integer format, currency format,
     * percent format.
+    * </ol>
     */
    public String getLocaleData(String localeTag)
    {
@@ -2746,6 +2750,18 @@ public class TeXOSQuery
        DateFormat timeShortFormat = DateFormat.getTimeInstance(
         DateFormat.SHORT, locale);
 
+       DateFormat dateTimeFullFormat = DateFormat.getDateTimeInstance(
+        DateFormat.FULL, DateFormat.FULL, locale);
+
+       DateFormat dateTimeLongFormat = DateFormat.getDateTimeInstance(
+        DateFormat.LONG, DateFormat.LONG, locale);
+
+       DateFormat dateTimeMediumFormat = DateFormat.getDateTimeInstance(
+        DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
+
+       DateFormat dateTimeShortFormat = DateFormat.getDateTimeInstance(
+        DateFormat.SHORT, DateFormat.SHORT, locale);
+
        // first day of the week index consistent with pgfcalendar
        // (0 = Monday, etc)
        int firstDay = 0;
@@ -2802,6 +2818,18 @@ public class TeXOSQuery
          formatDateTimePattern(timeLongFormat),
          formatDateTimePattern(timeMediumFormat),
          formatDateTimePattern(timeShortFormat));
+
+       String dateTimeGroup = String.format("{%s}{%s}{%s}{%s}",
+             escapeText(dateTimeFullFormat.format(now)),
+             escapeText(dateTimeLongFormat.format(now)),
+             escapeText(dateTimeMediumFormat.format(now)),
+             escapeText(dateTimeShortFormat.format(now)));
+
+       String dateTimeFmtGroup = String.format("{%s}{%s}{%s}{%s}",
+         formatDateTimePattern(dateTimeFullFormat),
+         formatDateTimePattern(dateTimeLongFormat),
+         formatDateTimePattern(dateTimeMediumFormat),
+         formatDateTimePattern(dateTimeShortFormat));
 
        DateFormatSymbols dateFmtSyms = DateFormatSymbols.getInstance(locale);
 
@@ -2938,12 +2966,14 @@ public class TeXOSQuery
          formatNumberPattern(pcFormat));
 
        return String.format(
-          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+          "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
              langRegionGroup,
              dateGroup,
              dateFmtGroup,
              timeGroup,
              timeFmtGroup,
+             dateTimeGroup,
+             dateTimeFmtGroup,
              weekdayNamesGroup,
              shortWeekdayNamesGroup,
              monthNamesGroup,
@@ -3112,7 +3142,7 @@ public class TeXOSQuery
          {
             try
             {
-               i = action.parseArgs(args, i);
+               i = action.parseArgs(args, i)-1;
 
                actions.add(action);
             }
@@ -3309,7 +3339,7 @@ public class TeXOSQuery
 
          for (int i = 0; i < optional; i++)
          {
-            if (index >= args.length-1 || args[index+1].startsWith("-"))
+            if (index >= args.length || args[index].startsWith("-"))
             {
                // no optional arguments, skip
                break;
@@ -3325,7 +3355,7 @@ public class TeXOSQuery
 
          for (int i = 0; i < required; i++)
          {
-            if (index >= args.length-1)
+            if (index >= args.length)
             {
                throw new IllegalArgumentException(String.format(
                  "Invalid syntax for action '%s'.%nExpected: %s",
@@ -3602,7 +3632,7 @@ public class TeXOSQuery
     
    private static final int DEFAULT_COMPATIBLE=2;
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2016-11-10";
+   private static final String VERSION_DATE = "2016-11-11";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
