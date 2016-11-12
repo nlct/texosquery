@@ -33,6 +33,9 @@
 \usepackage{upquote}
 \usepackage{metalogo}
 \usepackage[colorlinks,hyperindex=false]{hyperref}
+\usepackage[abbreviations,nomain,nonumberlist,nogroupskip]{glossaries-extra}
+
+\makeglossaries
 
 \makeatletter% doc.sty interferes with upquote.sty
 \def\@verbatim{\trivlist \item[]\if@minipage\else\vskip\parskip\fi
@@ -48,7 +51,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{842}
+\CheckSum{850}
 
 \RecordChanges
 \PageIndex
@@ -79,6 +82,26 @@
 
 \pdfstringdefDisableCommands{\renewcommand\meta[1]{#1}}
 
+\glssetcategoryattribute{abbreviation}{nohyperfirst}{true}
+
+\setabbreviationstyle[noexpand]{short}
+\newabbreviation[category=noexpand]{IEFT}{IEFT}{Internet Engineering Task Force}
+\newabbreviation[category=noexpand]{BCP}{BCP}{Best Common Practice}
+\newabbreviation[category=noexpand]{POSIX}{POSIX}{Portable Operating
+System Interface}
+\newabbreviation[category=noexpand]{CTAN}{CTAN}{Comprehensive \TeX\
+Archive Network}
+\newabbreviation[category=noexpand]{UTF}{UTF}{Unicode Transformation
+Format}
+\newabbreviation[category=noexpand]{ASCII}{ASCII}{American Standard
+Code for Information Interchange}
+\newabbreviation[category=noexpand]{ISO}{ISO}{International
+Organization for Standardization}
+
+\newabbreviation{OS}{OS}{operating system}
+\newabbreviation{JRE}{JRE}{Java Runtime Environment}
+\newabbreviation{CLDR}{CLDR}{Unicode Consortium's Common Locale Data Repository}
+
 \begin{document}
 \DocInput{texosquery.dtx}
 \end{document}
@@ -98,7 +121,7 @@
 %The \sty{texosquery} bundle provides the \app{texosquery.jar} application (and
 %variations \app{texosquery-jre8.jar} and \app{texosquery-jre5.jar})
 %This is a cross-platform Java application to query certain
-%operating system (OS) and locale information. The application is
+%\gls{OS} and locale information. The application is
 %specifically designed for use within \TeX's shell escape mechanism, 
 %through the \cs{TeXOSQuery} command provided by the \sty{texosquery} package
 %(\file{texosquery.tex} and \file{texosquery.sty}).
@@ -117,8 +140,7 @@
 %
 %\begin{important}
 %You will need \TeX's shell escape enabled,
-%and you will also need the Java Runtime Environment (JRE) 
-%installed.
+%and you will also need the \gls{JRE} installed.
 %\end{important}
 %
 %There are three variations of the \app{texosquery} application provided:
@@ -139,6 +161,76 @@
 %See also the installation instructions in the accompanying
 %\file{README.md} file.
 %
+%The aim of the original version of \app{texosquery} was to provide
+%a way of accessing the operating system's locale information.
+%Version 1.3 of the \sty{tracklang} package provides
+%\cs{TrackLangQueryEnv} which uses \app{kpsewhich} to query the
+%appropriate locale environment variable (such as \verb|$LANG|
+%or \verb|LC_ALL|). Unfortunately this doesn't work under Windows as
+%the locale information there is stored in the registry. The Lua
+%\texttt{os.setlocale(nil)} function can simply return \texttt{C} or
+%\texttt{POSIX}, which isn't helpful from \sty{tracklang}'s point of
+%view. Although Java has its drawbacks, it's one of the most
+%ubiquitous platform-independent methods to obtain this information.
+%Since it seemed overkill to write a Java application that simply
+%returned the locale, I decided to add a few extra functions that
+%might be of use, but accessing locale information was, and still
+%is, the primary purpose of this application.
+%
+%Although the \gls{POSIX} environment variables, such as \verb|$LC_ALL|
+%are easy to read with \app{kpsewhich}, these days the \gls{IEFT}
+%\gls{BCP}~47 language
+%tag is the more appropriate way of identifying a locale, so version
+%1.2 has added the \longarg{bcp47} function to support this.
+%The \sty{tracklang} package has similarly added
+%\cs{TrackLanguageTag}\marg{IEFT tag}.
+%
+%The \sty{locale} package occasionally referenced in this document
+%is still under development at the time of writing. The
+%\longarg{numeric} and \longarg{locale-data} options are designed to
+%interface with the \sty{locale} package, so although they will be
+%distributed separately, version 1.2 of \app{texosquery} is being
+%developed alongside version 1.0 of the \sty{locale} package.
+%The aim of the \sty{locale} package is to use both \sty{tracklang}
+%and \sty{texosquery} to automatically set up the document language.
+%For example, in the following \LaTeX\ document
+%\begin{verbatim}
+%\documentclass{article}
+%\usepackage{locale}
+%\begin{document}
+%\today
+%\end{document}
+%\end{verbatim}
+%the \sty{locale} package will automatically load:
+%\begin{itemize}
+%\item the \sty{textcomp} package for currency symbols (package
+%option \texttt{symbols=fontawesome} will use \sty{fontawesome}
+%instead);
+%\item if \XeLaTeX\ or \LuaLaTeX:
+% \begin{itemize}
+%  \item load \sty{fontspec} (unless option \texttt{fontspec=false}
+%  is used);
+%  \item load \sty{polyglossia} and use \cs{setmainlanguage}
+%  with options that can be determined from the language tag
+%  (use package option \texttt{support=babel} to use \sty{babel}
+%  regardless of the \LaTeX\ format);
+% \end{itemize}
+% otherwise:
+% \begin{itemize}
+%  \item load \sty{inputenc} (default file encoding obtained from
+%  \app{texosquery}'s \longarg{codeset-lcs} action);
+%  \item load \sty{fontenc} (font encoding obtained using
+%  \sty{tracklang} to query the language script);
+%  \item load \sty{babel} with the appropriate language label;
+% \end{itemize}
+%\item load \sty{datetime2} with the \texttt{useregional=text}
+%option (use \texttt{datetime2=false} to prevent this).
+%\end{itemize}
+%
+%So that's the reasoning behind the new v1.2 actions. Hopefully the
+%new \sty{locale} package will be uploaded to \gls{CTAN} shortly after the
+%new version of \sty{texosquery}.
+%
 %\tableofcontents
 %
 %\section{texosquery.jar: the Java application}
@@ -146,7 +238,7 @@
 %certain system information that may be of use in \TeX\ 
 %documents. All this information can easily be obtained using 
 %native commands, but the Java application allows an 
-%OS-independent approach with results that can easily be
+%\gls{OS}-independent approach with results that can easily be
 %captured by \TeX's shell-escape without having to strip 
 %formatting information.
 %
@@ -165,16 +257,16 @@
 %\cs{includegraphics}.
 %
 %Note that the result will be returned using the default input
-%encoding.  (For example, UTF-8.) You will need to ensure that your \TeX\
+%encoding.  (For example, \gls{UTF}-8.) You will need to ensure that your \TeX\
 %document uses the same encoding if you want to typeset any of the
 %results that may contain non-ASCII characters. You can determine
 %the default codeset with \texttt{texosquery \shortarg{C}}, which is
 %formatted to match the options used by the \sty{inputenc} package.
-%(For example, \texttt{uft8} for UTF-8.)
+%(For example, \texttt{uft8} for \gls{UTF}-8.)
 %You can change the default encoding by invoking the Java Virtual
 %Machine with the option \texttt{-Dfile.encoding=}\meta{codeset}.
 %For example, bash users can modify the \file{texosquery.sh} 
-%script to set the encoding to UTF-8 as follows:
+%script to set the encoding to \gls{UTF}-8 as follows:
 %\begin{verbatim}
 %#!/bin/sh
 %
@@ -222,7 +314,7 @@
 %\begin{verbatim}
 %texosquery --pdfdate /tmp/.test
 %\end{verbatim}
-%will return the file modification date in PDF format. However, if
+%will return the file modification date in PDF date-time format. However, if
 %\texttt{openin\_any} is set to \qt{\texttt{r}} (restricted), the read
 %access will be denied because the file is considered hidden so an
 %empty result is returned. Similarly, if \texttt{openin\_any} is set
@@ -236,7 +328,7 @@
 %The options that have a locale identifier as an argument need the
 %identifier formatted as a regular
 %\href{https://tools.ietf.org/html/bcp47}{IEFT BCP 47 language tag} that uses
-%hyphens as separators. POSIX style locales (with underscores
+%hyphens as separators. \gls{POSIX} style locales (with underscores
 %replaced by hyphens, for example \texttt{fr-BE.utf8@euro}) 
 %are only used as a return value in the \longarg{locale} and 
 %\longarg{locale-lcs} options.
@@ -244,14 +336,14 @@
 %\href{http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html}{\textbf{Not
 %all locales are supported by Java.}}
 %For example, Irish is supported but Scottish and Welsh 
-%aren't supported by the JRE.
-%The Unicode Consortium's Common Locale Data Repository (CLDR) can
+%aren't supported by the \gls{JRE}.
+%The \gls{CLDR} can
 %be accessed with Java~8, but
 %\href{http://openjdk.java.net/jeps/252}{the CLDR isn't
 %enabled by default}. It can be turned on using the system property
 %\texttt{java.locale.providers}, which may provide additional
 %support. For example, although Welsh isn't supported by the JRE,
-%it is supported with the CLDR, so both Java~8 and the CLDR 
+%it is supported with the \gls{CLDR}, so both Java~8 and the CLDR 
 %locale provider are required for that language. The proposed
 %Java~9 should have the CLDR enabled by default.
 %
@@ -379,7 +471,7 @@
 %Available actions are listed below.
 %
 %\subsubsection{Action \shortarg{b} or \longarg{bcp47}}
-%(New to version 1.2.) This action displays the BCP~47 language tag.
+%(New to version 1.2.) This action displays the \gls{BCP}~47 language tag.
 %For example, my locale is \texttt{en-GB} (English in the United
 %Kingdom), so
 %\begin{verbatim}
@@ -397,11 +489,11 @@
 %
 %\subsubsection{Action \shortarg{L} or \longarg{locale}}
 %
-%This action displays the locale information in the POSIX form
+%This action displays the locale information in the \gls{POSIX} form
 %\begin{flushleft}\ttfamily
 %\meta{lang}-\meta{region}.\meta{codeset}@\meta{modifier}
 %\end{flushleft}
-%where \meta{lang} is the ISO code for the language (e.g.\ 
+%where \meta{lang} is the \gls{ISO} code for the language (e.g.\ 
 %\texttt{en}),
 %\meta{region} is the ISO code for the region (e.g.\ \texttt{GB}),
 %\meta{codeset} is the default code set (e.g.\ \texttt{UTF-8})
@@ -421,7 +513,7 @@
 %
 %(New to version 1.2.)
 %This action returns just the codeset converted to lower case with hyphens 
-%stripped.  For example, my default file encoding is UTF-8, so 
+%stripped.  For example, my default file encoding is \gls{UTF}-8, so 
 %\begin{verbatim}
 %texosquery -C
 %\end{verbatim}
@@ -596,20 +688,46 @@
 %
 %(New to v1.2.) This action displays:
 %
-%\marg{grp sep}\marg{dec sep}\marg{exp sep}\marg{cur code}\marg{cur sym}\marg{cur sep} 
+%\marg{locale tag}\marg{group sep}\marg{decimal sep}\marg{exp
+%sep}\marg{use group}\marg{currency code}\marg{regional currency
+%code}\marg{currency sym}\marg{\TeX\ currency}\marg{currency sep} 
 %
 %for the \meta{language tag} given in the optional argument. If omitted, the
 %default locale is assumed. The returned values are:
 %\begin{itemize}
-%\item \meta{grp sep} the numeric group separator.
-%\item \meta{dec sep} the decimal separator.
+%\item \meta{tag} the language tag.
+%\item \meta{group sep} the numeric group separator.
+%\item \meta{decimal sep} the decimal separator.
 %\item \meta{exp sep} the exponent separator.
-%\item \meta{cur code} the ISO 4217 currency code.
-%\item \meta{cur sym} the currency symbol. (This may sometimes be
-%the same as \meta{cur code}.)
-%\item \meta{cur sep} the currency decimal separator.
+%\item \meta{use group} \texttt{true} if the locale uses number
+%grouping otherwise \texttt{false}.
+%\item \meta{currency code} the ISO 4217 currency code.
+%\item \meta{regional currency code} either the ISO 4217 currency
+%code or an unofficial code. The only unofficial codes returned are:
+%GGP (Guernsey pound), JEP (Jersey pound), IMP (Isle of Man
+%pound), KID (Kiribati dollar) and TVD (Tuvaluan dollar).
+%\item \meta{currency sym} the currency symbol. (This may sometimes be
+%the same as \meta{currency code}.) Non-ASCII characters will be
+%marked up with \cs{wrp} (see below).
+%\item \meta{\TeX\ currency} the currency symbol using \TeX\ code
+%provided by \cs{texosquery}.
+%This is obtained by substituting known Unicode
+%currency symbols occurring in \meta{currency sym} with
+%\cs{texosquerycurrency}\marg{xxx}, which expands to the control
+%sequence given by the name \texttt{texosquerycurrency}\meta{xxx}.
+%These commands are defined in \file{texosquery.tex}. Since there are no generic \TeX\ commands
+%available for all these symbols (except \$), these commands will need to be
+%redefined as appropriate but are provided in the event that there's
+%no UTF-8 support. There is a limited check for some known currency
+%commands, such as \cs{texteuro} or \cs{euro}, but if an appropriate
+%currency command can't be found, the
+%\cs{texosquerycurrency}\meta{xxx} commands will be defined to
+%simply the currency label (usually the same as the \meta{xxx}
+%part).
+%
+%\item \meta{currency sep} the currency decimal separator.
 %\end{itemize}
-%The language tag should conform to IETF BCP~47. See
+%The language tag should conform to \gls{IEFT} \gls{BCP}~47. See
 %\url{http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html}
 %for further details. If you are using \app{texosquery-jre5},
 %only the language, region and variant elements will be recognised
@@ -621,36 +739,33 @@
 %\end{verbatim}
 %produces
 %\begin{verbatim}
-%{,}{.}{E}{GBP}{\wrp{£}}{.}
+%{en-GB}{,}{.}{E}{true}{GBP}{GBP}{\wrp{£}}{\texosquerycurrency{pound}}{.}
 %\end{verbatim}
 %The \cs{wrp} command is used by \app{texosquery} to markup a
-%non-ASCII character. This command is one of the shorthands only
+%non-\gls{ASCII} character. This command is one of the shorthands only
 %defined within \cs{TeXOSQuery}. In this case it's a shortcut for
 %the command \cs{texosquerynonasciiwrap}. By default this just does its
 %argument, but it may be redefined to perform some other action.
 %
-%If Java doesn't support the given locale, the currency code will
-%appear as \texttt{XXX} with the symbol \textcurrency\ (generic
-%currency sign). Note that Java only returns official ISO 4217
-%currency codes. For example,
+%In most cases the \meta{regional currency code} will be the same
+%as \meta{currency} code. A few non-ambiguous unofficial codes
+%are known by \app{texosquery} and may be used if the country code
+%is recognised. For example, 
 %\begin{verbatim}
 %texosquery -N en-IM
 %\end{verbatim}
 %produces
 %\begin{verbatim}
-%{,}{.}{E}{GBP}{GBP}{.}
+%{en-IM}{,}{.}{E}{true}{GBP}{IMP}{M\wrp{£}}{M\texosquerycurrency{pound}}{.}
 %\end{verbatim}
-%However, the \longarg{locale-data} option (described next),
-%will check the region code and return both the official
-%ISO 4217 code and, optionally, a local unofficial code, so
-%\begin{verbatim}
-%texosquery -D en-IM
-%\end{verbatim}
-%will include \verb|{GBP}{IMP}{M\wrp{£}}| in the result.
+%
+%If Java doesn't support the given locale, the currency code will
+%appear as \texttt{XXX} with the symbol \textcurrency\ (generic
+%currency sign).
 %
 %\begin{important}
 %This option and the following (\longarg{locale-data}) are best used
-%with \XeTeX\ or \LuaTeX\ to deal with the non-ASCII characters. 
+%with \XeTeX\ or \LuaTeX\ to deal with the non-\gls{ASCII} characters. 
 %Make sure the file encoding used by Java matches the \TeX\ file.
 %\end{important}
 %
@@ -700,7 +815,7 @@
 %The information supplied with this option is quite complex,
 %but it's used by the \sty{locale} package\footnote{currently
 %pending} to set up all the required information for each locale
-%used in the document. Any non-ASCII characters are marked up with \cs{wrp},
+%used in the document. Any non-\gls{ASCII} characters are marked up with \cs{wrp},
 %which is locally defined by \cs{TeXOSQuery} to expand to
 %\cs{texosquerynonasciiwrap}.
 %
@@ -791,7 +906,7 @@
 %\begin{verbatim}
 %08/11/16
 %\end{verbatim}
-%Note that there's a difference between using the CLDR locale data
+%Note that there's a difference between using the \gls{CLDR} locale data
 %and the JRE data. If I'm using the Java~7 compatible
 %\app{texosquery.jar} which only uses JRE locale data, then I get
 %the above results, but if I use \file{texosquery-jre8.sh} which
@@ -806,8 +921,8 @@
 %\end{verbatim}
 %So the \meta{medium date} may be numeric or may be an abbreviated
 %form of \meta{long date}, depending on the language and the locale
-%provider. Some languages aren't supported by JRE but are supported
-%by CLDR. (Some aren't supported by either, but there's a 
+%provider. Some languages aren't supported by \gls{JRE} but are supported
+%by \gls{CLDR}. (Some aren't supported by either, but there's a 
 %chance that those languages will eventually be added to the CLDR.)
 %For example, if I use \texttt{-D cy-GB} with the JRE as the locale
 %provider I just get the \texttt{en-GB} dates, but if I use the CLDR
@@ -861,7 +976,7 @@
 %\begin{verbatim}
 %{15:59:41\spc o\csq clock\spc GMT}{15:59:41\spc GMT}{15:59:41}{15:59}
 %\end{verbatim}
-%with the JRE. If I switch to CLDR (\file{texosquery-jre8.sh}) I get:
+%with the \gls{JRE}. If I switch to \gls{CLDR} (\file{texosquery-jre8.sh}) I get:
 %\begin{verbatim}
 %{16:00:51\spc Greenwich\spc Mean\spc Time}{16:00:51\spc GMT}{16:00:51}{16:00}
 %\end{verbatim}
@@ -886,67 +1001,83 @@
 %\marg{full date time}\marg{long date time}\marg{medium date
 %time}\marg{short date time}
 %
+%This is may simply be the date and time from above separated by 
+%a space.
+%
 %\item \meta{date time pattern block}
 %
 %The pattern used to format the full date time, long date time, medium
-%date time and short date time.
+%date time and short date time. This is may simply be the date and
+%time patterns from above separated by a space.
 %
 %\marg{full date time pattern}\marg{long date time
 %pattern}\marg{medium date time pattern}\marg{short date time pattern}
 %
-%\item The week day names (starting with Monday for consistency with
-%\sty{pgfcalendar}).
+%\item \meta{days of the week block}
 %
-%\item The abbreviated week day names.
+%The week day names (starting with Monday for consistency with
+%\sty{pgfcalendar}). Non-\gls{ASCII} characters are marked up with
+%\cs{wrp}.
 %
-%\item The month names.
+%\marg{Monday}\marg{Tuesday}\marg{Wednesday}\marg{Thursday}\marg{Friday}\marg{Saturday}\marg{Sunday}
 %
-%\item The abbreviated month names.
+%\item \meta{abbreviated days of the week block}
 %
-%\item The numeric data similar to \longarg{numeric} but there are
-%some extra items:
+%As above, but abbreviated.
 %
-%\marg{grp sep}\marg{dec sep}\marg{exp sep}\marg{grp flag}\marg{cur
-%code}\marg{locale cur code}\marg{cur
-%sym}\marg{TeX cur}\marg{cur sep}\marg{percent sym}\marg{per mill
-%sym}
+%\item \meta{month names block}
+%
+%The month names.
+%
+%\item \meta{abbreviated month names block}
+%
+%The abbreviated month names.
+%
+%\item \meta{standalone days of the week block}
+%
+%The week day names when used in a standalone context (for example, a
+%column header). This may be the same as the earlier \meta{days of
+%the week block} (and will be the same for \file{texosquery.jar} and
+%\file{texosquery-jre5.jar}). The standalone support was 
+%introduced to Java~8.
+%
+%\item \meta{abbreviated standalone days of the week block}
+%
+%As above, but abbreviated.
+%
+%\item \meta{standalone month names block}
+%
+%The month names when used in a standalone context (for example, a
+%column header). This may be the same as the earlier \meta{month
+%names block} (and will be the same for \file{texosquery.jar} and
+%\file{texosquery-jre5.jar}). The standalone support was 
+%introduced to Java~8.
+%
+%\item \meta{abbreviated standalone month names block}
+%
+%As above but abbreviated.
+%
+%\item \meta{numeric block}
+%
+%The numeric data similar to \longarg{numeric} but it's
+%missing the \meta{tag} (which is provided in the earlier
+%\meta{locale block}) and there are two extra items:
+%
+%\marg{group sep}\marg{decimal sep}\marg{exp
+%sep}\marg{use group}\marg{currency code}\marg{regional currency
+%code}\marg{currency sym}\marg{currency tex}\marg{currency sep}
+%\marg{percent sym}\marg{per mill sym}
 %
 %See above for the elements that are also provided in
-%\longarg{numeric}. The additional elements are described below.
-%\begin{itemize}
-%\item \meta{grp flag} will be either \texttt{true} or
-%\texttt{false} indicating whether or not number grouping is used.
+%\longarg{numeric}. The additional elements are \meta{percent sym}
+%and \meta{per mill sym}, which are the percent and
+%per-mill symbols, respectively. The percent symbol \verb|%| has its
+%category code changed to 12 by \cs{TeXOSQuery}. As with other
+%non-ASCII characters, the per-mill symbol will be marked up with \cs{wrp}.
 %
-%\item
-%The extra currency code \meta{locale cur code} will usually be the
-%same as \meta{cur code}, except for the following regions:
-%\texttt{GG} (Guernsey), \texttt{JEP} (Jersey), \texttt{IM} (Isle of
-%Man), \texttt{KI} (Kiribati) and \texttt{TV} (Tuvaluan). These set
-%\meta{locale cur code} to, respectively, the unofficial codes \texttt{GGP},
-%\texttt{JEP}, \texttt{IMP}, \texttt{KID} and \texttt{TVD}.
+%\item \meta{numeric patterns block}
 %
-%\item
-%The \meta{percent sym} and \meta{per mill sym} are the percent and
-%per mill symbols (UTF-8). Note that \cs{TeXOSQuery} automatically
-%changes the category code of the percent character \verb|%| to
-%12 (\qt{other}), so the percent symbol can be parsed from the output of
-%\app{texosquery}.
-%
-%The \meta{TeX cur} part is obtained by substituting known Unicode
-%currency symbols occurring in \meta{cur sym} with commands in the
-%form \cs{texosquerycurrency}\meta{xxx} which are defined by
-%\file{texosquery.tex} (for example, \cs{texosquerycurrencypound}). Since there are no generic \TeX\ commands
-%available for all these symbols (except \$), these commands will need to be
-%redefined as appropriate but are provided in the event that there's
-%no UTF-8 support. There is a limited check for some known currency
-%commands, such as \cs{texteuro} or \cs{euro}, but if appropriate
-%currency command can't be found, the
-%\cs{texosquerycurrency}\meta{xxx} commands will be defined to
-%simply the currency label (usually the same as the \meta{xxx}
-%part).
-%\end{itemize}
-%
-%\item The patterns used to format decimals, integers, currency and
+%The patterns used to format decimals, integers, currency and
 %percentages.
 %
 %\marg{decimal pattern}\marg{integer pattern}\marg{currency
@@ -955,6 +1086,10 @@
 %As with the date and time patterns, when used with \cs{TeXOSQuery}, the
 %short commands, such as \cs{dgt}, are internally converted.
 %They're not defined outside that scope.
+%
+%If a pattern is used directly in the text, it will expand to the
+%original pattern padded to ten digits. (Eleven digit integers are outside
+%\TeX's maximum number range.)
 %\end{description}
 %
 %\section{texosquery.tex: generic \TeX\ code}
@@ -1332,7 +1467,7 @@
 %\end{flushleft}
 %where \meta{filename} is the name of the file.
 %
-%\StopEventually{\phantomsection
+%\StopEventually{\printabbreviations\phantomsection
 %\addcontentsline{toc}{section}{Change History}%
 %\PrintChanges
 %\addcontentsline{toc}{section}{\indexname}%
@@ -1372,24 +1507,32 @@
 %    \end{macrocode}
 %
 %\begin{macro}{\@texosquery@warn}
-%Generate warning message.
+%\changes{1.2}{??}{added check for tracklang's warning command}
+%Generate warning message. Use \sty{tracklang}'s warning if
+%available (so that the warnings can be disabled for both packages
+%at the same time).
 %    \begin{macrocode}
-\ifx\PackageWarning\undefined
-  \def\@texosquery@warn#1{%
-    {%
-      \newlinechar=`\^^J
-      \def\MessageBreak{^^J}%
-      \message{^^Jtexosquery Warning: #1 on line \the\inputlineno.^^J}%
-    }%
-  }
+\ifx\@tracklang@pkgwarn\undefined
+  \ifx\PackageWarning\undefined
+    \def\@texosquery@warn#1{%
+      {%
+        \newlinechar=`\^^J
+        \def\MessageBreak{^^J}%
+        \message{^^Jtexosquery Warning: #1 on line \the\inputlineno.^^J}%
+      }%
+    }
+  \else
+    \def\@texosquery@warn#1{%
+      \PackageWarning{texosquery}{#1}%
+    }
+  \fi
 \else
   \def\@texosquery@warn#1{%
-      \PackageWarning{texosquery}{#1}%
+    \@tracklang@pkgwarn{texosquery}{#1}%
   }
 \fi
 %    \end{macrocode}
 %\end{macro}
-%
 %
 %\begin{macro}{\TeXOSInvokerName}
 %The name of the \app{texosquery} application.

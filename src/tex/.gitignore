@@ -12,3 +12,8 @@
 *.ilg
 *.ind
 *.toc
+*.ist
+*.glg-abr
+*.glo-abr
+*.gls-abr
+*.cfg

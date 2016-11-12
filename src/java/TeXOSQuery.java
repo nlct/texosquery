@@ -1642,16 +1642,16 @@ public class TeXOSQuery
     * Gets all numerical information for the given locale. If the
     * given locale tag is null, the default locale is used. The
     * information is returned with each item grouped to make it
-    * easier to parse in TeX. Note that Java doesn't support any of
-    * the unofficial currency codes, such as IMP, that aren't
-    * recognised in ISO 4217. Use getLocaleData() for unofficial
-    * codes.
+    * easier to parse in TeX. This is an abridged version of
+    * getLocaleData().
     * @param localeTag the tag identifying the locale or null for
     * the default locale
-    * @return locale numerical information: number group separator,
-    * decimal separator, exponent separator, international currency
-    * identifier (e.g. GBP), currency symbol (e.g. £),
-    * monetary decimal separator.
+    * @return locale numerical information: language tag, 
+    * number group separator, decimal separator, exponent separator,
+    * grouping conditional ("true" if locale uses number grouping),
+    * currency code (e.g. GBP), regional currency identifier (e.g. IMP),
+    * currency symbol (e.g. \\wrp{£}), currency TeX code (e.g.
+    * \\texosquerycurrency{pound}), monetary decimal separator.
     */
    public String getNumericalInfo(String localeTag)
    {
@@ -1669,15 +1669,76 @@ public class TeXOSQuery
        DecimalFormatSymbols fmtSyms 
                = DecimalFormatSymbols.getInstance(locale);
 
-       // Don't escape punctuation. For example, de-CH uses ' as
-       // number grouping separator.
+       // ISO 4217 code
+       String currencyCode = fmtSyms.getInternationalCurrencySymbol();
 
-       return String.format("{%s}{%s}{%s}{%s}{%s}{%s}",
+       // Currency symbol
+       String currency = fmtSyms.getCurrencySymbol();
+
+       // Check for known unofficial currency codes
+
+       String localeCurrencyCode = currencyCode;
+
+       String countryCode = locale.getCountry();
+
+       if (countryCode != null && !"".equals(countryCode))
+       {
+          if (countryCode.equals("GG") || countryCode.equals("GGY")
+           || countryCode.equals("831"))
+          {// Guernsey
+             localeCurrencyCode = "GGP";
+             currency = "£";
+          }
+          else if (countryCode.equals("JE") || countryCode.equals("JEY")
+           || countryCode.equals("832"))
+          {// Jersey
+             localeCurrencyCode = "JEP";
+             currency = "£";
+          }
+          else if (countryCode.equals("IM") || countryCode.equals("IMN")
+           || countryCode.equals("833"))
+          {// Isle of Man
+             localeCurrencyCode = "IMP";
+             currency = "M£";
+          }
+          else if (countryCode.equals("KI") || countryCode.equals("KIR")
+           || countryCode.equals("296"))
+          {// Kiribati
+             localeCurrencyCode = "KID";
+             currency = "$";
+          }
+          else if (countryCode.equals("TV") || countryCode.equals("TUV")
+           || countryCode.equals("798"))
+          {// Tuvaluan
+             localeCurrencyCode = "TVD";
+             currency = "$";
+          }
+          // Transnistrian ruble omitted as it conflicts with ISO
+          // 4217 so omitted. There's also no country code for
+          // Transnistria. Other currencies don't have an associated
+          // region code (for example, Somaliland) or don't have an
+          // known unofficial currency (for example, Alderney).
+          // code.
+       }
+
+       // Convert known Unicode currency symbols to commands that
+       // may be redefined in TeX
+
+       String texCurrency = getTeXCurrency(currency);
+
+       NumberFormat numFormat = NumberFormat.getNumberInstance(locale);
+
+       return String.format(
+         "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+             getLanguageTag(locale),
              escapeText(fmtSyms.getGroupingSeparator()),
              escapeText(fmtSyms.getDecimalSeparator()),
              escapeText(fmtSyms.getExponentSeparator()), 
-             escapeText(fmtSyms.getInternationalCurrencySymbol()),
-             escapeText(fmtSyms.getCurrencySymbol()),
+             numFormat.isGroupingUsed(),// "true" or "false"
+             escapeText(currencyCode),
+             escapeText(localeCurrencyCode),
+             escapeText(currency),
+             texCurrency,// already escaped
              escapeText(fmtSyms.getMonetaryDecimalSeparator()));
    }
 

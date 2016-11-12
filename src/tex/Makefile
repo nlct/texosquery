@@ -1,5 +1,6 @@
 texosquery.pdf	: texosquery.dtx
 		pdflatex -file-line-error texosquery.dtx
+		makeglossaries texosquery
 		makeindex -s gglo.ist -t texosquery.glg -o texosquery.gls texosquery.glo
 		pdflatex texosquery.dtx
 		makeindex -s gind.ist texosquery.idx
