@@ -19,6 +19,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 
 /**
  * Application functions. These methods need to be Java version 1.5
@@ -33,7 +34,7 @@ import java.io.InputStreamReader;
  * @version 1.2
  * @since 1.0
  */
-public class TeXOSQuery
+public class TeXOSQuery implements Serializable
 {
    public TeXOSQuery(String name)
    {
@@ -3101,7 +3102,7 @@ public class TeXOSQuery
       System.out.println("General actions:");
       System.out.println();
 
-      for (QueryAction action : availableActions)
+      for (QueryAction action : AVAILABLE_ACTIONS)
       {
          if (action.getType() == QueryActionType.GENERAL_ACTION)
          {
@@ -3113,7 +3114,7 @@ public class TeXOSQuery
       System.out.println("Locale actions:");
       System.out.println();
 
-      for (QueryAction action : availableActions)
+      for (QueryAction action : AVAILABLE_ACTIONS)
       {
          if (action.getType() == QueryActionType.LOCALE_ACTION)
          {
@@ -3129,7 +3130,7 @@ public class TeXOSQuery
       System.out.println("to access file information.");
       System.out.println();
 
-      for (QueryAction action : availableActions)
+      for (QueryAction action : AVAILABLE_ACTIONS)
       {
          if (action.getType() == QueryActionType.FILE_ACTION)
          {
@@ -3176,11 +3177,11 @@ public class TeXOSQuery
 
    private QueryAction getAction(String name)
    {
-      for (int i = 0; i < availableActions.length; i++)
+      for (int i = 0; i < AVAILABLE_ACTIONS.length; i++)
       {
-         if (availableActions[i].isAction(name))
+         if (AVAILABLE_ACTIONS[i].isAction(name))
          {
-            return availableActions[i];
+            return AVAILABLE_ACTIONS[i].copy();
          }
       }
 
@@ -3306,7 +3307,7 @@ public class TeXOSQuery
       {
          try
          {
-            print(numActions, action.doAction());
+            print(numActions, action.doAction(compatible));
          }
          catch (Throwable e)
          {
@@ -3318,203 +3319,7 @@ public class TeXOSQuery
       }
    }
 
-   private abstract class QueryAction
-   {
-      public QueryAction(String longForm, QueryActionType type,
-         String description)
-      {
-         this(longForm, null, 0, 0, "", type, description);
-      }
-
-      public QueryAction(String longForm, QueryActionType type,
-         String description, int minCompat)
-      {
-         this(longForm, null, 0, 0, "", type, description, minCompat);
-      }
-
-      public QueryAction(String longForm, String shortForm, 
-        QueryActionType type, String description)
-      {
-         this(longForm, shortForm, 0, 0, "", type, description);
-      }
-
-      public QueryAction(String longForm, String shortForm, 
-        QueryActionType type, String description, int minCompat)
-      {
-         this(longForm, shortForm, 0, 0, "", type, description, minCompat);
-      }
-
-      public QueryAction(String longForm, String shortForm, String syntax, 
-         QueryActionType type, String description)
-      {
-         this(longForm, shortForm, 0, 0, syntax, type, description);
-      }
-
-      public QueryAction(String longForm, String shortForm,
-        int numOptional, int numRequired, String syntax, 
-        QueryActionType type, String description)
-      {
-         this(longForm, shortForm, numOptional, numRequired, 
-              syntax, type, description, DEFAULT_COMPATIBLE);
-      }
-
-      public QueryAction(String longForm, String shortForm,
-        int numOptional, int numRequired, String syntax, 
-        QueryActionType type, String description, int minCompat)
-      {
-         if (longForm != null)
-         {
-            longName = "--"+longForm;
-         }
-
-         if (shortForm != null)
-         {
-            shortName = "-"+shortForm;
-         }
-
-         optional = numOptional;
-         required = numRequired;
-
-         this.syntax = syntax;
-         this.type = type;
-         this.description = description;
-         this.minCompatibility = minCompat;
-      }
-
-      public boolean isAction(String name)
-      {
-         return (name.equals(longName) || name.equals(shortName));
-      }
-
-      public int parseArgs(String[] args, int index)
-      throws IllegalArgumentException
-      {
-         invokedName = args[index++];
-
-         optionalProvided = 0;
-
-         if (optional > 0)
-         {
-            optionalArgs = new String[optional];
-         }
-
-         for (int i = 0; i < optional; i++)
-         {
-            if (index >= args.length || args[index].startsWith("-"))
-            {
-               // no optional arguments, skip
-               break;
-            }
-
-            optionalArgs[optionalProvided++] = args[index++];
-         }
-
-         if (required > 0)
-         {
-            requiredArgs = new String[required];
-         }
-
-         for (int i = 0; i < required; i++)
-         {
-            if (index >= args.length)
-            {
-               throw new IllegalArgumentException(String.format(
-                 "Invalid syntax for action '%s'.%nExpected: %s",
-                 invokedName, getUsage(invokedName)));
-            }
-
-            requiredArgs[i] = args[index++];
-         }
-
-         return index;
-      }
-
-      public int providedOptionCount()
-      {
-         return optionalProvided;
-      }
-
-      public String getOptionalArgument(int index)
-      {
-         return index < optionalArgs.length ? optionalArgs[index] : null;
-      }
-
-      public String getRequiredArgument(int index)
-      {
-         return requiredArgs[index];
-      }
-
-      public String getInvokedName()
-      {
-         return invokedName;
-      }
-
-      public QueryActionType getType()
-      {
-         return type;
-      }
-
-      public String getUsage(String name)
-      {
-         return String.format("%s%s",
-           name, syntax == null || "".equals(syntax) ? "" : " "+syntax);
-      }
-
-      public String help()
-      {
-         String usage;
-
-         if (shortName == null)
-         {
-            usage = getUsage(longName);
-         }
-         else
-         {
-            usage = String.format("%s or %s", getUsage(shortName),
-              getUsage(longName));
-         }
-
-         int n = usage.length();
-
-         // This could do with a bit of neatening. Some of the
-         // descriptions need line wrapping.
-         return String.format("%s%n\t%s.%n", usage, description);
-      }
-
-      public String doAction() throws IllegalArgumentException
-      {
-         if (compatible < minCompatibility)
-         {
-            throw new IllegalArgumentException(String.format(
-            "'%s' option not available in compatibility mode %d",
-            invokedName, compatible));
-         }
-
-         return action();
-      }
-
-      protected abstract String action();
-
-      private String longName=null;
-      private String shortName=null;
-      private String invokedName=null;
-      private String syntax="";
-      private int optional=0;
-      private int optionalProvided=0;
-      private int required=0;
-      private String[] requiredArgs=null;
-      private String[] optionalArgs=null;
-      private QueryActionType type;
-      private String description;
-      private int minCompatibility;
-   }
-
-   private enum QueryActionType
-   {
-      FILE_ACTION, LOCALE_ACTION, GENERAL_ACTION
-   }
-
-   private QueryAction[] availableActions = new QueryAction[]
+   private final QueryAction[] AVAILABLE_ACTIONS = new QueryAction[]
    {
       new QueryAction("cwd", "c", QueryActionType.FILE_ACTION, 
         "Display current working directory")
@@ -3691,7 +3496,7 @@ public class TeXOSQuery
 
    private String name;
     
-   private static final int DEFAULT_COMPATIBLE=2;
+   public static final int DEFAULT_COMPATIBLE=2;
    private static final String VERSION_NUMBER = "1.2";
    private static final String VERSION_DATE = "2016-11-11";
    private static final char BACKSLASH = '\\';

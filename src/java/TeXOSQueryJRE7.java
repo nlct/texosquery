@@ -2,6 +2,7 @@ package com.dickimawbooks.texosquery;
 
 import java.util.Locale;
 import java.util.Locale.Builder;
+import java.io.Serializable;
 
 /**
  * Main class. Supports Java 1.7.
