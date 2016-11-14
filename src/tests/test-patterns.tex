@@ -1,0 +1,14 @@
+% arara: pdftex
+\input texosquery
+
+\texosquerydefpattern{\pattern}{\dtf{2}{d}/\dtf{2}{M}/\dtf{4}{y}\spc
+\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}}
+
+Pattern: {\tt \pattern}
+
+\def\datetimedata{{1}{2016}{2016}{10}{46}{3}{319}{14}{2}{2}{1}{14}{14}{2}{2}{8}{50}{799}{0:0}}
+
+\expandafter\texosqueryfmtdatetime\expandafter\pattern
+ \datetimedata
+
+\bye
