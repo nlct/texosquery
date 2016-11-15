@@ -1,7 +1,8 @@
 all	: test.pdf test-plain.pdf test-ltx.pdf test-xeltx.pdf \
 	  test-locale-data-ltx.pdf \
 	  test-locale-data-xe.pdf \
-	  test-locale-data-xeltx.pdf
+	  test-locale-data-xeltx.pdf \
+	  test-patterns.pdf
 
 texosquery.tex	: ../tex/texosquery.dtx ../tex/texosquery.ins
 		cd ../tex; latex -file-line-error texosquery.ins; mv texosquery.{tex,sty} ../tests
@@ -29,6 +30,9 @@ test-locale-data-xe.pdf	: texosquery.sty test-locale-data-xe.tex ../bin/texosque
 
 test-locale-data-xeltx.pdf	: texosquery.sty test-locale-data-xeltx.tex ../bin/texosquery.jar
 		arara test-locale-data-xeltx
+
+test-patterns.pdf	: texosquery.tex test-patterns.tex ../bin/texosquery.jar
+		arara test-patterns
 
 clean	:
 	\rm -f *.{aux,log,pdf}

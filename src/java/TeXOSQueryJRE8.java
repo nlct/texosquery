@@ -78,6 +78,28 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
       return locale.toLanguageTag();
    }
 
+   /**
+    * Gets the week year for the given calendar.
+    * @return The week year
+    */
+   @Override
+   public int getWeekYear(Calendar cal)
+   {
+      try
+      {
+        return cal.isWeekDateSupported() ?
+          cal.getWeekYear() : cal.get(Calendar.YEAR);
+      }
+      catch (UnsupportedOperationException e)
+      {
+         // shouldn't happen with the above conditional, but just in
+         // case...
+
+         debug(e.getMessage(), e);
+         return cal.get(Calendar.YEAR);
+      }
+   }
+
    /** Gets the standalone month names for the locale data.
     * These are only available for Java 8, so just return the 
     * month names used in the date format instead.

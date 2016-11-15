@@ -17,3 +17,5 @@
 *.glo-abr
 *.gls-abr
 *.cfg
+*.bat
+*.sh

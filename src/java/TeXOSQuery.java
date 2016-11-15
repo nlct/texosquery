@@ -745,6 +745,65 @@ public class TeXOSQuery implements Serializable
       return toTeXPath(filename);
    }
 
+   /**
+    * Gets the week year for the given calendar.
+    * Calendar.getWeekYear() was added to Java 7, so this defaults
+    * to the year instead. 
+    * @return The week year
+    */ 
+   public int getWeekYear(Calendar cal)
+   {
+      return cal.get(Calendar.YEAR);
+   }
+
+   /**
+    *Gets all the date-time data for the current date-time. 
+    @return data in format that can be read by \\texosqueryfmtdatetime
+    */ 
+   public String getDateTimeData()
+   {
+      Calendar cal = Calendar.getInstance();
+      cal.setTimeInMillis(now.getTime());
+
+      int hourH = cal.get(Calendar.HOUR_OF_DAY);
+
+      int hourk = (hourH == 0 ? 24 : hourH);
+
+      int hourK = cal.get(Calendar.HOUR);
+
+      int hourh = (hourK == 0 ? 12 : hourK);
+
+      int timezoneoffset = cal.get(Calendar.ZONE_OFFSET);
+
+      // convert from offset millisec to hours and minutes
+      // (ignore left-over seconds and milliseconds)
+
+      int tzm = timezoneoffset/(60000);
+
+      int tzh = tzm/60;
+
+      tzm = tzm % 60;
+
+      return String.format("{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{{%d}{%d}{%d}{%d}{%s}}",
+       cal.get(Calendar.ERA),
+       cal.get(Calendar.YEAR),
+       getWeekYear(cal),
+       cal.get(Calendar.MONTH),
+       cal.get(Calendar.WEEK_OF_YEAR),
+       cal.get(Calendar.WEEK_OF_MONTH),
+       cal.get(Calendar.DAY_OF_YEAR),
+       cal.get(Calendar.DAY_OF_MONTH),
+       cal.get(Calendar.DAY_OF_WEEK_IN_MONTH),
+       cal.get(Calendar.DAY_OF_WEEK),
+       cal.get(Calendar.AM_PM),
+       hourH, hourk, hourK, hourh,
+       cal.get(Calendar.MINUTE),
+       cal.get(Calendar.SECOND),
+       cal.get(Calendar.MILLISECOND),
+       cal.get(Calendar.DST_OFFSET),
+       timezoneoffset, tzh, tzm, cal.getTimeZone().getID());
+   }
+
     /**
      * Gets the current date in PDF format. (The same format as
      * \pdfcreationdate.)
@@ -2490,6 +2549,7 @@ public class TeXOSQuery implements Serializable
       boolean inString = false;
 
       int digitCount = 0;
+      int groupCount = -1;
 
       // count the number of digits
 
@@ -2519,6 +2579,12 @@ public class TeXOSQuery implements Serializable
          else if (codepoint == '#' || codepoint == '0')
          {
             digitCount++;
+
+            if (groupCount > -1) groupCount++;
+         }
+         else if (codepoint == ',')
+         {
+            groupCount=0;
          }
       }
 
@@ -2574,6 +2640,11 @@ public class TeXOSQuery implements Serializable
                     for ( ; digitIndex > digitCount; digitIndex--)
                     {
                        builder.append("\\dgtnz ");
+
+                       if (groupCount > 0 && ((digitIndex-1) % groupCount) == 0)
+                       {
+                          builder.append("\\ngp ");
+                       }
                     }
 
                     builder.append("\\dgt ");
@@ -2629,6 +2700,11 @@ public class TeXOSQuery implements Serializable
                     for ( ; digitIndex > digitCount; digitIndex--)
                     {
                        builder.append("\\dgtnz ");
+
+                       if (groupCount > 0 && ((digitIndex-1) % groupCount) == 0)
+                       {
+                          builder.append("\\ngp ");
+                       }
                     }
 
                     builder.append("\\dgtnz ");
@@ -3425,6 +3501,15 @@ public class TeXOSQuery implements Serializable
          public String action()
          {
             return getLocaleData(getOptionalArgument(0));
+         }
+      },
+      new QueryAction("date-time", "M", 
+         QueryActionType.GENERAL_ACTION,
+         "Display all the current date-time data", 2)
+      {
+         public String action()
+         {
+            return getDateTimeData();
          }
       },
       new QueryAction("pdfdate", "d", 0, 1, "<file>",

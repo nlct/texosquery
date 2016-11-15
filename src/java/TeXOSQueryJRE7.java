@@ -2,6 +2,7 @@ package com.dickimawbooks.texosquery;
 
 import java.util.Locale;
 import java.util.Locale.Builder;
+import java.util.Calendar;
 import java.io.Serializable;
 
 /**
@@ -77,6 +78,27 @@ public class TeXOSQueryJRE7 extends TeXOSQuery
       return locale.toLanguageTag();
    }
 
+   /**
+    * Gets the week year for the given calendar.
+    * @return The week year
+    */
+   @Override
+   public int getWeekYear(Calendar cal)
+   {
+      try
+      {
+        return cal.isWeekDateSupported() ?
+          cal.getWeekYear() : cal.get(Calendar.YEAR);
+      }
+      catch (UnsupportedOperationException e)
+      {
+         // shouldn't happen with the above conditional, but just in
+         // case...
+
+         debug(e.getMessage(), e);
+         return cal.get(Calendar.YEAR);
+      }
+   }
 
    /**
     * Main method.

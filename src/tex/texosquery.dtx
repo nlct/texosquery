@@ -51,7 +51,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{850}
+\CheckSum{2391}
 
 \RecordChanges
 \PageIndex
@@ -77,6 +77,10 @@
 \newenvironment{important}
  {\begin{quote}\textbf{Important Note:}}
  {\end{quote}}
+
+\newenvironment{definition}
+ {\begin{flushleft}\ttfamily}
+ {\end{flushleft}}
 
 \setcounter{secnumdepth}{2}
 
@@ -157,9 +161,7 @@ Organization for Standardization}
 %The default is \file{texosquery.jar}. Throughout this document
 %\app{texosquery} is used to reference the application, regardless
 %which of these three jar files you've chosen to use. See
-%\cs{TeXOSInvokerName} in section~\ref{sec:tex} for further details.
-%See also the installation instructions in the accompanying
-%\file{README.md} file.
+%section~\ref{sec:setup} for further details.
 %
 %The aim of the original version of \app{texosquery} was to provide
 %a way of accessing the operating system's locale information.
@@ -256,13 +258,142 @@ Organization for Standardization}
 %system, so the result can be used, for example, in \cs{input} or
 %\cs{includegraphics}.
 %
-%Note that the result will be returned using the default input
+%\subsection{Installation and Setup}
+%\label{sec:setup}
+%
+%This bundle contains the following files:
+%\begin{itemize}
+%\item \file{texosquery.dtx} Contains the source code for this
+%document, and the files: \file{texosquery.tex} (generic \TeX\ code),
+%\file{texosquery.sty} (\LaTeX\ package wrapper), \file{texosquery.cfg}
+%(configuration file), \file{texosquery-jre8.sh} (bash script that
+%runs \file{texosquery-jre8.jar}), \file{texosquery.sh} 
+%(runs \file{texosquery.jar}), \file{texosquery-jre5.sh} 
+%(runs \file{texosquery-jre5.jar}),
+%\file{texosquery-jre8.bat} (Windows batch script that
+%runs \file{texosquery-jre8.jar}), \file{texosquery.bat} 
+%(runs \file{texosquery.jar}), and
+%\file{texosquery-jre5.bat} (runs \file{texosquery-jre5.jar}).
+%\item \file{texosquery.ins} The driver file used to extract all the
+%above files contained in \file{texosquery.dtx}.
+%\item The three different versions of the \app{texosquery}
+%application: \file{texosquery-jre8.jar}, \file{texosquery.jar} and
+%\file{texosquery.jar}. The source code for these is contained in
+%the \file{java} sub-directory.
+%\item \file{texosquery.pdf} This PDF document.
+%\item \file{README.md} The README file in markdown format.
+%\item \file{CHANGES} Lists major changes for each version.
+%\end{itemize}
+%
+%To install (\meta{TEXMF} indicates the TEXMF directory):
+%\begin{enumerate}
+%\item Run
+%\begin{verbatim}
+%tex texosquery.ins
+%\end{verbatim}
+%to extract the \file{.tex}, \file{.sty}, \file{.cfg}, \file{.sh}
+%and \file{.bat} files. Unix-like users may delete the \file{.bat}
+%files and Windows users may delete the \file{.sh} files.
+%
+%\item Move \file{texosquery.tex} to
+%\meta{TEXMF}\file{/tex/generic/texosquery/}
+%\item Edit \file{texosquery.cfg} so that \cs{TeXOSInvokerName} is
+%defined to the application of your choice. For example, Unix users
+%with Java 8 installed:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre8.sh}
+%\end{verbatim}
+%or Windows users with Java 8 installed:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre8}
+%\end{verbatim}
+%\item Move \file{texosquery.cfg} to
+%\meta{TEXMF}\file{/tex/generic/texosquery/}
+%\item Move \file{texosquery.sty} to
+%\meta{TEXMF}\file{/tex/latex/texosquery/}
+%\item Move the \file{.jar} files to
+%\meta{TEXMF}\file{/scripts/texosquery/}
+%\item Windows users: move the \file{.bat} files to somewhere on
+%your system's path. Unix-like users: move the \file{.sh} files to
+%somewhere on your system's path and make them executable.
+%\end{enumerate}
+%Now test the installation:
+%\begin{enumerate}
+%\item In the
+%\href{http://www.dickimaw-books.com/latex/novices/html/terminal.html}{command
+%prompt or terminal}:
+%\begin{verbatim}
+%texosquery -b
+%\end{verbatim}
+%(Replace \texttt{texosquery} with the command that matches the value
+%of \cs{TeXOSInvokerName} in the \file{texosquery.cfg} file
+%described above.) This should display the system's default locale.
+%For me, this simply displays the line:
+%\begin{verbatim}
+%en-GB
+%\end{verbatim}
+%If you get an \qt{Unknown option \texttt{'-b'}} error, then it's
+%picking up an old version of \app{texosquery}. Check the version
+%number with the \shortarg{v} switch. If you get a \qt{command not
+%found error}, then recheck the installation steps above.
+%If this test is successful, try the next step.
+%\item Create the plain \TeX\ document called \file{test.tex}:
+%\begin{verbatim}
+%\input texosquery
+%\TeXOSQuery{\result}{-b}\result
+%\bye
+%\end{verbatim}
+%and compile using:
+%\begin{verbatim}
+%pdftex --shell-escape test
+%\end{verbatim}
+%
+%Alternatively, create the \LaTeX\ document called \file{test.tex}
+%\begin{verbatim}
+%\documentclass{article}
+%\usepackage{texosquery}
+%\begin{document}
+%\TeXOSQuery{\result}{-b}\result
+%\end{document}
+%\end{verbatim}
+%and compile using:
+%\begin{verbatim}
+%pdflatex --shell-escape test
+%\end{verbatim}
+%
+%In both cases, the resulting PDF file \file{test.pdf} should show the default
+%locale. If not check the transcript \file{test.log} which should
+%include \verb"(|texosquery -b)" or  \verb"(|texosquery-jre8.sh -b)"
+%etc. If it simply has the line:
+%\begin{verbatim}
+%TeXOSQuery: texosquery -b
+%\end{verbatim}
+%Then the dry run mode was on, which means the shell escape wasn't
+%used. Check that the \longarg{shell-escape} switch was used when
+%calling \app{pdftex} or \app{pdflatex}.
+%\end{enumerate}
+%
+%If you don't intend using \shortarg{D} (\longarg{locale-data}) or
+%\shortarg{N} (\longarg{numeric}) you can skip the next bit.
+%
+%The output produced by the \app{texosquery} application 
+%will be returned using the system's default input
 %encoding.  (For example, \gls{UTF}-8.) You will need to ensure that your \TeX\
 %document uses the same encoding if you want to typeset any of the
 %results that may contain non-ASCII characters. You can determine
 %the default codeset with \texttt{texosquery \shortarg{C}}, which is
 %formatted to match the options used by the \sty{inputenc} package.
 %(For example, \texttt{uft8} for \gls{UTF}-8.)
+%
+%To test the file encoding rerun the above \TeX\ or \LaTeX\ test file with
+%\shortarg{N} instead of \shortarg{b}. Most currency symbols are
+%outside the ASCII set, so this should return a non-ASCII character.
+%If you happen to have \$ as your currency,
+%then try \texttt{en-GB} or \texttt{en-IE} which have \pounds\ and
+%\texteuro, respectively. \LaTeX\ users may need to load
+%\sty{inputenc} and \sty{fontenc}. \XeLaTeX\ users may need to load
+%\sty{fontspec}.
+%
 %You can change the default encoding by invoking the Java Virtual
 %Machine with the option \texttt{-Dfile.encoding=}\meta{codeset}.
 %For example, bash users can modify the \file{texosquery.sh} 
@@ -273,24 +404,16 @@ Organization for Standardization}
 %jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar`
 %java -Dfile.encoding=UTF-8 -jar "$jarpath" "$@"
 %\end{verbatim}
-%If this file can't be modified or you don't have bash available
-%(for example, Windows users) you can set the
+%Similarly for the corresponding \file{.bat} file for Windows users.
+%
+%If the script file can't be modified you can set the
 %\href{https://docs.oracle.com/javase/8/docs/platform/jvmti/jvmti.html#tooloptions}{\texttt{JAVA\_TOOL\_OPTIONS} environment variable}.
 %For example:
 %\begin{verbatim}
 %declare -x JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 %\end{verbatim}
-%Note that, unlike the edit to the \file{.sh} file, this will 
+%Note that, unlike the edit to the \file{.sh} or \file{.bat} file, this will 
 %affect all your Java applications.
-%An alternative is to create a batch file, \file{texosquery.bat},
-%that looks something like (untested):
-%\bgroup\appto\MacroFont{\scriptsize}
-%\begin{verbatim}
-%@ECHO OFF
-%FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar') DO SET JARPATH=%%I
-%START javaw -Dfile.encoding=UTF-8 -jar "%JARPATH%\texosquery.jar" %*
-%\end{verbatim}
-%\egroup
 %
 %\subsection{Accessing file information}
 %If an input file name is required (for example, with the
@@ -381,22 +504,22 @@ Organization for Standardization}
 %\subsection{Command line invocation}
 %The syntax for the command line invocation of \app{texosquery}
 %is:
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %texosquery \oarg{options} \meta{action} ...
-%\end{flushleft}
+%\end{definition}
 %or
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %texosquery.sh \oarg{options} \meta{action} ...
-%\end{flushleft}
+%\end{definition}
 %The syntax for \app{texosquery-jre8} is exactly the same except
 %for the application name:
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %texosquery-jre8 \oarg{options} \meta{action} ...
-%\end{flushleft}
+%\end{definition}
 %or
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %texosquery-jre8.sh \oarg{options} \meta{action} ...
-%\end{flushleft}
+%\end{definition}
 %Similarly for \app{texosquery-jre5}. Available actions are
 %described below. At least one action is required.
 %
@@ -490,9 +613,9 @@ Organization for Standardization}
 %\subsubsection{Action \shortarg{L} or \longarg{locale}}
 %
 %This action displays the locale information in the \gls{POSIX} form
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\meta{lang}-\meta{region}.\meta{codeset}@\meta{modifier}
-%\end{flushleft}
+%\end{definition}
 %where \meta{lang} is the \gls{ISO} code for the language (e.g.\ 
 %\texttt{en}),
 %\meta{region} is the ISO code for the region (e.g.\ \texttt{GB}),
@@ -550,6 +673,12 @@ Organization for Standardization}
 %\begin{verbatim}
 %amd64
 %\end{verbatim}
+%
+%\subsubsection{Action \shortarg{M} or \longarg{date-time}}
+%(New to version 1.2.)
+%This action displays all the current date time data in a format
+%suitable for use in \cs{texosqueryfmtdatetime}. (See
+%section~\ref{sec:applydatetimepatterns}.)
 %
 %\subsubsection{Action \shortarg{n} or \longarg{pdfnow}}
 %
@@ -1099,8 +1228,10 @@ Organization for Standardization}
 %\begin{verbatim}
 %\input|"texosquery --locale"
 %\end{verbatim}
-%However, \file{texosquery.tex} provides generic \TeX\ code to do
-%this for you and store the result in a control sequence.
+%However, \app{texosquery} uses markup commands in the some of
+%the results which need to be defined first. The file
+%\file{texosquery.tex} provides generic \TeX\ code to do
+%this for you and stores the result in a control sequence.
 %
 %Plain \TeX\ users can input this file through the usual \cs{input}
 %method:
@@ -1123,18 +1254,18 @@ Organization for Standardization}
 %The basic command to run \app{texosquery} and capture its output
 %in a control sequence is:
 %\DescribeMacro\TeXOSQuery
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQuery}\marg{cs}\marg{args}
-%\end{flushleft}
+%\end{definition}
 %where \meta{cs} is the control sequence in which to store the
 %result and \meta{args} are the command line arguments to pass to 
 %\app{texosquery}. This first locally changes the category code
 %of some problematic characters that may appear in the result.
 %The only special characters that aren't changed are the backslash
 %\verb|\|, curly braces \verb|{| and \verb|}|, and hash \verb|#|.
-%(\app{texosquery.jar} will replace \verb|#| with \verb|\#| in places
-%where it might possibly occur in the result, but in general it's
-%best to avoid these characters in file names.)
+%If these characters should occur literally in the result, the \app{texosquery}
+%application will replace them with markup commands that are locally
+%defined within \cs{TeXOSQuery}.
 %
 %If the command failed, \meta{cs} will be set to empty. It's best to
 %always test for success after using \cs{TeXOSQuery} (or one of the
@@ -1148,14 +1279,14 @@ Organization for Standardization}
 %\fi
 %\end{verbatim}
 %
-%Failure can occur because the dry run mode is on, or it can occur
+%Failure can occur because the dry run mode was on, or it can occur
 %if the query was denied (for example, forbidden file access),
 %or if there's a syntax error in the system call. As from 
 %version 1.2, \app{texosquery} checks the \texttt{openin\_any}
 %setting, which may forbid read access. Java's security manager
 %or the filing system may also forbid read access.
 %
-%To determine the cause of the error, first inspect the log file 
+%To determine the cause of the error, first inspect the log file to
 %check if the shell escape was used. In the above example, if 
 %the shell escape was permitted, then the log file should include
 %\begin{verbatim}
@@ -1167,105 +1298,6 @@ Organization for Standardization}
 %the \longarg{debug} switch before pressing enter. This should help
 %determine whether it's a syntax error or a query forbidden by the
 %operating system.
-%
-%Dry run mode is determined by the conditional
-%\DescribeMacro\ifTeXOSQueryDryRun
-%\begin{verbatim}
-%\ifTeXOSQueryDryRun
-%\end{verbatim}
-%If true, the shell escape won't be used and the requested command
-%invocation will be printed in the transcript file prefixed with
-%\begin{verbatim}
-%TeXOSQuery:
-%\end{verbatim}
-%(the control sequence \meta{cs} will be set to empty).
-%
-%\begin{important}
-%Remember that a query can still fail even if the dry run mode is
-%off.
-%\end{important}
-%
-%\DescribeMacro\TeXOSInvokerName
-%The \cs{TeXOSQuery} command uses \cs{TeXOSInvokerName} to reference the
-%application name. This defaults to \app{texosquery}. Bash users
-%will need to change this to \file{texosquery.sh}. For example:
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery.sh}
-%\end{verbatim}
-%If you need
-%to use \app{texosquery-jre5} instead, you can redefine it:
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery-jre5}
-%\end{verbatim}
-%or
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery-jre5.sh}
-%\end{verbatim}
-%Alternatively, if you have at least Java~8, then use:
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery-jre8}
-%\end{verbatim}
-%or
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery-jre8.sh}
-%\end{verbatim}
-%This needs to be done before using \cs{TeXOSQuery} (or any of the
-%short cut commands). To avoid the hassle of doing this for every
-%document, there's a configuration file called
-%\file{texosquery.cfg} that contains the definition of 
-%\cs{TeXOSInvokerName}. This should be placed somewhere on \TeX's path. 
-%If the configuration file is found it will be automatically loaded. 
-%For example:
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery.sh}
-%\end{verbatim}
-%Dry-run mode (no shell escape allowed) is automatically switched on unless
-%TeX is called with the unrestricted shell escape enabled. For
-%example, for a plain \TeX\ document \file{myfile.tex}:
-%\begin{verbatim}
-%pdftex -shell-escape myfile
-%\end{verbatim}
-%or for a \LaTeX\ document \file{myfile.tex}:
-%\begin{verbatim}
-%pdflatex -shell-escape myfile
-%\end{verbatim}
-%If \app{texosquery} is added to the restricted list, you can add
-%\begin{verbatim}
-%\TeXOSQueryAllowRestricted
-%\end{verbatim}
-%to the \file{texosquery.cfg} file. (This command can't be used
-%outside of that file.) If you use this command when the name
-%given in \cs{TeXOSInvokerName} isn't on the restricted list, you'll
-%get an error in the form:
-%\begin{verbatim}
-%runpopen command not allowed: texosquery-jre8
-%
-%! I can't find file `"|texosquery-jre8 -b"'.
-%\TeXOSQueryInvoker ...TeXOSInvokerName \space #1" 
-%                                                  
-%l.184 \TeXOSQuery{\result}{-b}
-%                              ^^M
-%(Press Enter to retry, or Control-D to exit)
-%Please type another input file name:
-%\end{verbatim}
-%if you try building the document in restricted mode.
-%
-%If you get this error, then:
-%\begin{itemize}
-%\item make sure you don't have
-%\cs{TeXOSQueryAllowRestricted} in your \file{texosquery.cfg}
-%file; 
-%\item make sure you run \TeX\ with the shell escape enabled;
-%\item check the definition of \cs{TeXOSInvokerName};
-%\item try using the application directly from the command prompt or
-%terminal. For example, in the above message, the bit between 
-%\verb+`"|+ and \verb|"'| (that is, \texttt{texosquery-jre8 -b})
-%shows the attempted system call. Copy and paste it directly
-%into your operating system's 
-%\href{http://www.dickimaw-books.com/latex/novices/html/terminal.html}{command
-%prompt or terminal} and to check the application has been installed
-%correctly.
-%\end{itemize}
 %
 %If multiple queries are required, it's more efficient to
 %perform them all in one go. For example:
@@ -1284,87 +1316,182 @@ Organization for Standardization}
 %\end{verbatim}
 %(Make sure you have at least v1.1 for this to work correctly.)
 %
+%Dry run mode is determined by the conditional
+%\DescribeMacro\ifTeXOSQueryDryRun
+%\begin{verbatim}
+%\ifTeXOSQueryDryRun
+%\end{verbatim}
+%If true, the shell escape won't be used and the requested command
+%invocation will be printed in the transcript file prefixed with
+%\begin{verbatim}
+%TeXOSQuery:
+%\end{verbatim}
+%(the control sequence \meta{cs} will be set to empty).
+%
+%\begin{important}
+%Remember that a query can still fail even if the dry run mode is
+%off.
+%\end{important}
+%
+%Note that if you switch off the dry run mode when the
+%shell escape setting forbids the execution of \app{texosquery},
+%then you'll get the rather annoying error:
+%\begin{verbatim}
+%runpopen command not allowed: texosquery
+%
+%! I can't find file `"|texosquery -b"'.
+%\TeXOSQueryInvoker ...TeXOSInvokerName \space #1" 
+%                                                  
+%\TeXOSQuery ...noexpand #1{\TeXOSQueryInvoker {#2}
+%                                                  }}\x \fi 
+%l.5 \TeXOSQuery{\result}{-b}
+%                              ^^M
+%(Press Enter to retry, or Control-D to exit)
+%\end{verbatim}
+%By default, the dry run mode is only switched off if the
+%unrestricted shell escape mode is on (detected through
+%\cs{shellescape} or \cs{pdfshellescape}).
+%
+%If \app{texosquery} is added to the restricted list, you can add
+%\begin{verbatim}
+%\TeXOSQueryAllowRestricted
+%\end{verbatim}
+%to the \file{texosquery.cfg} file. (This command can't be used
+%outside of that file.)
+%
+%If you get the above error, then:
+%\begin{itemize}
+%\item make sure you don't have
+%\cs{TeXOSQueryAllowRestricted} in your \file{texosquery.cfg}
+%file; 
+%\item make sure you run \TeX\ with the shell escape enabled;
+%\item check the definition of \cs{TeXOSInvokerName};
+%\item try using the application directly from the command prompt or
+%terminal. For example, in the above message, the bit between 
+%\verb+`"|+ and \verb|"'| (that is, \texttt{texosquery-jre8 -b})
+%shows the attempted system call. Copy and paste it directly
+%into your operating system's 
+%\href{http://www.dickimaw-books.com/latex/novices/html/terminal.html}{command
+%prompt or terminal} and to check the application has been installed
+%correctly.
+%\end{itemize}
+%
+%\DescribeMacro\TeXOSInvokerName
+%The \cs{TeXOSQuery} command uses \cs{TeXOSInvokerName} to reference the
+%application name. This defaults to \app{texosquery} but needs to be
+%redefined to reflect the particular system call that's required.
+%For example, \texttt{texosquery.sh} (Unix-like with Java~7) or
+%\texttt{texosquery-jre8} (Windows with Java~8). This redefinition
+%can be done in the configuration file \file{texosquery.cfg} for a
+%system-wide setting. See section~\ref{sec:setup} for further
+%details.
+%
 %The locale (\shortarg{l} or \longarg{locale-lcs}) information can be
 %obtained using:
 %\DescribeMacro\TeXOSQueryLocale
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryLocale}\marg{cs}
-%\end{flushleft}
+%\end{definition}
 %Note that this uses the lower case codeset form, which has a better
 %chance of matching the encoding names used by the \sty{inputenc}
 %package. If you want the unprocessed codeset name, you can do:
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQuery}\marg{cs}\{\shortarg{L}\}
-%\end{flushleft}
+%\end{definition}
 %If you just want the codeset in the same form as
 %\longarg{locale-lcs} you can do:
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQuery}\marg{cs}\{\shortarg{C}\}
-%\end{flushleft}
+%\end{definition}
 %
-%The BCP 47 language tag (\shortarg{b} or \longarg{bcp47}) can be obtained using:
+%The \gls{IEFT} \gls{BCP}~47 language tag (\shortarg{b} or \longarg{bcp47}) 
+%can be obtained using:
 %\DescribeMacro\TeXOSQueryLangTag
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryLangTag}\marg{cs}
-%\end{flushleft}
+%\end{definition}
 %
 %The numeric separators and currency symbols (\shortarg{N} or
 %\longarg{numeric}) can be obtained using
 %\DescribeMacro\TeXOSQueryNumeric
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryNumeric}\marg{cs}\marg{locale}
-%\end{flushleft}
+%\end{definition}
 %The \meta{locale} should be a valid language tag or may be empty
 %for the system's default locale.
 %
 %The current working directory (\shortarg{c} or \longarg{cwd}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryCwd
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryCwd}\marg{cs}
-%\end{flushleft}
+%\end{definition}
 %
 %The home directory (\shortarg{m} or \longarg{userhome}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryHome
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryHome}\marg{cs}
-%\end{flushleft}
+%\end{definition}
 %
 %The temporary directory (\shortarg{t} or \longarg{tmpdir}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryTmpDir
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryTmpDir}\marg{cs}
-%\end{flushleft}
+%\end{definition}
 %
 %The OS name (\shortarg{o} or \longarg{osname}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryName
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryName}\marg{cs}
-%\end{flushleft}
+%\end{definition}
 %
 %The OS version (\shortarg{r} or \longarg{osversion}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryVersion
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryVersion}\marg{cs}
-%\end{flushleft}
+%\end{definition}
 %
 %The OS architecture (\shortarg{a} or \longarg{osarch}) can
 %be obtained using:
 %\DescribeMacro\TeXOSQueryArch
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryArch}\marg{cs}
-%\end{flushleft}
+%\end{definition}
+%
+%The current date and time information (\shortarg{M} or
+%\longarg{date-time}) can be obtained using:
+%\DescribeMacro\TeXOSQueryDateTime
+%\begin{definition}
+%\cs{TeXOSQueryDateTime}\marg{cs}
+%\end{definition}
+%Example usage:
+%\begin{verbatim}
+%\texosquerydefpattern{\pattern}{\dtf{2}{d}/\dtf{2}{M}/\dtf{4}{y}\spc
+%\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}}
+%
+%\TeXOSQueryDateTime{\datetimedata}
+%
+%\ifx\datetimedata\empty
+% Query Failed!
+%\else
+% \expandafter\texosqueryfmtdatetime\expandafter\pattern\datetimedata
+%\fi
+%\end{verbatim}
+%Note that commands such as \cs{texosqueryfmtpatMMM} will need to be
+%defined to produce textual elements. See
+%sections~\ref{sec:patternformats} and \ref{sec:applydatetimepatterns} for
+%further details.
 %
 %The current date-time stamp in PDF format (\shortarg{n} or
 %\longarg{pdfnow}) can be obtained using:
 %\DescribeMacro\TeXOSQueryNow
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryNow}\marg{cs}
-%\end{flushleft}
+%\end{definition}
 %This is provided for the benefit of users who don't have
 %\cs{pdfcreationdate} defined by their \TeX\ format (for example,
 %\XeTeX).
@@ -1389,21 +1516,19 @@ Organization for Standardization}
 %The modification date-time stamp in PDF format for a file
 %(\shortarg{d} or \longarg{pdfdate}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFileDate
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryFileDate}\marg{cs}\marg{filename}
-%\end{flushleft}
+%\end{definition}
 %where \meta{filename} is the name of the file.
 %This is provided for the benefit of users who don't have
-%\cs{pdffilemoddate} defined by their \TeX\ format. As from v1.1,
-%this ensures that the initial \texttt{D} has category code 12 (which 
-%won't happen if \cs{TeXOSQuery} is used explicitly).
+%\cs{pdffilemoddate} defined by their \TeX\ format.
 %
 %The size in bytes of a file
 %(\shortarg{s} or \longarg{filesize}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFileSize
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryFileSize}\marg{cs}\marg{filename}
-%\end{flushleft}
+%\end{definition}
 %where \meta{filename} is the name of the file.
 %This is provided for the benefit of users who don't have
 %\cs{pdffilesize} defined by their \TeX\ format.
@@ -1411,9 +1536,9 @@ Organization for Standardization}
 %The list of files in a given directory
 %(\shortarg{i} or \longarg{list}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFileList
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryFileList}\marg{cs}\marg{sep}\marg{dir}
-%\end{flushleft}
+%\end{definition}
 %where \meta{sep} is the separator and \meta{dir} is the directory name.
 %For example:
 %\begin{verbatim}
@@ -1425,9 +1550,9 @@ Organization for Standardization}
 %A filtered list of files in a given directory
 %(\shortarg{f} or \longarg{filterlist}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFilterFileList
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryFilterFileList}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
-%\end{flushleft}
+%\end{definition}
 %where \meta{regex} is a regular expression. \emph{Take care of any backslashes
 %in the regular expression!}
 %For example, to list only those files that have an extension:
@@ -1444,9 +1569,9 @@ Organization for Standardization}
 %The URI of a file
 %(\shortarg{u} or \longarg{uri}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFileURI
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryFileURI}\marg{cs}\marg{filename}
-%\end{flushleft}
+%\end{definition}
 %where \meta{filename} is the name of the file.
 %(Any percent symbols \verb|%| contained in the URI will have
 %their category code set to 12.)
@@ -1454,19 +1579,20 @@ Organization for Standardization}
 %The canonical path of a file
 %(\shortarg{p} or \longarg{path}) can be obtained using:
 %\DescribeMacro\TeXOSQueryFilePath
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryFilePath}\marg{cs}\marg{filename}
-%\end{flushleft}
+%\end{definition}
 %where \meta{filename} is the name of the file.
 %
 %The canonical path of a file's parent
 %(\shortarg{e} or \longarg{dirname}) can be obtained using:
 %\DescribeMacro\TeXOSQueryDirName
-%\begin{flushleft}\ttfamily
+%\begin{definition}
 %\cs{TeXOSQueryDirName}\marg{cs}\marg{filename}
-%\end{flushleft}
+%\end{definition}
 %where \meta{filename} is the name of the file.
 %
+%\setcounter{secnumdepth}{3}
 %\StopEventually{\printabbreviations\phantomsection
 %\addcontentsline{toc}{section}{Change History}%
 %\PrintChanges
@@ -1529,6 +1655,37 @@ Organization for Standardization}
 \else
   \def\@texosquery@warn#1{%
     \@tracklang@pkgwarn{texosquery}{#1}%
+  }
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@ifundef}
+%This is defined in the same way as \sty{tracklang}'s
+%\cs{@tracklang@ifundef}.
+%    \begin{macrocode}
+\long\def\@texosquery@ifundef#1#2#3{%
+  \ifcsname#1\endcsname
+    \expandafter\ifx\csname #1\endcsname\relax
+      #2%
+    \else
+      #3%
+    \fi
+  \else
+    \expandafter\ifx\csname #1\endcsname\relax
+      #2%
+    \else
+      #3%
+    \fi
+  \fi
+}
+\ifx\ifcsname\undefined
+  \long\def\@texosquery@ifundef#1#2#3{%
+    \expandafter\ifx\csname #1\endcsname\relax
+      #2%
+    \else
+      #3%
+    \fi
   }
 \fi
 %    \end{macrocode}
@@ -1771,27 +1928,27 @@ Organization for Standardization}
 %    \begin{macrocode}
 \def\@texosquery@enableshortcs{%
      \def\dtf{\noexpand\texosquerydtf}%
-     \def\pmnumfmt{\noexpand\texosqueryfmtplusminus}%
-     \def\numfmt{\noexpand\texosqueryfmtnum}%
-     \def\sinumfmt{\noexpand\texosqueryfmtsinum}%
-     \def\decfmt{\noexpand\texosqueryfmtdec}%
-     \def\intfmt{\noexpand\texosqueryfmtint}%
-     \def\pcur{\noexpand\texosqueryfmtprefixcurrency}%
-     \def\picur{\noexpand\texosqueryfmtprefixicurrency}%
-     \def\scur{\noexpand\texosqueryfmtsuffixcurrency}%
-     \def\sicur{\noexpand\texosqueryfmtsuffixicurrency}%
-     \def\str{\noexpand\texosqueryfmtstr}%
-     \def\apo{\noexpand\texosqueryfmtquote}%
-     \def\spc{\noexpand\texosqueryfmtspc}%
-     \def\dgt{\noexpand\texosqueryfmtdigit}%
-     \def\dgtnz{\noexpand\texosqueryfmtdigitnozero}%
-     \def\dpt{\noexpand\texosqueryfmtdecimalpoint}%
-     \def\msg{\noexpand\texosqueryfmtminus}%
-     \def\ngp{\noexpand\texosqueryfmtgroupsep}%
-     \def\ppct{\noexpand\texosqueryfmtprefixpercent}%
-     \def\spct{\noexpand\texosqueryfmtsuffixpercent}%
-     \def\ppml{\noexpand\texosqueryfmtprefixpermill}%
-     \def\spml{\noexpand\texosqueryfmtsuffixpermill}%
+     \def\pmnumfmt{\noexpand\texosquerypatplusminus}%
+     \def\numfmt{\noexpand\texosquerypatnum}%
+     \def\sinumfmt{\noexpand\texosquerypatsinum}%
+     \def\decfmt{\noexpand\texosquerypatdec}%
+     \def\intfmt{\noexpand\texosquerypatint}%
+     \def\pcur{\noexpand\texosquerypatprefixcurrency}%
+     \def\picur{\noexpand\texosquerypatprefixicurrency}%
+     \def\scur{\noexpand\texosquerypatsuffixcurrency}%
+     \def\sicur{\noexpand\texosquerypatsuffixicurrency}%
+     \def\str{\noexpand\texosquerypatstr}%
+     \def\apo{\noexpand\texosquerypatquote}%
+     \def\spc{\noexpand\texosquerypatspc}%
+     \def\dgt{\noexpand\texosquerypatdigit}%
+     \def\dgtnz{\noexpand\texosquerypatdigitnozero}%
+     \def\dpt{\noexpand\texosquerypatdecimalpoint}%
+     \def\msg{\noexpand\texosquerypatminus}%
+     \def\ngp{\noexpand\texosquerypatgroupsep}%
+     \def\ppct{\noexpand\texosquerypatprefixpercent}%
+     \def\spct{\noexpand\texosquerypatsuffixpercent}%
+     \def\ppml{\noexpand\texosquerypatprefixpermill}%
+     \def\spml{\noexpand\texosquerypatsuffixpermill}%
 %    \end{macrocode}
 %Hook to adjust the processing of non-ASCII characters.
 %    \begin{macrocode}
@@ -1860,48 +2017,6 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
-%Now for some convenient shortcuts so the user doesn't have to
-%remember the command line options. \cs{string} is used in
-%case the hyphen character has been made active.
-%\begin{macro}{\TeXOSQueryLocale}
-%Query the locale and store the result in the control sequence
-%provided in the argument.
-%    \begin{macrocode}
-\def\TeXOSQueryLocale#1{\TeXOSQuery{#1}{\string-l}}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\TeXOSQueryLangTag}
-%Query the language tag and store the result in the control sequence
-%provided in the argument.
-%\changes{1.2}{??}{new}
-%    \begin{macrocode}
-\def\TeXOSQueryLangTag#1{\TeXOSQuery{#1}{\string-b}}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\TeXOSQueryNumeric}
-%Query the numeric settings for the locale given in the second
-%argument and store the result in the control sequence
-%provided in the argument. Leave the second argument empty for the
-%default locale.
-%\changes{1.2}{??}{new}
-%    \begin{macrocode}
-\def\TeXOSQueryNumeric#1#2{\TeXOSQuery{#1}{\string-N #2}}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\TeXOSQueryLocaleData}
-%Query the data for the locale given in the second
-%argument and store the result in the control sequence
-%provided in the argument. Leave the second argument empty for the
-%default locale.
-%\changes{1.2}{??}{new}
-%    \begin{macrocode}
-\def\TeXOSQueryLocaleData#1#2{\TeXOSQuery{#1}{\string-D #2}}
-%    \end{macrocode}
-%\end{macro}
-%
 %Since \cs{TeXOSQuery} expands the results, we need a way to prevent
 %it from prematurely expanding the currency control sequences.
 %\begin{macro}{\@texosquery@protect}
@@ -1917,6 +2032,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
+%\subsubsection{Currency}
 %\begin{macro}{\texosquerycurrency}
 %\changes{1.2}{??}{new}
 %    \begin{macrocode}
@@ -2263,6 +2379,49 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
+%\subsubsection{Shortcut Commands}
+%Now for some convenient shortcuts so the user doesn't have to
+%remember the command line options. \cs{string} is used in
+%case the hyphen character has been made active.
+%\begin{macro}{\TeXOSQueryLocale}
+%Query the locale and store the result in the control sequence
+%provided in the argument.
+%    \begin{macrocode}
+\def\TeXOSQueryLocale#1{\TeXOSQuery{#1}{\string-l}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryLangTag}
+%Query the language tag and store the result in the control sequence
+%provided in the argument.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\TeXOSQueryLangTag#1{\TeXOSQuery{#1}{\string-b}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryNumeric}
+%Query the numeric settings for the locale given in the second
+%argument and store the result in the control sequence
+%provided in the argument. Leave the second argument empty for the
+%default locale.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\TeXOSQueryNumeric#1#2{\TeXOSQuery{#1}{\string-N #2}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryLocaleData}
+%Query the data for the locale given in the second
+%argument and store the result in the control sequence
+%provided in the argument. Leave the second argument empty for the
+%default locale.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\TeXOSQueryLocaleData#1#2{\TeXOSQuery{#1}{\string-D #2}}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\TeXOSQueryCwd}
 %Query the current working directory.
 %    \begin{macrocode}
@@ -2302,6 +2461,16 @@ Organization for Standardization}
 %Query the operating system name.
 %    \begin{macrocode}
 \def\TeXOSQueryName#1{\TeXOSQuery{#1}{\string-o}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryDateTime}
+%\changes{1.2}{??}{new}
+%Query the current date and time.
+%    \begin{macrocode}
+\def\TeXOSQueryDateTime#1{%
+  \TeXOSQuery{#1}{\string-M}%
+}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -2405,6 +2574,10 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
+%\subsubsection{Pattern Formats}
+%\label{sec:patternformats}
+%There are two basic types of patterns: date/time or numeric.
+%
 %\begin{macro}{\texosquerydtf}
 %Date/time format placeholder. The second argument is the
 %placeholder character and the first argument is the number of
@@ -2430,122 +2603,1993 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\texosqueryfmtstr}
+%\begin{macro}{\texosquerypatstr}
 %Quoted string contained in number format.
 %    \begin{macrocode}
-\def\texosqueryfmtstr#1{'#1'}
+\def\texosquerypatstr#1{'#1'}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtquote}
+%\begin{macro}{\texosquerypatquote}
 %Literal quote contained in number format.
 %    \begin{macrocode}
-\def\texosqueryfmtquote{''}
+\def\texosquerypatquote{''}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtspc}
+%\begin{macro}{\texosquerypatspc}
 %Literal space contained in number format.
 %    \begin{macrocode}
-\def\texosqueryfmtspc{ }
+\def\texosquerypatspc{ }
 %    \end{macrocode}
 %\end{macro}
 %Number format place holders.
-%\begin{macro}{\texosqueryfmtplusminus}
+%\begin{macro}{\texosquerypatplusminus}
 %    \begin{macrocode}
-\def\texosqueryfmtplusminus#1#2{#1;#2}
+\def\texosquerypatplusminus#1#2{#1;#2}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtnum}
+%\begin{macro}{\texosquerypatnum}
 %    \begin{macrocode}
-\def\texosqueryfmtnum#1{#1}
+\def\texosquerypatnum#1{#1}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtsinum}
+%\begin{macro}{\texosquerypatsinum}
 %    \begin{macrocode}
-\def\texosqueryfmtsinum#1#2{#1E#2}
+\def\texosquerypatsinum#1#2{#1E#2}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtdec}
+%\begin{macro}{\texosquerypatdec}
 %    \begin{macrocode}
-\def\texosqueryfmtdec#1#2{#1.#2}
+\def\texosquerypatdec#1#2{#1.#2}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtint}
+%\begin{macro}{\texosquerypatint}
 %    \begin{macrocode}
-\def\texosqueryfmtint#1{#1}
+\def\texosquerypatint#1{#1}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtprefixcurrency}
+%\begin{macro}{\texosquerypatprefixcurrency}
 %First argument is a number, the second is optional text before the
 %currency symbol.
 %    \begin{macrocode}
-\def\texosqueryfmtprefixcurrency#1#2{#2¤#1}
+\def\texosquerypatprefixcurrency#1#2{#2¤#1}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtprefixicurrency}
+%\begin{macro}{\texosquerypatprefixicurrency}
 %As above but use international currency symbol.
 %    \begin{macrocode}
-\def\texosqueryfmtprefixicurrency#1#2{#2¤¤#1}
+\def\texosquerypatprefixicurrency#1#2{#2¤¤#1}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtsuffixcurrency}
+%\begin{macro}{\texosquerypatsuffixcurrency}
 %First argument is a number, the second is optional text after the
 %currency symbol.
 %    \begin{macrocode}
-\def\texosqueryfmtsuffixcurrency#1#2{#1¤#2}
+\def\texosquerypatsuffixcurrency#1#2{#1¤#2}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtsuffixicurrency}
+%\begin{macro}{\texosquerypatsuffixicurrency}
 %As above but use international currency symbol.
 %    \begin{macrocode}
-\def\texosqueryfmtsuffixicurrency#1#2{#1¤¤#2}
+\def\texosquerypatsuffixicurrency#1#2{#1¤¤#2}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtdigit}
+%\begin{macro}{\texosquerypatdigit}
 %    \begin{macrocode}
-\def\texosqueryfmtdigit{0}
+\def\texosquerypatdigit{0}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtdigitnozero}
+%\begin{macro}{\texosquerypatdigitnozero}
 %    \begin{macrocode}
-\def\texosqueryfmtdigitnozero{\#}
+\def\texosquerypatdigitnozero{\#}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtminus}
+%\begin{macro}{\texosquerypatminus}
 %    \begin{macrocode}
-\def\texosqueryfmtminus{-}
+\def\texosquerypatminus{-}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtgroupsep}
+%\begin{macro}{\texosquerypatgroupsep}
 %    \begin{macrocode}
-\def\texosqueryfmtgroupsep{,}
+\def\texosquerypatgroupsep{,}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtprefixpercent}
+%\begin{macro}{\texosquerypatprefixpercent}
 %The first argument is the value, the second argument is optional
 %text before the percent symbol.
 %    \begin{macrocode}
-\def\texosqueryfmtprefixpercent#1#2{#2\%#1}
+\def\texosquerypatprefixpercent#1#2{#2\%#1}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtsuffixpercent}
+%\begin{macro}{\texosquerypatsuffixpercent}
 %The first argument is the value, the second argument is optional
 %text after the percent symbol.
 %    \begin{macrocode}
-\def\texosqueryfmtsuffixpercent#1#2{#1\%#2}
+\def\texosquerypatsuffixpercent#1#2{#1\%#2}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtprefixpermill}
+%\begin{macro}{\texosquerypatprefixpermill}
 %The first argument is the value, the second argument is optional
 %text before the per-mill symbol.
 %    \begin{macrocode}
-\def\texosqueryfmtprefixpermill#1#2{#2‰#1}
+\def\texosquerypatprefixpermill#1#2{#2‰#1}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosqueryfmtsuffixpermill}
+%\begin{macro}{\texosquerypatsuffixpermill}
 %The first argument is the value, the second argument is optional
 %text after the per-mill symbol.
 %    \begin{macrocode}
-\def\texosqueryfmtsuffixpermill#1#2{#1‰#2}
+\def\texosquerypatsuffixpermill#1#2{#1‰#2}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerydefpattern}
+%Define a new pattern using the shortcut markup. The first argument
+%is the name of the control sequence in which to store the pattern
+%provided in the second argument.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosquerydefpattern#1#2{%
+ \begingroup
+    \@texosquery@enableshortcs
+    \catcode`\-=12\relax
+    \catcode`\_=12\relax
+    \catcode`\^=12\relax
+    \catcode`\~=12\relax
+    \catcode`\$=12\relax
+    \catcode`\&=12\relax
+    \catcode`\.=12\relax
+    \catcode`\/=12\relax
+    \catcode`\:=12\relax
+    \catcode`\"=12\relax
+    \catcode`\'=12\relax
+    \catcode`\;=12\relax
+    \catcode`\%=12\relax
+  \@texosquery@edef\x{\endgroup\def\noexpand#1{#2}}\x
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\subsubsection{Applying Date-Time Patterns}
+%\label{sec:applydatetimepatterns}
+%In order to apply date-time patterns, we need all the information about the
+%date or time we're trying to format.
+%\begin{enumerate}
+%\item Era needed by the \texttt{G} designator. Java
+%identifies the era by an integer (0 = BC and 1 = AD).
+%\item Era text (e.g. AD) can be supplied by a macro.
+%\item Year needed by the \texttt{y} designator.
+%\item Week year needed by the \texttt{Y} designator.
+%\item Month in year needed by the \texttt{M} or \texttt{L}
+%designators.
+%\item Month name needed by the \texttt{M} or \texttt{L}
+%designators. This can be provided as macros that convert the month
+%number to the name. Four macros are needed: short, full, standalone
+%short and standalone full.
+%\item Week in year needed by the \texttt{w} designator.
+%\item Week in month needed by the \texttt{W} designator.
+%\item Day in year needed by the \texttt{D} designator.
+%\item Day in month needed by the \texttt{d} designator.
+%\item Day of week in month needed by the \texttt{F} designator.
+%\item Day name in week needed by the \texttt{E} designator.
+%This can be provided as a macros that accepts the day of week
+%number. The full form is needed for 4 letter patterns otherwise a
+%short form.
+%\item Day number of week (1 = Monday, 7 = Sunday) needed by the
+%\texttt{u} designator. This means that
+%the above day of week name macros needs to use Monday=1 base indexing.
+%This means that \cs{pgfcalendarweekdayname} can't be used directly.
+%\item AM/PM identifier needed by the \texttt{a}
+%designator. Assume 0 = AM and 1 = PM to match Java.
+%\item AM/PM text can be provided by a macro.
+%\item Hour of the day (0-23) needed by the \texttt{H}
+%designator.
+%\item Hour in day (1-24) needed by the \texttt{k}
+%designator.
+%\item Hour in am/pm (0-11) needed by the \texttt{K} designator.
+%\item Hour in am/pm (1-12) needed by the \texttt{h} designator.
+%\item Minute in hour needed by the \texttt{m} designator.
+%\item Second in minute needed by the \texttt{s} designator.
+%\item Millisecond needed by the \texttt{S} designator.
+%\item Time zone needed by the \texttt{z}, \texttt{Z} and \texttt{X}
+%designators. This will require macros for converting the time zone
+%to each of those formats. (Provide the time zone in the form
+%\meta{TZh}\texttt{:}\meta{TZm} which can then be used as the
+%argument to those macros.)
+%\end{enumerate}
+%Supply a general utility command that has enough arguments to pass
+%all the above information. A higher level user command can then be
+%provided that determines all the arguments to provide an easier
+%interface.
+%
+%The arguments need to be the pattern followed by
+%\marg{era id}\marg{year}\marg{week year}\marg{month}\marg{week in 
+%year}\marg{week in month}\marg{day in year}\marg{day in month}\marg{day of 
+%week in month}\marg{day number of week}\marg{am/pm id}\marg{hour of day 
+%(H)}\marg{hour in day (k)}\marg{hour in am/pm (K)}\marg{hour in
+%am/pm (h)}\marg{minute in hour}\marg{second in minute}\marg{millisecond}\marg{time zone}
+%The arguments must all be integers except for the time zone which
+%must be in the form \marg{dst offset}\marg{offset}\marg{TZh}\marg{TZm}\marg{id}. These arguments can all be
+%obtained using the \longarg{date-time} / \shortarg{M} action.
+%
+%We'll need some helper macros to get around the nine argument
+%maximum limit.
+%
+%\begin{macro}{\texosqueryfmtdatetime}
+%\changes{1.2}{??}{new}
+%The general utility command to format a pattern. The first argument
+%is the pattern. After that are the date-time data arguments.
+%    \begin{macrocode}
+\def\texosqueryfmtdatetime#1{%
+  \def\@texosquery@fmt@dt@pattern{#1}%
+  \@texosquery@fmt@getera
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%All the remaining arguments except for the time zone must be
+%integers. These are padded using \cs{@texosquery@paddigits}.
+%
+%\begin{macro}{\@texosquery@fmt@getera}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getera#1{%
+  \edef\@texosquery@fmt@G{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getyear
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getyear}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getyear#1{%
+  \edef\@texosquery@fmt@y{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getweekyear
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getweekyear}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getweekyear#1{%
+  \edef\@texosquery@fmt@Y{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getmonth
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getmonth}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getmonth#1{%
+  \edef\@texosquery@fmt@M{\@texosquery@paddigits{#1}}%
+  \let\@texosquery@fmt@L\@texosquery@fmt@M
+  \@texosquery@fmt@getweekinyear
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getweekinyear}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getweekinyear#1{%
+  \edef\@texosquery@fmt@w{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getweekinmonth
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getweekinmonth}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getweekinmonth#1{%
+  \edef\@texosquery@fmt@W{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getdayinyear
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getdayinyear}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getdayinyear#1{%
+  \edef\@texosquery@fmt@D{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getdayinmonth
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getdayinmonth}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getdayinmonth#1{%
+  \edef\@texosquery@fmt@d{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getdayofweekinmonth
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getdayofweekinmonth}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getdayofweekinmonth#1{%
+  \edef\@texosquery@fmt@F{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getdaynumberofweek
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getdaynumberofweek}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getdaynumberofweek#1{%
+  \edef\@texosquery@fmt@u{\@texosquery@paddigits{#1}}%
+  \let\@texosquery@fmt@E\@texosquery@fmt@u
+  \@texosquery@fmt@getampm
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getampm}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getampm#1{%
+  \edef\@texosquery@fmt@a{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@gethourindayH
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@gethourindayH}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@gethourindayH#1{%
+  \edef\@texosquery@fmt@H{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@gethourindayk
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@gethourindayk}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@gethourindayk#1{%
+  \edef\@texosquery@fmt@k{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@gethourinampmK
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@gethourinampmK}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@gethourinampmK#1{%
+  \edef\@texosquery@fmt@K{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@gethourinampmh
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@gethourinampmh}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@gethourinampmh#1{%
+  \edef\@texosquery@fmt@h{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getminute
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getminute}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getminute#1{%
+  \edef\@texosquery@fmt@m{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getsecond
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getsecond}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getsecond#1{%
+  \edef\@texosquery@fmt@s{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@getmillisecond
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@getmillisecond}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@getmillisecond#1{%
+  \edef\@texosquery@fmt@S{\@texosquery@paddigits{#1}}%
+  \@texosquery@fmt@gettimezone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@gettimezone}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@gettimezone#1{%
+  \def\@texosquery@fmt@Z{#1}%
+  \def\@texosquery@fmt@z{#1}%
+  \def\@texosquery@fmt@X{#1}%
+%    \end{macrocode}
+%All data now supplied. Temporarily redefine pattern markup and
+%process the pattern.
+%    \begin{macrocode}
+  \begingroup
+    \let\texosquerydtf\@texosquery@fmt@dtf
+    \@texosquery@fmt@dt@pattern
+  \endgroup
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@paddigits@pos}
+%\changes{1.2}{??}{new}
+%Pad positive number to 10 digits. \TeX\ can't reach 11 digits, so this is
+%the maximum representation.
+%    \begin{macrocode}
+\def\@texosquery@paddigits@pos#1{%
+  \ifnum#1<10
+   000000000\number#1
+  \else
+   \ifnum#1<100
+    00000000\number#1
+   \else
+     \ifnum#1<1000
+      0000000\number#1
+     \else
+       \ifnum#1<10000
+        000000\number#1
+       \else
+         \ifnum#1<100000
+          00000\number#1
+         \else
+           \ifnum#1<1000000
+            0000\number#1
+           \else
+             \ifnum#1<10000000
+              000\number#1
+             \else
+               \ifnum#1<100000000
+                00\number#1
+               \else
+                 \ifnum#1<1000000000
+                  0\number#1
+                 \else
+                   \number#1
+                 \fi
+               \fi
+             \fi
+           \fi
+         \fi
+       \fi
+     \fi
+   \fi
+  \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@paddigits}
+%\changes{1.2}{??}{new}
+%This will expand to 11 characters (sign followed by 10 digits).
+%    \begin{macrocode}
+\def\@texosquery@paddigits#1{%
+ \ifnum#1<0
+%    \end{macrocode}
+%Move the minus sign outside.
+%    \begin{macrocode}
+   -\expandafter\@texosquery@paddigits@pos\expandafter
+     {\@texosquery@gobble#1}%
+ \else
+   +\@texosquery@paddigits@pos{#1}%
+ \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@paddigits@trailing}
+%\changes{1.2}{??}{new}
+%Pad trailing zeros.
+%    \begin{macrocode}
+\def\@texosquery@paddigits@trailing#1{%
+  \expandafter\@texosquery@tenoften@then@gobble
+    #10000000000\@texosquery@end@tenoften
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@tenoften@then@gobble}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@tenoften@then@gobble#1#2#3#4#5#6#7#8#9{%
+  #1#2#3#4#5#6#7#8#9%
+  \@texosquery@lastoften@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@lastoften@gobble}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@lastoften@gobble#1#2\@texosquery@end@tenoften{#1}
+%    \end{macrocode}
+%\end{macro}
+%
+%Provide commands to select certain digits. (Sign not included.)
+%
+%\begin{macro}{\@texosquery@firstoften}
+%\changes{1.2}{??}{new}
+%First of ten.
+%    \begin{macrocode}
+\def\@texosquery@firstoften#1#2#3#4#5#6#7#8#9{%
+ #1%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@secondoften}
+%\changes{1.2}{??}{new}
+%Second of ten.
+%    \begin{macrocode}
+\def\@texosquery@secondoften#1#2#3#4#5#6#7#8#9{%
+ #2%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@thirdoften}
+%\changes{1.2}{??}{new}
+%Third of ten.
+%    \begin{macrocode}
+\def\@texosquery@thirdoften#1#2#3#4#5#6#7#8#9{%
+ #3%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fourthoften}
+%\changes{1.2}{??}{new}
+%Fourth of ten.
+%    \begin{macrocode}
+\def\@texosquery@fourthoften#1#2#3#4#5#6#7#8#9{%
+ #4%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fifthoften}
+%\changes{1.2}{??}{new}
+%Fifth of ten.
+%    \begin{macrocode}
+\def\@texosquery@fifthoften#1#2#3#4#5#6#7#8#9{%
+ #5%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@sixthoften}
+%\changes{1.2}{??}{new}
+%Sixth of ten.
+%    \begin{macrocode}
+\def\@texosquery@sixthoften#1#2#3#4#5#6#7#8#9{%
+ #6%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@seventhoften}
+%\changes{1.2}{??}{new}
+%Seventh of ten.
+%    \begin{macrocode}
+\def\@texosquery@seventhoften#1#2#3#4#5#6#7#8#9{%
+ #7%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@eighthoften}
+%\changes{1.2}{??}{new}
+%Eighth of ten.
+%    \begin{macrocode}
+\def\@texosquery@eighthoften#1#2#3#4#5#6#7#8#9{%
+ #8%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@ninthoften}
+%\changes{1.2}{??}{new}
+%Ninth of ten.
+%    \begin{macrocode}
+\def\@texosquery@ninthoften#1#2#3#4#5#6#7#8#9{%
+ #9%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@tenthoften}
+%\changes{1.2}{??}{new}
+%Tenth of ten.
+%    \begin{macrocode}
+\def\@texosquery@tenthoften#1#2#3#4#5#6#7#8#9{%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%Now macros to select first $n$ of ten.
+%
+%\begin{macro}{@texosquery@firsttwooften}
+%\changes{1.2}{??}{new}
+%First two of ten.
+%    \begin{macrocode}
+\def\@texosquery@firsttwooften#1#2#3#4#5#6#7#8#9{%
+ #1#2%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@firstthreeoften}
+%\changes{1.2}{??}{new}
+%First three of ten.
+%    \begin{macrocode}
+\def\@texosquery@firstthreeoften#1#2#3#4#5#6#7#8#9{%
+ #1#2#3%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@firstfouroften}
+%\changes{1.2}{??}{new}
+%First four of ten.
+%    \begin{macrocode}
+\def\@texosquery@firstfouroften#1#2#3#4#5#6#7#8#9{%
+ #1#2#3#4%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@firstfiveoften}
+%\changes{1.2}{??}{new}
+%First five of ten.
+%    \begin{macrocode}
+\def\@texosquery@firstfiveoften#1#2#3#4#5#6#7#8#9{%
+ #1#2#3#4#5%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@firstsixoften}
+%\changes{1.2}{??}{new}
+%First six of ten.
+%    \begin{macrocode}
+\def\@texosquery@firstsixoften#1#2#3#4#5#6#7#8#9{%
+ #1#2#3#4#5#6%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@firstsevenoften}
+%\changes{1.2}{??}{new}
+%First seven of ten.
+%    \begin{macrocode}
+\def\@texosquery@firstsevenoften#1#2#3#4#5#6#7#8#9{%
+ #1#2#3#4#5#6#7%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@firsteightoften}
+%\changes{1.2}{??}{new}
+%First eight of ten.
+%    \begin{macrocode}
+\def\@texosquery@firsteightoften#1#2#3#4#5#6#7#8#9{%
+ #1#2#3#4#5#6#7#8%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@firstnineoften}
+%\changes{1.2}{??}{new}
+%First nine of ten.
+%    \begin{macrocode}
+\def\@texosquery@firstnineoften#1#2#3#4#5#6#7#8#9{%
+ #1#2#3#4#5#6#7#8#9%
+%    \end{macrocode}
+%Grab tenth argument and discard.
+%    \begin{macrocode}
+ \@texosquery@gobble
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@alltenoften}
+%\changes{1.2}{??}{new}
+%All ten.
+%    \begin{macrocode}
+\def\@texosquery@alltenoften#1#2#3#4#5#6#7#8#9{%
+ #1#2#3#4#5#6#7#8#9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%Select last $n$ of ten.
+%
+%\begin{macro}{@texosquery@lasttwooften}
+%\changes{1.2}{??}{new}
+%Last two of ten.
+%    \begin{macrocode}
+\def\@texosquery@lasttwooften#1#2#3#4#5#6#7#8#9{%
+ #9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@lastthreeoften}
+%\changes{1.2}{??}{new}
+%Last three of ten.
+%    \begin{macrocode}
+\def\@texosquery@lastthreeoften#1#2#3#4#5#6#7#8#9{%
+ #8#9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@lastfouroften}
+%\changes{1.2}{??}{new}
+%Last four of ten.
+%    \begin{macrocode}
+\def\@texosquery@lastfouroften#1#2#3#4#5#6#7#8#9{%
+ #7#8#9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@lastfiveoften}
+%\changes{1.2}{??}{new}
+%Last five of ten.
+%    \begin{macrocode}
+\def\@texosquery@lastfiveoften#1#2#3#4#5#6#7#8#9{%
+ #6#7#8#9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@lastsixoften}
+%\changes{1.2}{??}{new}
+%Last six of ten.
+%    \begin{macrocode}
+\def\@texosquery@lastsixoften#1#2#3#4#5#6#7#8#9{%
+ #5#6#7#8#9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@lastsevenoften}
+%\changes{1.2}{??}{new}
+%Last seven of ten.
+%    \begin{macrocode}
+\def\@texosquery@lastsevenoften#1#2#3#4#5#6#7#8#9{%
+ #4#5#6#7#8#9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@lasteightoften}
+%\changes{1.2}{??}{new}
+%Last eight of ten.
+%    \begin{macrocode}
+\def\@texosquery@lasteightoften#1#2#3#4#5#6#7#8#9{%
+ #3#4#5#6#7#8#9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{@texosquery@lastnineoften}
+%\changes{1.2}{??}{new}
+%Last nine of ten.
+%    \begin{macrocode}
+\def\@texosquery@lastnineoften#1#2#3#4#5#6#7#8#9{%
+ #2#3#4#5#6#7#8#9%
+ \@texosquery@firstofone
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmtminus}
+%\changes{1.2}{??}{new}
+%Minus symbol for use in date-time patterns.
+%    \begin{macrocode}
+\def\@texosquery@fmtminus{-}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmtplus}
+%\changes{1.2}{??}{new}
+%Plus symbol for use in date-time patterns. Omit by default.
+%    \begin{macrocode}
+\def\@texosquery@fmtplus{}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmtsign}
+%\changes{1.2}{??}{new}
+%Plus or minus sign for use in date-time patterns.
+%    \begin{macrocode}
+\def\@texosquery@fmtsign#1{%
+ \ifx#1+\@texosquery@fmtplus\else\@texosquery@fmtminus\fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@atleastonedigit}
+%\changes{1.2}{??}{new}
+%At least one digit with leading zeros removed.
+%    \begin{macrocode}
+\def\@texosquery@atleastonedigit#1{%
+  \ifnum#1<0
+   \@texosquery@fmtminus\number-#1
+  \else
+   \number#1
+  \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@atleastfourdigits}
+%\changes{1.2}{??}{new}
+%At least four digits, possible padded with zeros to make up four. The first
+%argument is the sign, then follow the ten digits.
+%    \begin{macrocode}
+\def\@texosquery@atleastfourdigits#1{%
+  \@texosquery@at@leastfourdigits#1\@texosquery@end@atleastfourdigits
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@at@leastfourdigits}
+%\changes{1.2}{??}{new}
+%At least four digits, possible padded with zeros to make up four. The first
+%argument is the sign, then follow the ten digits.
+%    \begin{macrocode}
+\def\@texosquery@at@leastfourdigits#1#2\@texosquery@end@atleastfourdigits{%
+  \@texosquery@fmtsign{#1}%
+  \ifnum#2<1000
+    \@texosquery@lastfouroften#2%
+  \else
+    \number#2
+  \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@threedigitsexactly}
+%\changes{1.2}{??}{new}
+%Exactly three digits.
+%    \begin{macrocode}
+\def\@texosquery@threedigitsexactly#1{%
+  \@texosquery@threedigits@exactly#1\@texosquery@threedigits@exactly
+}%
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@threedigits@exactly}
+%\changes{1.2}{??}{new}
+%Exactly three digits.
+%    \begin{macrocode}
+\def\@texosquery@threedigits@exactly#1#2\@texosquery@threedigits@exactly{%
+  \@texosquery@fmtsign{#1}%
+  \@texosquery@lastthreeoften#2%
+}%
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@twodigitsexactly}
+%\changes{1.2}{??}{new}
+%Exactly two digits.
+%    \begin{macrocode}
+\def\@texosquery@twodigitsexactly#1{%
+  \@texosquery@twodigits@exactly#1\@texosquery@twodigits@exactly
+}%
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@twodigits@exactly}
+%\changes{1.2}{??}{new}
+%Exactly two digits.
+%    \begin{macrocode}
+\def\@texosquery@twodigits@exactly#1#2\@texosquery@twodigits@exactly{%
+  \@texosquery@fmtsign{#1}%
+  \@texosquery@lasttwooften#2%
+}%
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fmt@dtf}
+%\begin{definition}
+%\cs{@texosquery@fmt@dtf}\marg{n}\marg{designator}
+%\end{definition}
+%
+%When formatting a date-time pattern \cs{texosquerydtf} will
+%temporarily be redefined to this command. This command indicates
+%the format obtained by \meta{n} instances of \meta{designator}.
+%For example, \verb|{2}{M}| indicates the format \texttt{MM}. This
+%command tests for \cs{texosqueryfmtpat}\meta{format}, which should
+%take a single argument. If defined, that's used, otherwise use one
+%of the numeric commands defined above. The \sty{locale} package
+%defines \cs{texosqueryfmtpatMMM} and so on to use the locale's month names
+%etc.
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fmt@dtf#1#2{%
+  \@texosquery@ifundef{@texosquery@fmt@#2}%
+  {\@texosquery@warn{Unknown date-time pattern designator `#2'}}%
+  {%
+    \ifcase#1
+    \or
+      \@texosquery@ifundef{texosqueryfmtpat#2}%
+      {%
+        \expandafter\expandafter\expandafter
+          \@texosquery@atleastonedigit
+          \expandafter\expandafter\expandafter
+         {\csname @texosquery@fmt@#2\endcsname}%
+      }%
+      {%
+        \csname texosqueryfmtpat#2\expandafter\expandafter\expandafter\endcsname
+         \expandafter\expandafter\expandafter
+         {\csname @texosquery@fmt@#2\endcsname}%
+      }%
+    \or
+      \@texosquery@ifundef{texosqueryfmtpat#2#2}%
+      {%
+        \expandafter\expandafter\expandafter
+          \@texosquery@twodigitsexactly
+          \expandafter\expandafter\expandafter
+          {\csname @texosquery@fmt@#2\endcsname}%
+      }%
+      {%
+        \csname texosqueryfmtpat#2#2\expandafter\expandafter\expandafter
+        \endcsname \expandafter\expandafter\expandafter
+         {\csname @texosquery@fmt@#2\endcsname}%
+      }%
+    \or
+      \@texosquery@ifundef{texosqueryfmtpat#2#2#2}%
+      {%
+        \expandafter\expandafter\expandafter
+          \@texosquery@threedigitsexactly
+          \expandafter\expandafter\expandafter
+        {\csname @texosquery@fmt@#2\endcsname}%
+      }%
+      {%
+        \csname texosqueryfmtpat#2#2#2\expandafter\expandafter\expandafter
+        \endcsname \expandafter\expandafter\expandafter
+         {\csname @texosquery@fmt@#2\endcsname}%
+      }%
+    \else
+      \@texosquery@ifundef{texosqueryfmtpat#2#2#2#2}%
+      {%
+        \expandafter\expandafter\expandafter
+          \@texosquery@atleastfourdigits
+          \expandafter\expandafter\expandafter
+          {\csname @texosquery@fmt@#2\endcsname}%
+      }%
+      {%
+        \csname texosqueryfmtpat#2#2#2#2\expandafter\expandafter\expandafter
+        \endcsname \expandafter\expandafter\expandafter
+         {\csname @texosquery@fmt@#2\endcsname}%
+      }%
+    \fi
+  }%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%Provide default commands for the time zone designators, since the
+%time zone isn't supplied as a single integer.
+%
+%\begin{macro}{\texosqueryfmttimezonehr}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosqueryfmttimezonehr#1{%
+  \ifnum#1<0\@texosquery@fmtminus\else+\fi
+  \ifnum#1<10 0\fi\number#1
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmttimezonemin}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\texosqueryfmttimezonemin#1{%
+  \ifnum#1<10 0\fi\number#1
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@firstoffive}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@firstoffive#1#2#3#4#5{#1}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@secondoffive}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@secondoffive#1#2#3#4#5{#2}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@thirdoffive}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@thirdoffive#1#2#3#4#5{#3}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fourthoffive}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fourthoffive#1#2#3#4#5{#4}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@fifthoffive}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@fifthoffive#1#2#3#4#5{#5}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryshorttimezone}
+%\changes{1.2}{??}{new}
+%Maps id to short time zone display name. This will need redefining
+%as appropriate. The default simply expands to the ID.
+%    \begin{macrocode}
+\def\texosqueryshorttimezone#1{#1}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerylongtimezone}
+%\changes{1.2}{??}{new}
+%Maps id to long time zone display name. This will need redefining
+%as appropriate. The default simply expands to the ID.
+%    \begin{macrocode}
+\def\texosquerylongtimezone#1{#1}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatz}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{z} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatz#1{%
+ \expandafter\texosqueryshorttimezone\expandafter{\@texosquery@fifthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatzz}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{zz} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatzz#1{%
+ \expandafter\texosqueryshorttimezone\expandafter{\@texosquery@fifthoffive#1}%
+  \expandafter\number\@texosquery@thirdoffive#1%
+  :%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatzzz}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{zzz} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatzzz#1{%
+ \expandafter\texosquerylongtimezone\expandafter{\@texosquery@fifthoffive#1}%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  :%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatzzzz}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{zzzz} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatzzzz#1{%
+ \expandafter\texosquerylongtimezone\expandafter{\@texosquery@fifthoffive#1}%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  :%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatZ}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{Z} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatZ#1{%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatZZ}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{ZZ} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatZZ#1{%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatZZZ}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{ZZZ} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatZZZ#1{%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatZZZZ}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{ZZZZ} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatZZZZ#1{%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatX}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{X} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatX#1{%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  :%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatXX}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{XX} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatXX#1{%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  :%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatXXX}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{XXX} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatXXX#1{%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  :%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtpatXXXX}
+%\changes{1.2}{??}{new}
+%Default time zone format for \texttt{XXXX} designator.
+%    \begin{macrocode}
+\def\texosqueryfmtpatXXXX#1{%
+  \expandafter\texosqueryfmttimezonehr\expandafter
+    {\@texosquery@thirdoffive#1}%
+  :%
+  \expandafter\texosqueryfmttimezonemin\expandafter
+    {\@texosquery@fourthoffive#1}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\subsubsection{Applying Numeric Patterns}
+%\label{sec:applynumpatterns}
+%
+%\begin{macro}{\@texosquery@digitindex}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\newcount\@texosquery@digitindex
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\if@texosquery@digitfound}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\newif\if@texosquery@digitfound
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryfmtnumber}
+%\changes{1.2}{??}{new}
+%\begin{definition}
+%\cs{texosqueryfmtnumber}\marg{pattern}\marg{int}\marg{frac}\marg{mantissa}
+%\end{definition}
+%General purpose low-level command. The \meta{frac} part must not
+%start with a sign. The sign should go at the start of \meta{int} if
+%required.
+%    \begin{macrocode}
+\def\texosqueryfmtnumber#1#2#3#4{%
+  \begingroup
+   \let\texosquerypatstr\texosquerypatfmtstr
+   \let\texosquerypatquote\texosquerypatfmtquote
+   \let\texosquerypatspc\texosquerypatfmtspc
+   \let\texosquerypatplusminus\texosquerypatfmt@plusminus
+   \let\texosquerypatnum\texosquerypatfmt@num
+   \let\texosquerypatsinum\texosquerypatfmt@sinum
+   \let\texosquerypatdec\texosquerypatfmt@dec
+   \let\texosquerypatint\texosquerypatfmt@int
+   \let\texosquerypatprefixcurrency\texosquery@patfmt@prefixcurrency
+   \let\texosquerypatprefixicurrency\texosquery@patfmt@prefixicurrency
+   \let\texosquerypatsuffixcurrency\texosquery@patfmt@suffixcurrency
+   \let\texosquerypatsuffixicurrency\texosquery@patfmt@suffixicurrency
+   \let\texosquerypatdigit\texosquerypatfmt@digit
+   \let\texosquerypatdigitnozero\texosquerypatfmt@digitnozero
+   \let\texosquerypatgroupsep\texosquerypatfmt@groupsep
+   \let\texosquerypatprefixpercent\texosquery@patfmt@prefixpercent
+   \let\texosquerypatsuffixpercent\texosquery@patfmt@suffixpercent
+   \let\texosquerypatprefixpermill\texosquery@patfmt@prefixpermill
+   \let\texosquerypatsuffixpermill\texosquery@patfmt@suffixpermill
+   \let\texosquerypatminus\@texosquerypat@numfmt@sign
+%    \end{macrocode}
+%Allow for negative zero in the \meta{int} part.
+%    \begin{macrocode}
+   \edef\@texosquery@sgn{\expandafter\ifnum#21<0 -\else+\fi}%
+%    \end{macrocode}
+%Allow for arguments passed as control sequences that expand to a
+%number.
+%    \begin{macrocode}
+   \edef\@texosquery@int{\expandafter\@texosquery@paddigits
+      \expandafter{\number#2}}%
+   \let\@texosquery@si@int\@texosquery@int
+%    \end{macrocode}
+%Can't use \cs{number} here as we'll lose any leading zeros.
+%    \begin{macrocode}
+   \edef\@texosquery@frac{\expandafter\@texosquery@paddigits@trailing
+     \expandafter{#3}}%
+   \let\@texosquery@si@frac\@texosquery@frac
+   \edef\@texosquery@mantissa{\expandafter\@texosquery@paddigits
+     \expandafter{\number#4}}%
+%    \end{macrocode}
+%Is the mantissa non-zero?
+%    \begin{macrocode}
+   \ifnum#4=0\relax
+   \else
+     \expandafter\ifx\@texosquery@sgn-%
+       \edef\@texosquery@int{\expandafter
+          \@texosquery@paddigits@pos\expandafter{\number-#2}}%
+     \else
+       \edef\@texosquery@int{\@texosquery@paddigits@pos{#2}}%
+     \fi
+%    \end{macrocode}
+%Shift.
+%    \begin{macrocode}
+     \ifnum#4<0
+       \expandafter\@texosquery@neg@shift\expandafter{\number-#4}%
+     \else
+       \@texosquery@pos@shift{#4}%
+     \fi
+     \expandafter\ifx\@texosquery@sgn-%
+       \edef\@texosquery@int{\expandafter\@texosquery@paddigits
+         \expandafter{\number-\@texosquery@int}}%
+     \else
+       \edef\@texosquery@int{\expandafter\@texosquery@paddigits
+         \expandafter{\number\@texosquery@int}}%
+     \fi
+     \edef\@texosquery@frac{\@texosquery@paddigits@trailing{\@texosquery@frac}}%
+   \fi
+   \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
+   \let\@texosquery@zerodigit\@texosquery@zerodigit@leading
+   \expandafter\ifx\@texosquery@sgn-%
+     \let\@texosquery@currentsign\texosquerypatfmtminus
+   \else
+     \let\@texosquery@currentsign\texosquerypatfmtplus
+   \fi
+   \@texosquery@digitindex=0\relax
+   \@texosquery@digitfoundfalse
+   #1%
+  \endgroup
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@pos@shift}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@pos@shift#1{%
+  \ifcase#1
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@lastnineoften\@texosquery@int
+      \expandafter\@texosquery@firstoften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@lastnineoften\@texosquery@frac
+    }%
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@lasteightoften\@texosquery@int
+      \expandafter\@texosquery@firsttwooften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@lasteightoften\@texosquery@frac
+    }%
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@lastsevenoften\@texosquery@int
+      \expandafter\@texosquery@firstthreeoften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@lastsevenoften\@texosquery@frac
+    }%
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@lastsixoften\@texosquery@int
+      \expandafter\@texosquery@firstfouroften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@lastsixoften\@texosquery@frac
+    }%
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@lastfiveoften\@texosquery@int
+      \expandafter\@texosquery@firstfiveoften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@lastfiveoften\@texosquery@frac
+    }%
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@lastfouroften\@texosquery@int
+      \expandafter\@texosquery@firstsixoften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@lastfouroften\@texosquery@frac
+    }%
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@lastthreeoften\@texosquery@int
+      \expandafter\@texosquery@firstsevenoften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@lastthreeoften\@texosquery@frac
+    }%
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@lasttwooften\@texosquery@int
+      \expandafter\@texosquery@firsteightoften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@lasttwooften\@texosquery@frac
+    }%
+  \or
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@tenthoften\@texosquery@int
+      \expandafter\@texosquery@firstnineoften\@texosquery@frac}%
+    \edef\@texosquery@frac{%
+       \expandafter\@texosquery@tenthoften\@texosquery@frac
+    }%
+  \or
+    \let\@texosquery@int\@texosquery@frac
+    \edef\@texosquery@frac{0}%
+%   \end{macrocode}
+%Anything larger will require scientific notation. Hopefully the
+%pattern supports this.
+%   \begin{macrocode}
+  \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@neg@shift}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@neg@shift#1{%
+  \ifcase#1
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lastoneoften\@texosquery@int
+      \expandafter\@texosquery@firstnineoften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firstnineoften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lasttwooften\@texosquery@int
+      \expandafter\@texosquery@firsteightoften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firsteightoften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lastthreeoften\@texosquery@int
+      \expandafter\@texosquery@firstsevenoften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firstsevenoften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lastfouroften\@texosquery@int
+      \expandafter\@texosquery@firstsixoften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firstsixoften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lastfiveoften\@texosquery@int
+      \expandafter\@texosquery@firstfiveoften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firstfiveoften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lastsixoften\@texosquery@int
+      \expandafter\@texosquery@firstfouroften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firstfouroften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lastsevenoften\@texosquery@int
+      \expandafter\@texosquery@firstthreeoften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firstthreeoften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lasteightoften\@texosquery@int
+      \expandafter\@texosquery@firsttwooften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firsttwooften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{%
+      \expandafter\@texosquery@lastnineoften\@texosquery@int
+      \expandafter\@texosquery@firstoften\@texosquery@frac
+    }%
+    \edef\@texosquery@int{%
+      \expandafter\@texosquery@firstoften\@texosquery@int
+    }%
+  \or
+    \edef\@texosquery@frac{\@texosquery@int\@texosquery@frac}%
+    \edef\@texosquery@int{0}%
+%   \end{macrocode}
+%Anything beyond this will require scientific notation. Hopefully the
+%pattern supports it.
+%   \begin{macrocode}
+  \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquerypat@numfmt@sign}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquerypat@numfmt@sign{%
+  \@texosquery@currentsign
+  \let\@texosquery@currentsign\empty
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\begin{macro}{\texosquerypatfmtstr}
+%    \begin{macrocode}
+\def\texosquerypatfmtstr#1{#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmtquote}
+%    \begin{macrocode}
+\def\texosquerypatfmtquote{'}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmtspc}
+%    \begin{macrocode}
+\def\texosquerypatfmtspc{ }
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmt@plusminus}
+%    \begin{macrocode}
+\def\texosquerypatfmt@plusminus#1#2{%
+ \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
+ \@texosquery@digitindex=0\relax
+ \@texosquery@digitfoundfalse
+ \expandafter\ifx\@texosquery@sgn-%
+  #2%
+ \else
+  #1%
+ \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmt@num}
+%    \begin{macrocode}
+\def\texosquerypatfmt@num#1{#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmtexp}
+%\changes{1.2}{??}{new}
+%Exponent symbol. Change as appropriate.
+%    \begin{macrocode}
+\def\texosquerypatfmtexp{E}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypatfmt@sinum}
+%    \begin{macrocode}
+\def\texosquerypatfmt@sinum#1#2{%
+ \let\@texosquery@int\@texosquery@si@int
+ \let\@texosquery@frac\@texosquery@si@frac
+ \let\@texosquery@current\@texosquery@int
+ #1%
+ \texosquerypatfmtexp
+ \let\@texosquery@zerodigit\@texosquery@zerodigit@leading
+ \ifnum\@texosquery@mantissa<0\relax
+   \let\@texosquery@currentsign\texosquerypatfmtminus
+ \else
+   \let\@texosquery@currentsign\texosquerypatfmtplus
+ \fi
+ \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@mantissa}%
+ \@texosquery@digitindex=0\relax
+ \@texosquery@digitfoundfalse
+ #2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmtdecsep}
+%\changes{1.2}{??}{new}
+%Decimal separator. Change as appropriate.
+%    \begin{macrocode}
+\def\texosquerypatfmtdecsep{.}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypatfmt@dec}
+%    \begin{macrocode}
+\def\texosquerypatfmt@dec#1#2{%
+ \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
+ \@texosquery@digitindex=0\relax
+ \@texosquery@digitfoundfalse
+ \let\@texosquery@zerodigit\@texosquery@zerodigit@leading
+ #1%
+ \texosquerypatfmtdecsep
+ \let\@texosquery@current\@texosquery@frac
+ \@texosquery@digitindex=0\relax
+ \@texosquery@digitfoundfalse
+ \let\@texosquery@zerodigit\@texosquery@zerodigit@trailing
+ \let\@texosquery@currentsign\empty
+ #2%
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmtint}
+%    \begin{macrocode}
+\def\texosquerypatfmtint#1{%
+ \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
+ \@texosquery@digitindex=0\relax
+ \@texosquery@digitfoundfalse
+ \let\@texosquery@zerodigit\@texosquery@zerodigit@leading
+ #1%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypatfmtcurrencysign}
+%\changes{1.2}{??}{new}
+%Currency symbol. Redefine as appropriate.
+%    \begin{macrocode}
+\def\texosquerypatfmtcurrencysign{\$}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypatfmticurrencysign}
+%\changes{1.2}{??}{new}
+%International currency symbol. Redefine as appropriate.
+%    \begin{macrocode}
+\ifx\textcurrency\undefined
+  \def\texosquerypatfmticurrencysign{¤}
+\else
+  \def\texosquerypatfmticurrencysign{\textcurrency}
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquery@patfmt@prefixcurrency}
+%    \begin{macrocode}
+\def\texosquery@patfmt@prefixcurrency#1#2{#2\texosquerypatfmtcurrencysign#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquery@patfmt@prefixicurrency}
+%    \begin{macrocode}
+\def\texosquery@patfmt@prefixicurrency#1#2{#2\texosquerypatfmticurrencysign#1}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquery@patfmt@suffixcurrency}
+%    \begin{macrocode}
+\def\texosquery@patfmt@suffixcurrency#1#2{#1\texosquerypatfmtcurrencysign#2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquery@patfmt@suffixicurrency}
+%    \begin{macrocode}
+\def\texosquery@patfmt@suffixicurrency#1#2{#1\texosquerypatfmticurrencysign#2}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmt@digit}
+%    \begin{macrocode}
+\def\texosquerypatfmt@digit{%
+ \advance\@texosquery@digitindex by 1\relax
+ \if@texosquery@digitfound
+ \else
+   \ifx\@texosquery@currentsign\texosquerypatfmtminus
+    \texosquerypatfmtminus
+    \let\@texosquery@currentsign\empty
+   \fi
+ \fi
+ \@texosquery@digitfoundtrue
+ \ifcase\@texosquery@digitindex
+ \or
+   \expandafter\@texosquery@firstoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@secondoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@thirdoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@fourthoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@fifthoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@sixthoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@seventhoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@eighthoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@ninthoften\@texosquery@current
+ \or
+   \expandafter\@texosquery@tenthoften\@texosquery@current
+ \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmt@digitnozero}
+%    \begin{macrocode}
+\def\texosquerypatfmt@digitnozero{%
+ \advance\@texosquery@digitindex by 1\relax
+ \edef\@texosquery@digit{%
+   \ifcase\@texosquery@digitindex
+    0%
+   \or
+     \expandafter\@texosquery@firstoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@secondoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@thirdoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@fourthoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@fifthoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@sixthoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@seventhoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@eighthoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@ninthoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@tenthoften\@texosquery@current
+   \else
+   0%
+ \fi
+ }%
+ \ifnum\@texosquery@digit=0\relax
+   \@texosquery@zerodigit
+ \else
+   \if@texosquery@digitfound
+   \else
+     \ifx\@texosquery@currentsign\texosquerypatfmtminus
+      \texosquerypatfmtminus
+      \let\@texosquery@currentsign\empty
+     \fi
+   \fi
+   \@texosquery@digitfoundtrue
+   \@texosquery@digit
+ \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@zerodigit@leading}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@zerodigit@leading{%
+ \edef\@texosquery@digit{%
+   \ifcase\@texosquery@digitindex
+    0%
+   \or
+     \expandafter\@texosquery@firstoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@firsttwooften\@texosquery@current
+   \or
+     \expandafter\@texosquery@firstthreeoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@firstfouroften\@texosquery@current
+   \or
+     \expandafter\@texosquery@firstfiveoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@firstsixoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@firstsevenoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@firsteightoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@firstnineoften\@texosquery@current
+   \or
+     \@texosquery@current
+   \else
+    0%
+   \fi
+  }%
+  \ifnum\@texosquery@digit>0\relax
+   \if@texosquery@digitfound
+   \else
+     \ifx\texosquerypatminus\texosquerypatfmtminus
+      \texosquerypatfmtminus
+     \fi
+   \fi
+   \@texosquery@digitfoundtrue
+   0%
+  \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@zerodigit@trailing}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@zerodigit@trailing{%
+ \edef\@texosquery@digit{%
+   \ifcase\@texosquery@digitindex
+    0%
+   \or
+     \@texosquery@current
+   \or
+     \expandafter\@texosquery@lastnineoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@lasteightoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@lastsevenoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@lastsixoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@lastfiveoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@lastfouroften\@texosquery@current
+   \or
+     \expandafter\@texosquery@lastthreeoften\@texosquery@current
+   \or
+     \expandafter\@texosquery@lasttwooften\@texosquery@current
+   \or
+     \expandafter\@texosquery@tenthoften\@texosquery@current
+   \else
+    0%
+   \fi
+  }%
+  \ifnum\@texosquery@digit>0\relax
+   \if@texosquery@digitfound
+   \else
+     \ifx\texosquerypatminus\texosquerypatfmtminus
+      \texosquerypatfmtminus
+     \fi
+   \fi
+   \@texosquery@digitfoundtrue
+   0%
+  \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypatfmtminus}
+%Formatted minus sign. Redefined as appropriate.
+%    \begin{macrocode}
+\def\texosquerypatfmtminus{\ifmmode-\else$-$\fi}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmtplus}
+%Formatted plus sign. Redefined as appropriate.
+%    \begin{macrocode}
+\def\texosquerypatfmtplus{\ifmmode+\else$+$\fi}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmtgroupsep}
+%    \begin{macrocode}
+\def\texosquerypatfmtgroupsep{,}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquerypatfmt@groupsep}
+%    \begin{macrocode}
+\def\texosquerypatfmt@groupsep{%
+  \if@texosquery@digitfound\texosquerypatfmtgroupsep\fi}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypatfmtpercentsign}
+%\changes{1.2}{??}{new}
+%Percent sign used in number format.
+%    \begin{macrocode}
+\def\texosquerypatfmtpercentsign{\%}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypatfmtpermillsign}
+%\changes{1.2}{??}{new}
+%Per-mill sign used in number format. Redefine as appropriate.
+%    \begin{macrocode}
+\def\texosquerypatfmtpermillsign{‰}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@adjust@per}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\def\@texosquery@adjust@per#1{%
+ \@texosquery@pos@shift{#1}%
+ \edef\@texosquery@int{\expandafter\@texosquery@paddigits
+     \expandafter{\number\@texosquery@int}}%
+ \edef\@texosquery@frac{\@texosquery@paddigits@trailing{\@texosquery@frac}}%
+ \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquery@patfmt@prefixpercent}
+%    \begin{macrocode}
+\def\texosquery@patfmt@prefixpercent#1#2{%
+ \@texosquery@adjust@per{2}%
+  #2\texosquerypatfmtpercentsign#1%
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquery@patfmt@suffixpercent}
+%    \begin{macrocode}
+\def\texosquery@patfmt@suffixpercent#1#2{%
+ \@texosquery@adjust@per{2}%
+ #1\texosquerypatfmtpercentsign#2%
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquery@patfmt@prefixpermill}
+%    \begin{macrocode}
+\def\texosquery@patfmt@prefixpermill#1#2{%
+ \@texosquery@adjust@per{3}%
+ #2\texosquerypatfmtpermillsign#1%
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\texosquery@patfmt@suffixpermill}
+%    \begin{macrocode}
+\def\texosquery@patfmt@suffixpermill#1#2{%
+ \@texosquery@adjust@per{3}%
+ #1\texosquerypatfmtpermillsign#2%
+}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -2593,28 +4637,130 @@ v1.2 (NLCT)]
 %    \end{macrocode}
 %\fi
 %    \begin{macrocode}
-%If this configuration file is added to TeX's path, it can
-%be used to set up the texosquery defaults for the installation.
+ %If this configuration file is added to TeX's path, it can
+ %be used to set up the texosquery defaults for the installation.
 
-%Default application (must be installed on the operating system's
-%path). Change as appropriate. Available options:
-%  - Unix-like systems:
-%     * texosquery-jre8.sh (at least Java 8 required)
-%     * texosquery.sh (at least Java 7 required)
-%     * texosquery-jre5.sh (at least Java 5 required)
-%  - Windows:
-%     * texosquery-jre8 (at least Java 8 required)
-%     * texosquery (at least Java 7 required)
-%     * texosquery-jre5 (at least Java 5 required)
+ %Default application (must be installed on the operating system's
+ %path). Change as appropriate. Available options:
+ %  - Unix-like systems:
+ %     * texosquery-jre8.sh (at least Java 8 required)
+ %     * texosquery.sh (at least Java 7 required)
+ %     * texosquery-jre5.sh (at least Java 5 required)
+ %  - Windows:
+ %     * texosquery-jre8 (at least Java 8 required)
+ %     * texosquery (at least Java 7 required)
+ %     * texosquery-jre5 (at least Java 5 required)
 \def\TeXOSInvokerName{texosquery}
 
-% If the invoker name given above is on the restricted list,
-% allow it to be run in restricted mode:
+ % If the invoker name given above is on the restricted list,
+ % allow it to be run in restricted mode:
 %\TeXOSQueryAllowRestricted
 %    \end{macrocode}
 %\iffalse
 %    \begin{macrocode}
 %</texosquery.cfg>
+%    \end{macrocode}
+%\fi
+%\subsection{Bash Scripts}
+%These are the bash scripts for Unix-like systems.
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery.sh>
+%    \end{macrocode}
+%\fi
+%    \begin{macrocode}
+#!/bin/sh
+
+jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar`
+java -jar "$jarpath" "$@"
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery.sh>
+%    \end{macrocode}
+%\fi
+%
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery-jre8.sh>
+%    \end{macrocode}
+%\fi
+%    \begin{macrocode}
+#!/bin/sh
+
+jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar`
+java -Djava.locale.providers=CLDR,JRE -jar "$jarpath" "$@"
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery-jre8.sh>
+%    \end{macrocode}
+%\fi
+%
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery-jre5.sh>
+%    \end{macrocode}
+%\fi
+%    \begin{macrocode}
+#!/bin/sh
+
+jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar`
+java -jar "$jarpath" "$@"
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery-jre5.sh>
+%    \end{macrocode}
+%\fi
+%
+%\subsection{Windows Batch Scripts}
+%These are the batch scripts for Windows.
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery.bat>
+%    \end{macrocode}
+%\fi
+%    \begin{macrocode}
+@ECHO OFF
+FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar') DO SET JARPATH=%%I
+START javaw -jar "%JARPATH%\texosquery.jar" %*
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery.bat>
+%    \end{macrocode}
+%\fi
+%
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery-jre8.bat>
+%    \end{macrocode}
+%\fi
+%    \begin{macrocode}
+@ECHO OFF
+FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar') DO SET JARPATH=%%I
+START javaw -Djava.locale.providers=CLDR,JRE -jar "%JARPATH%\texosquery-jre8.jar" %*
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery-jre8.bat>
+%    \end{macrocode}
+%\fi
+%
+%\iffalse
+%    \begin{macrocode}
+%<*texosquery-jre5.bat>
+%    \end{macrocode}
+%\fi
+%    \begin{macrocode}
+@ECHO OFF
+FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar') DO SET JARPATH=%%I
+START javaw -jar "%JARPATH%\texosquery-jre5.jar" %*
+%    \end{macrocode}
+%\iffalse
+%    \begin{macrocode}
+%</texosquery-jre5.bat>
 %    \end{macrocode}
 %\fi
 %

@@ -1,18 +1,15 @@
 dist	:
 	make -C ../src/tex
 	make -C ../src
-	mkdir -p texosquery
-	cp texosquery.sh texosquery/texosquery
-	cp texosquery-jre5.sh texosquery/texosquery
-	cp texosquery-jre8.sh texosquery/texosquery
+	mkdir -p texosquery/java
 	cp ../src/bin/texosquery.jar texosquery
 	cp ../src/bin/texosquery-jre5.jar texosquery
 	cp ../src/bin/texosquery-jre8.jar texosquery
 	cp ../src/tex/texosquery.dtx texosquery
 	cp ../src/tex/texosquery.ins texosquery
 	cp ../src/tex/texosquery.pdf texosquery
-	cp ../src/java/TeXOSQuery*.java texosquery
-	cp ../src/java/Manifest*.txt texosquery
+	cp ../src/java/TeXOSQuery*.java texosquery/java
+	cp ../src/java/Manifest*.txt texosquery/java
 	cp ../README.md texosquery
 	cp CHANGES texosquery
 	zip --exclude="*.swp" -r texosquery.zip texosquery

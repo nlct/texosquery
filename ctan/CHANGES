@@ -1,3 +1,95 @@
+1.2:
+
+ * Now has three .jar files depending on the Java installation:
+
+   - texosquery-jre8.jar
+
+     Full application. May be used with the CLDR locale provider
+     (Unicode Consortium's Common Locale Data Repository).
+     Requires at least Java 8 (use with
+     -Djava.locale.providers=CLDR,JRE to access the CLDR)
+
+   - texosquery.jar
+
+     The default version of the application. Can't be used with
+     CLDR. Less locale support. Requires at least Java 7.
+
+   - texosquery-jre5.jar
+
+     Cut-down version of the application with significantly less
+     locale support. Provided for old systems that can't upgrade,
+     but not recommended. (Use of Java 5 or 6 is deprecated.)
+     Requires at least Java 5.
+
+  * Corresponding scripts that run the appropriate .jar file
+    are bundled in texosquery.dtx and extracted using:
+
+    tex texosquery.ins
+
+    - Unix-like (run `chmod +x texosquery*.sh`): 
+
+      texosquery-jre8.sh : runs texosquery-jre8.jar with
+      -Djava.locale.providers=CLDR,JRE
+
+      texosquery.sh : runs texosquery.jar
+
+      texosquery-jre5.sh : runs texosquery-jre5.jar
+
+    - Windows:
+
+      texosquery-jre8.bat : runs texosquery-jre8.jar with
+      -Djava.locale.providers=CLDR,JRE
+
+      texosquery.bat : runs texosquery.jar
+
+      texosquery-jre5.bat : runs texosquery-jre5.jar
+
+    You can edit these files if additional Java settings
+    are required (e.g. -Dfile.encoding=UTF-8). Alternatively
+    set the JAVA_TOOLS_OPTIONS environment variable.
+
+  * New texosquery.cfg configuration file. Edit the definition
+    of \TeXOSInvokerName to indicate which application you
+    need to use. For example, bash user with Java 8 installed:
+
+    \def\TeXOSInvokerName{texosquery-jre8.sh}
+
+  See the installation section of the manual.
+
+  * New command line switches:
+
+  Actions:
+
+  --bcp47 / -b
+  --codeset-lcs / -C
+  --locale-data [⟨locale⟩] / -D [⟨locale⟩]
+  --numeric [⟨locale⟩] / -N [⟨locale⟩]
+  --date-time / -M
+
+  Options:
+
+  --debug [⟨n⟩]
+  --nodebug
+  --compatible ⟨n⟩
+
+  * When accessing file information, the TEXMF openin_any
+    setting is first checked to determine if read access is 
+    permitted.
+
+  * Returned values now include some shorthand markup that's
+    internally converted when read in by \TeXOSQuery. For
+    example "texosquery -n" now returns
+
+    \pdfd :20161113161156+00'00'
+
+    instead of
+
+    D:20161113161156+00'00'
+
+    To restore the original behaviour use --compatible 1
+
+    See the manual for further details.
+
 1.1 (2016-07-14):
 
  * texosquery.jar:
