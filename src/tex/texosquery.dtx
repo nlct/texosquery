@@ -51,7 +51,7 @@
  \let\do\@makeother \dospecials}
 \makeatother
 
-\CheckSum{2391}
+\CheckSum{2408}
 
 \RecordChanges
 \PageIndex
@@ -1219,6 +1219,80 @@ Organization for Standardization}
 %If a pattern is used directly in the text, it will expand to the
 %original pattern padded to ten digits. (Eleven digit integers are outside
 %\TeX's maximum number range.)
+%
+%Any of these numeric patterns may be used in the first argument of
+%the low-level user command \cs{texosqueryfmtnumber} described in 
+%section~\ref{sec:applynumpatterns}. This command uses the following
+%macros:
+%\begin{definition}
+%\cs{texosquerypatfmtcurrencysign}
+%\end{definition}
+%The currency sign (defaults to \verb|\$|). For example, when parsing the previous
+%\meta{numeric block}, this command can be redefined to the \marg{currency sym} or
+%\marg{currency tex} elements.
+%
+%\begin{definition}
+%\cs{texosquerypatfmtgroupsep}
+%\end{definition}
+%The group separator (defaults to \verb|,|). For example, when parsing the previous
+%\meta{numeric block}, this command can be redefined to the
+%\marg{group sep} element.
+%
+%\begin{definition}
+%\cs{texosquerypatfmtdecsep}
+%\end{definition}
+%The decimal separator (defaults to \verb|.|). For example, when parsing the previous
+%\meta{numeric block}, this command can be redefined to the
+%\marg{dec sep} element.
+%
+%\begin{definition}
+%\cs{texosquerypatfmtcurdecsep}
+%\end{definition}
+%The monetary decimal separator (defaults to \verb|.|). For example, when parsing the previous
+%\meta{numeric block}, this command can be redefined to the
+%\marg{currency sep} element.
+%
+%\begin{definition}
+%\cs{texosquerypatfmtexp}
+%\end{definition}
+%The exponent sign (defaults to \texttt{E}). For example, when parsing the previous
+%\meta{numeric block}, this command can be redefined to the
+%\marg{exp sep} element.
+%
+%\begin{definition}
+%\cs{texosquerypatfmtpercentsign}
+%\end{definition}
+%The percent symbol. For example, when parsing the previous
+%\meta{numeric block}, this command can be redefined to the
+%\marg{percent sym} element.
+%
+%\begin{definition}
+%\cs{texosquerypatfmtpermillsign}
+%\end{definition}
+%The per-mill symbol. For example, when parsing the previous
+%\meta{numeric block}, this command can be redefined to the
+%\marg{per-mill sym} element.
+%
+%\begin{definition}
+%\cs{texosquerypatfmticurrencysign}
+%\end{definition}
+%The international currency sign. This is defined as \texttt{¤} by
+%default, unless the command \cs{textcurrency} has been defined, in
+%which case that's used instead. If the UTF-8 character ¤ is
+%available and the \cs{textcurrency} hasn't been defined before 
+%\sty{texosquery} was input, then you will need to redefine this
+%command as appropriate.
+%
+%\begin{definition}
+%\cs{texosquerypatfmtminus}
+%\end{definition}
+%The minus sign.
+%
+%\begin{definition}
+%\cs{texosquerypatfmtplus}
+%\end{definition}
+%The plus sign.
+%
 %\end{description}
 %
 %\section{texosquery.tex: generic \TeX\ code}
@@ -3905,28 +3979,23 @@ Organization for Standardization}
 %\subsubsection{Applying Numeric Patterns}
 %\label{sec:applynumpatterns}
 %
-%\begin{macro}{\@texosquery@digitindex}
-%\changes{1.2}{??}{new}
-%    \begin{macrocode}
-\newcount\@texosquery@digitindex
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\if@texosquery@digitfound}
-%\changes{1.2}{??}{new}
-%    \begin{macrocode}
-\newif\if@texosquery@digitfound
-%    \end{macrocode}
-%\end{macro}
-%
 %\begin{macro}{\texosqueryfmtnumber}
 %\changes{1.2}{??}{new}
 %\begin{definition}
 %\cs{texosqueryfmtnumber}\marg{pattern}\marg{int}\marg{frac}\marg{mantissa}
 %\end{definition}
-%General purpose low-level command. The \meta{frac} part must not
-%start with a sign. The sign should go at the start of \meta{int} if
-%required.
+%General purpose low-level number formatting command. The first argument 
+%\meta{pattern} is the pattern. The other arguments are unformatted integers 
+%and must be present and not exceed 10 digits each. The \meta{frac} part must 
+%not start with a sign. The minus sign should go at the start of
+%\meta{int} for negative numbers. The plus sign is
+%optional for positive \meta{int} or \meta{mantissa} and not
+%permitted in \meta{frac}. The arguments may each be the actual numerical
+%value or be a single control sequence whose replacement text is 
+%the value. Avoid anything more complicated than that.
+%
+%This package doesn't provide a higher level command that can split a number 
+%into integer, fractional and mantissa parts.
 %    \begin{macrocode}
 \def\texosqueryfmtnumber#1#2#3#4{%
   \begingroup
@@ -3950,6 +4019,7 @@ Organization for Standardization}
    \let\texosquerypatprefixpermill\texosquery@patfmt@prefixpermill
    \let\texosquerypatsuffixpermill\texosquery@patfmt@suffixpermill
    \let\texosquerypatminus\@texosquerypat@numfmt@sign
+   \let\texosquerypatfmt@decsep\texosquerypatfmtdecsep
 %    \end{macrocode}
 %Allow for negative zero in the \meta{int} part.
 %    \begin{macrocode}
@@ -4009,6 +4079,20 @@ Organization for Standardization}
    #1%
   \endgroup
 }
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@digitindex}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\newcount\@texosquery@digitindex
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\if@texosquery@digitfound}
+%\changes{1.2}{??}{new}
+%    \begin{macrocode}
+\newif\if@texosquery@digitfound
 %    \end{macrocode}
 %\end{macro}
 %
@@ -4242,7 +4326,7 @@ Organization for Standardization}
  \let\@texosquery@current\@texosquery@int
  #1%
  \texosquerypatfmtexp
- \let\@texosquery@zerodigit\@texosquery@zerodigit@leading
+ {\let\@texosquery@zerodigit\@texosquery@zerodigit@leading
  \ifnum\@texosquery@mantissa<0\relax
    \let\@texosquery@currentsign\texosquerypatfmtminus
  \else
@@ -4251,7 +4335,7 @@ Organization for Standardization}
  \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@mantissa}%
  \@texosquery@digitindex=0\relax
  \@texosquery@digitfoundfalse
- #2}
+ #2}}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmtdecsep}
@@ -4259,6 +4343,14 @@ Organization for Standardization}
 %Decimal separator. Change as appropriate.
 %    \begin{macrocode}
 \def\texosquerypatfmtdecsep{.}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypatfmtcurdecsep}
+%\changes{1.2}{??}{new}
+%Currency decimal separator. Change as appropriate.
+%    \begin{macrocode}
+\def\texosquerypatfmtcurdecsep{.}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -4270,7 +4362,7 @@ Organization for Standardization}
  \@texosquery@digitfoundfalse
  \let\@texosquery@zerodigit\@texosquery@zerodigit@leading
  #1%
- \texosquerypatfmtdecsep
+ \texosquerypatfmt@decsep
  \let\@texosquery@current\@texosquery@frac
  \@texosquery@digitindex=0\relax
  \@texosquery@digitfoundfalse
@@ -4314,22 +4406,34 @@ Organization for Standardization}
 %
 %\begin{macro}{\texosquery@patfmt@prefixcurrency}
 %    \begin{macrocode}
-\def\texosquery@patfmt@prefixcurrency#1#2{#2\texosquerypatfmtcurrencysign#1}
+\def\texosquery@patfmt@prefixcurrency#1#2{%
+ \let\texosquerypatfmt@decsep\texosquerypatfmtcurdecsep
+ #2\texosquerypatfmtcurrencysign#1%
+}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@prefixicurrency}
 %    \begin{macrocode}
-\def\texosquery@patfmt@prefixicurrency#1#2{#2\texosquerypatfmticurrencysign#1}
+\def\texosquery@patfmt@prefixicurrency#1#2{%
+ \let\texosquerypatfmt@decsep\texosquerypatfmtcurdecsep
+ #2\texosquerypatfmticurrencysign#1%
+}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@suffixcurrency}
 %    \begin{macrocode}
-\def\texosquery@patfmt@suffixcurrency#1#2{#1\texosquerypatfmtcurrencysign#2}
+\def\texosquery@patfmt@suffixcurrency#1#2{%
+ \let\texosquerypatfmt@decsep\texosquerypatfmtcurdecsep
+ #1\texosquerypatfmtcurrencysign#2%
+}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@suffixicurrency}
 %    \begin{macrocode}
-\def\texosquery@patfmt@suffixicurrency#1#2{#1\texosquerypatfmticurrencysign#2}
+\def\texosquery@patfmt@suffixicurrency#1#2{%
+ \let\texosquerypatfmt@decsep\texosquerypatfmtcurdecsep
+ #1\texosquerypatfmticurrencysign#2%
+}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmt@digit}
