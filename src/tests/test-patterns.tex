@@ -2,18 +2,18 @@
 
 \input texosquery
 
-%\texosquerydefpattern{\DTpattern}{\dtf{2}{d}/\dtf{2}{M}/\dtf{4}{y}\spc
-%\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s} \dtf{2}{Z}}
-%
-%Pattern: {\tt \DTpattern}
-%
-%\TeXOSQueryDateTime{\datetimedata}
-%
-%\ifx\datetimedata\empty
-% Query Failed!
-%\else
-% \expandafter\texosqueryfmtdatetime\expandafter\DTpattern\datetimedata
-%\fi
+\texosquerydefpattern{\DTpattern}{\dtf{2}{d}/\dtf{2}{M}/\dtf{4}{y}\spc
+\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s} \dtf{2}{Z}}
+
+Pattern: {\tt \DTpattern}
+
+\TeXOSQueryDateTime{\datetimedata}
+
+\ifx\datetimedata\empty
+ Query Failed!
+\else
+ \expandafter\texosqueryfmtdatetime\expandafter\DTpattern\datetimedata
+\fi
 
 \texosquerydefpattern{\numpattern}{\numfmt{\decfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz \dgtnz
 \ngp \dgtnz \dgtnz \dgt }{\dgtnz \dgtnz \dgtnz \dgtnz \dgtnz \dgtnz
@@ -29,7 +29,9 @@
 \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz \dgt
 }}
 
-\texosquerydefpattern{\curpattern}{\numfmt{\pcur{\decfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz
+\texosquerydefpattern{\curpattern}{\pmnumfmt{\pcur{\decfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz
+\dgtnz \ngp \dgtnz \dgtnz \dgt }{\dgt \dgt \dgtnz \dgtnz \dgtnz
+\dgtnz \dgtnz \dgtnz \dgtnz \dgtnz }}{}}{\pcur{\decfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz
 \dgtnz \ngp \dgtnz \dgtnz \dgt }{\dgt \dgt \dgtnz \dgtnz \dgtnz
 \dgtnz \dgtnz \dgtnz \dgtnz \dgtnz }}{\msg}}}
 
@@ -62,6 +64,8 @@ Numeric patterns.
 
 \testpattern{\sinumpattern}{-1}{234567}{2}
 
+\testpattern{\sinumpattern}{1}{234567}{+890}
+
 {\tt \intpattern}
 
 \testpattern{\intpattern}{123}{4567}{2}
@@ -77,6 +81,8 @@ Numeric patterns.
 \testpattern{\curpattern}{-12345678}{0}{0}
 
 {\tt \pcpattern}
+
+\testpattern{\pcpattern}{1}{23}{0}
 
 \testpattern{\pcpattern}{-0}{56}{0}
 
