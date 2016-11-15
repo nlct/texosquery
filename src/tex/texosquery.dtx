@@ -190,8 +190,9 @@ Organization for Standardization}
 %The \sty{locale} package occasionally referenced in this document
 %is still under development at the time of writing. The
 %\longarg{numeric} and \longarg{locale-data} options are designed to
-%interface with the \sty{locale} package, so although they will be
-%distributed separately, version 1.2 of \app{texosquery} is being
+%interface with the \sty{locale} package, so although
+%\sty{texosquery} and \sty{locale} will be distributed separately, 
+%version 1.2 of \app{texosquery} is being
 %developed alongside version 1.0 of the \sty{locale} package.
 %The aim of the \sty{locale} package is to use both \sty{tracklang}
 %and \sty{texosquery} to automatically set up the document language.
@@ -200,7 +201,19 @@ Organization for Standardization}
 %\documentclass{article}
 %\usepackage{locale}
 %\begin{document}
-%\today
+%Language: \CurrentLocaleLanguageNativeName.
+%Region: \CurrentLocaleRegionNativeName.
+%Today: \CurrentLocaleDate. (Compare with \today.)
+%Time: \CurrentLocaleTime.
+%Currency Symbol: \CurrentLocaleCurrency
+%Integer:
+%\texosqueryfmtnumber{\CurrentLocaleIntegerPattern}{123456}{0}{0}
+%Decimal:
+%\texosqueryfmtnumber{\CurrentLocaleDecimalPattern}{123456}{78}{0}
+%Percentage:
+%\texosqueryfmtnumber{\CurrentLocalePercentPattern}{0}{65}{0}
+%Currency:
+%\texosqueryfmtnumber{\CurrentLocaleCurrencyPattern}{1234567}{0}{0}
 %\end{document}
 %\end{verbatim}
 %the \sty{locale} package will automatically load:
@@ -229,11 +242,34 @@ Organization for Standardization}
 %option (use \texttt{datetime2=false} to prevent this).
 %\end{itemize}
 %
+%The generic \texttt{locale.tex} code doesn't load the above packages, but can
+%still obtain information about the locale:
+%\begin{verbatim}
+%\input locale
+
+%Language: \CurrentLocaleLanguageNativeName.
+%Region: \CurrentLocaleRegionNativeName.
+%Today: \CurrentLocaleDate. (Compare with \today.)
+%Time: \CurrentLocaleTime.
+%Currency Symbol: \CurrentLocaleCurrency
+%Integer:
+%\texosqueryfmtnumber{\CurrentLocaleIntegerPattern}{123456}{0}{0}
+%Decimal:
+%\texosqueryfmtnumber{\CurrentLocaleDecimalPattern}{123456}{78}{0}
+%Percentage:
+%\texosqueryfmtnumber{\CurrentLocalePercentPattern}{0}{65}{0}
+%Currency:
+%\texosqueryfmtnumber{\CurrentLocaleCurrencyPattern}{1234567}{0}{0}
+%\bye
+%\end{verbatim}
+%
 %So that's the reasoning behind the new v1.2 actions. Hopefully the
 %new \sty{locale} package will be uploaded to \gls{CTAN} shortly after the
 %new version of \sty{texosquery}.
 %
+%\clearpage
 %\tableofcontents
+%\clearpage
 %
 %\section{texosquery.jar: the Java application}
 %The \app{texosquery} Java command line application looks up
@@ -942,9 +978,9 @@ Organization for Standardization}
 %the non-standalone names.
 %
 %The information supplied with this option is quite complex,
-%but it's used by the \sty{locale} package\footnote{currently
-%pending} to set up all the required information for each locale
-%used in the document. Any non-\gls{ASCII} characters are marked up with \cs{wrp},
+%but it's used by the \sty{locale} package to set up all the 
+%required information for each locale used in the document. 
+%Any non-\gls{ASCII} characters are marked up with \cs{wrp},
 %which is locally defined by \cs{TeXOSQuery} to expand to
 %\cs{texosquerynonasciiwrap}.
 %
