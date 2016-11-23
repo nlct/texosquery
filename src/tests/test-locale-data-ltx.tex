@@ -234,7 +234,7 @@
   Numeric data: #1 (number group separator)
   #2 (decimal separator)
   #3 (exponent symbol)
-  Uses number grouping: #4.
+  Uses number grouping: \ifnum#4=1 true\else false\fi.
   \par Example numbers: 
   1\ifstrequal{#4}{true}{#1}{}234#20 (decimal) and
   1#2234#3+3 (scientific).

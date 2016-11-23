@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.util.Locale;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +24,9 @@ import java.io.Serializable;
 
 /**
  * Application functions. These methods need to be Java version 1.5
- * compatible. The 1.7 methods need to be in the TeXOSQueryJRE7 class.
+ * compatible. The 1.7 methods need to be in the TeXOSQueryJRE7 class
+ * and the 1.8 methods in TeXOSQueryJRE8.
+ *
  * Since this application is designed to be run from TeX, the output
  * needs to be easy to parse using TeX commands. For this reason,
  * most exceptions are caught and an empty string is returned. The
@@ -36,6 +39,10 @@ import java.io.Serializable;
  */
 public class TeXOSQuery implements Serializable
 {
+   /**
+    * Constructor.
+    * @param name The application name. 
+    */ 
    public TeXOSQuery(String name)
    {
       this.name = name;
@@ -47,6 +54,7 @@ public class TeXOSQuery implements Serializable
     * or variable value.
     * @param arg The argument to pass to kpsewhich
     * @return The result read from the first line of STDIN
+    * @since 1.2
     */
    protected String kpsewhich(String arg)
       throws IOException,InterruptedException
@@ -107,6 +115,7 @@ public class TeXOSQuery implements Serializable
      * if the debug level is greater than or equal to the given level.
      * @param message Debugging message.
      * @param level Debugging level.
+     * @since 1.2
      */
    public void debug(String message, int level)
    {
@@ -120,6 +129,7 @@ public class TeXOSQuery implements Serializable
      * Print message if in debug mode. Message is printed to STDERR
      * if the debug level is greater than 0.
      * @param message Debugging message.
+     * @since 1.2
      */
    public void debug(String message)
    {
@@ -135,6 +145,7 @@ public class TeXOSQuery implements Serializable
      * @param excpt Exception.
      * @param msgLevel Debugging level for message.
      * @param traceLevel Debugging level for stack trace.
+     * @since 1.2
      */
    public void debug(String message, Throwable excpt, int msgLevel,
       int traceLevel)
@@ -157,6 +168,7 @@ public class TeXOSQuery implements Serializable
      * level is 1 and the trace level is 2.
      * @param message Debugging message.
      * @param excpt Exception.
+     * @since 1.2
      */
    public void debug(String message, Throwable excpt)
    {
@@ -170,6 +182,7 @@ public class TeXOSQuery implements Serializable
      * @param file The file being checked
      * @param dir The directory being searched
      * @return true if found
+     * @since 1.2
      */
    protected boolean isFileInTree(File file, File dir)
     throws IOException
@@ -203,6 +216,9 @@ public class TeXOSQuery implements Serializable
      * may have one of the following values: a (any), r (restricted,
      * no hidden files) or p (paranoid, as restricted and no parent
      * directories and no absolute paths except under $TEXMFOUTPUT)
+     * @param file The file to be checked
+     * @return true if read-access allowed
+     * @since 1.2
      */
    public boolean isReadPermitted(File file)
    {
@@ -250,39 +266,47 @@ public class TeXOSQuery implements Serializable
                openin = OPENIN_P;
             }
 
-            // Now find TEXMFOUTPUT if set
-            String path = null;
+            // Now find TEXMFOUTPUT if set (only need this with the
+            // paranoid setting)
 
-            try
+            if (openin == OPENIN_P)
             {
-               path = System.getenv("TEXMFOUTPUT");
-            }
-            catch (SecurityException e)
-            {
-               debug("Can't query TEXMFOUTPUT", e);
-            }
+               String path = null;
 
-            if (path != null && !"".equals(path))
-            {
-               texmfoutput = new File(fromTeXPath(path));
-
-               if (!texmfoutput.exists())
+               try
                {
-                  debug(String.format("TEXMFOUTPUT (%s) doesn't exist, ignoring",
-                        texmfoutput.toString()));
-                  texmfoutput = null;
+                  path = System.getenv("TEXMFOUTPUT");
                }
-               else if (!texmfoutput.isDirectory())
+               catch (SecurityException e)
                {
-                  debug(String.format("TEXMFOUTPUT (%s) isn't a directory, ignoring",
-                        texmfoutput.toString()));
-                  texmfoutput = null;
+                  debug("Can't query TEXMFOUTPUT", e);
                }
-               else if (!texmfoutput.canRead())
+
+               if (path != null && !"".equals(path))
                {
-                  debug(String.format("TEXMFOUTPUT (%s) doesn't have read permission, ignoring",
-                        texmfoutput.toString()));
-                  texmfoutput = null;
+                  texmfoutput = new File(fromTeXPath(path));
+
+                  if (!texmfoutput.exists())
+                  {
+                     debug(String.format(
+                           "TEXMFOUTPUT (%s) doesn't exist, ignoring",
+                           texmfoutput.toString()));
+                     texmfoutput = null;
+                  }
+                  else if (!texmfoutput.isDirectory())
+                  {
+                     debug(String.format(
+                           "TEXMFOUTPUT (%s) isn't a directory, ignoring",
+                           texmfoutput.toString()));
+                     texmfoutput = null;
+                  }
+                  else if (!texmfoutput.canRead())
+                  {
+                     debug(String.format(
+                           "TEXMFOUTPUT (%s) doesn't have read permission, ignoring",
+                           texmfoutput.toString()));
+                     texmfoutput = null;
+                  }
                }
             }
          }
@@ -298,17 +322,12 @@ public class TeXOSQuery implements Serializable
             case OPENIN_P:
               // paranoid check
 
-              // is the file under TEXMFOUTPUT?
-
-              if (texmfoutput != null)
+              if (isFileInTree(file, texmfoutput))
               {
-                 if (isFileInTree(file, texmfoutput))
-                 {
-                    // file under TEXMFOUTPUT, so it's okay as long
-                    // as it has read permission
-                    return file.canRead();
-                 }
-              } 
+                 // file under TEXMFOUTPUT, so it's okay as long
+                 // as it has read permission
+                 return file.canRead();
+              }
 
               // does the file have an absolute path?
 
@@ -335,8 +354,6 @@ public class TeXOSQuery implements Serializable
 
             // no break, fall through to restricted check
             case OPENIN_R:
-
-              // is the file hidden?
 
               if (file.isHidden())
               {
@@ -374,26 +391,26 @@ public class TeXOSQuery implements Serializable
      * @param propName The property name
      * @param defValue The default value
      * @return The property value or the default if unavailable
+     * @since 1.2
      */
    public String getSystemProperty(String propName, String defValue)
    {
-      // This may cause a SecurityException if the security manager
-      // doesn't permit access to this property.
-
       try
       {
          return System.getProperty(propName, defValue);
       }
       catch (SecurityException e)
       {
+         // The security manager doesn't permit access to this property.
+
          debug(String.format("unable to access '%s' property", propName), e);
          return defValue;
       }
    }
 
     /**
-     * Escapes problematic characters from input string.
-     * Exception for the hash, TeX's special characters shouldn't need escaping.
+     * Escapes problematic characters from string.
+     * Except for the hash, TeX's special characters shouldn't need escaping.
      * The definition of \\TeXOSQuery in texosquery.tex changes the category
      * code for the standard special characters (and a few others) except 
      * hash, curly braces and backslash. 
@@ -406,7 +423,7 @@ public class TeXOSQuery implements Serializable
      * \\TeXOSQuery locally defines \\bks (literal backslash), 
      * \\lbr (literal left brace), \\rbr (literal right brace), 
      * \\hsh (literal hash), \\grv (literal grave), \\lspc (literal
-     * space), \\spc (regular space), \\csq (close single quote),
+     * space, catcode 12), \\spc (regular space), \\csq (close single quote),
      * \\dqt (double quote) and \\osq (open single quote).
      *
      * This should take care of any insane file-naming schemes, such
@@ -422,8 +439,11 @@ public class TeXOSQuery implements Serializable
      * provide some protection or conversion, if required.
      *
      * @param string Input string.
-     * @param isRegularText true if the string represents text, set to
-     * false if string is a file name etc
+     * @param isRegularText true if the string represents text (for example, 
+     * month names), set to false if string is something literal,
+     * such as a file name.
+     * @return The processed string
+     * @since 1.2
      */
    public String escapeSpChars(String string, boolean isRegularText)
    {
@@ -434,6 +454,8 @@ public class TeXOSQuery implements Serializable
 
       StringBuilder builder = new StringBuilder();
 
+      // This iterates over Unicode characters so we can't use a simple
+      // i++ increment. The offset is obtained from Character.charCount
       for (int i = 0, n = string.length(); i < n; )
       {
          int codepoint = string.codePointAt(i);
@@ -447,9 +469,10 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Escapes file name. This should already have had the directory
-     * divider change to a forward slash where necessary.
+     * divider changed to a forward slash where necessary.
      * @param filename Input string.
      * @return String with characters escaped.
+     * @since 1.2
      */
    public String escapeFileName(String filename)
    {
@@ -460,6 +483,7 @@ public class TeXOSQuery implements Serializable
      * Escapes regular text.
      * @param string Input string.
      * @return String with characters escaped.
+     * @since 1.2
      */
    public String escapeText(String string)
    {
@@ -470,6 +494,7 @@ public class TeXOSQuery implements Serializable
      * Escapes regular text.
      * @param codepoint Input Unicode character.
      * @return String with characters escaped.
+     * @since 1.2
      */
    public String escapeText(int codepoint)
    {
@@ -479,9 +504,15 @@ public class TeXOSQuery implements Serializable
     /**
      * Escapes character include punctuation.
      * \\TeXOSQuery sets the catcode to 12 for the following:
-     * - _ ^ ~ $ &amp; . / : " ' ; and % 
+     * <pre>- _ ^ ~ $ &amp; . / : " ' ; %</pre>
+     * so we don't need to worry about them when processing 
+     * file names, but some of them will need conversion for regular
+     * text.
      * @param codePoint Input code point.
+     * @param isRegularText true if the character is in a string representing
+     * text, set to false if string is a file name etc
      * @return String with character escaped.
+     * @since 1.2
      */
    public String escapeSpChars(int codepoint, boolean isRegularText)
    {
@@ -511,6 +542,8 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Escapes any hashes in input string.
+     * Now only used if compatibility level is less than 2 (pre
+     * texosquery version 1.2).
      * @param string Input string.
      * @return String with hash escaped.
      */
@@ -553,8 +586,8 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Gets the OS version. This may contain an underscore, but we
-     * don't need to worry about that as \TeXOSQuery changes the
-     * category code for _ before parsing the result of texosquery.
+     * don't need to worry about that as \\TeXOSQuery changes the
+     * category code for <tt>_</tt> before parsing the result of texosquery.
      * @return The OS version as string.
      */
    public String getOSversion()
@@ -563,27 +596,14 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
-     * Gets the user home.
-     * @return The user home as string.
-     */
-   public String getUserHome()
-   {
-      // The result path needs to be converted to a TeX path.
-      return toTeXPath(getSystemProperty("user.home", ""));
-   }
-
-    /**
      * Converts the filename string to TeX path. Since this is designed to work
      * within TeX, backslashes in paths need to be replaced with forward
-     * slashes. The hash character needs escaping just in case of
-     * exotic file names.
+     * slashes.
      * @param filename The filename string.
      * @return TeX path.
      */
    public String toTeXPath(String filename)
    {
-      String path = "";
-        
       if (filename == null)
       {
          // This shouldn't happen, but just in case...
@@ -610,15 +630,13 @@ public class TeXOSQuery implements Serializable
          filename = filename.replaceAll("\\\\", "/");
       }
 
-      path = escapeFileName(filename);
-        
-      return path;
+      return escapeFileName(filename);
    }
 
     /**
-     * Converts the TeX path back to the original representation.
+     * Converts the TeX path back to the OS representation.
      * @param filename The filename string.
-     * @return The original representation.
+     * @return The OS representation.
      */
    public String fromTeXPath(String filename)
    {
@@ -654,7 +672,7 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Gets a file representation from a filename string. If the
-     * provided file doesn't have a parent, if it's not found in the
+     * provided file doesn't have a parent and if it's not found in the
      * current directory, kpsewhich will be used to locate it on
      * TeX's path. The provided file name is assumed to have been
      * passed through commands provided by texosquery.tex so the
@@ -663,6 +681,7 @@ public class TeXOSQuery implements Serializable
      * that uses this method needs to check for existence.
      * @param filename Filename string.
      * @return File representation 
+     * @since 1.2
      */
    public File fileFromTeXPath(String filename)
    {
@@ -680,7 +699,7 @@ public class TeXOSQuery implements Serializable
          {
             String result = kpsewhich(filename);
 
-            if ((result != null) && (!"".equals(result)))
+            if (result != null && !"".equals(result))
             {
                file = new File(fromTeXPath(result));
             }
@@ -698,6 +717,24 @@ public class TeXOSQuery implements Serializable
       }
 
       return file;
+   }
+
+    /**
+     * Gets the user's home directory.
+     * @return The user home as string.
+     */
+   public String getUserHome()
+   {
+      File dir = new File(getSystemProperty("user.home", ""));
+
+      if (!isReadPermitted(dir))
+      {
+         debug("read access not permitted for the home directory");
+         return "";
+      }
+
+      // The resulting path needs to be converted to a TeX path.
+      return toTeXPath(dir.getAbsolutePath());
    }
 
     /**
@@ -748,8 +785,10 @@ public class TeXOSQuery implements Serializable
    /**
     * Gets the week year for the given calendar.
     * Calendar.getWeekYear() was added to Java 7, so this defaults
-    * to the year instead. 
+    * to the year instead. This method needs to be overridden in
+    * TeXOSQueryJRE7 and TeXOSQueryJRE8.
     * @return The week year
+    * @since 1.2
     */ 
    public int getWeekYear(Calendar cal)
    {
@@ -757,8 +796,9 @@ public class TeXOSQuery implements Serializable
    }
 
    /**
-    *Gets all the date-time data for the current date-time. 
-    @return data in format that can be read by \\texosqueryfmtdatetime
+    * Gets all the date-time data for the current date-time. 
+    * @return data in format that can be read by \\texosqueryfmtdatetime
+    * @since 1.2
     */ 
    public String getDateTimeData()
    {
@@ -773,18 +813,27 @@ public class TeXOSQuery implements Serializable
 
       int hourh = (hourK == 0 ? 12 : hourK);
 
+      TimeZone timeZone = cal.getTimeZone();
+      boolean isDaylightSaving = timeZone.inDaylightTime(now);
+
       int timezoneoffset = cal.get(Calendar.ZONE_OFFSET);
+
+      if (isDaylightSaving)
+      {
+         timezoneoffset += cal.get(Calendar.DST_OFFSET);
+      }
 
       // convert from offset millisec to hours and minutes
       // (ignore left-over seconds and milliseconds)
 
-      int tzm = timezoneoffset/(60000);
+      int tzm = timezoneoffset/60000;
 
       int tzh = tzm/60;
 
       tzm = tzm % 60;
 
-      return String.format("{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{{%d}{%d}{%d}{%d}{%s}}",
+      return String.format(
+       "{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{%d}{{%d}{%d}{%s}{%d}}",
        cal.get(Calendar.ERA),
        cal.get(Calendar.YEAR),
        getWeekYear(cal),
@@ -800,8 +849,49 @@ public class TeXOSQuery implements Serializable
        cal.get(Calendar.MINUTE),
        cal.get(Calendar.SECOND),
        cal.get(Calendar.MILLISECOND),
-       cal.get(Calendar.DST_OFFSET),
-       timezoneoffset, tzh, tzm, cal.getTimeZone().getID());
+       tzh, tzm, timeZone.getID(), 
+       isDaylightSaving ? 1 : 0);
+   }
+
+   /**
+    * Get the time zone names for the given locale.
+    * The data for each zone is provided in the form
+    * {id}{short name}{long name}{short dst name}\marg{long dst name}
+    * @param localeTag The locale 
+    * @return list of zone information for the locale
+    * @since 1.2
+    */ 
+
+   public String getTimeZones(String localeTag)
+   {
+      Locale locale;
+
+      if (localeTag == null || "".equals(localeTag))
+      {
+         locale = Locale.getDefault();
+      }
+      else
+      {
+         locale = getLocale(localeTag);
+      }
+
+      StringBuilder builder = new StringBuilder();
+
+      String[] zones = TimeZone.getAvailableIDs();
+
+      for (int i = 0; i < zones.length; i++)
+      {
+         TimeZone tz = TimeZone.getTimeZone(zones[i]);
+
+         builder.append(String.format("{{%s}{%s}{%s}{%s}{%s}}",
+          escapeFileName(tz.getID()), 
+          escapeText(tz.getDisplayName(false, TimeZone.SHORT, locale)),
+          escapeText(tz.getDisplayName(false, TimeZone.LONG, locale)),
+          escapeText(tz.getDisplayName(true, TimeZone.SHORT, locale)),
+          escapeText(tz.getDisplayName(true, TimeZone.LONG, locale))));
+      }
+
+      return builder.toString();
    }
 
     /**
@@ -871,7 +961,7 @@ public class TeXOSQuery implements Serializable
          }
 
          // I/O error has occurred (already checked for file
-         // existence).
+         // existence and read permission).
          debug(String.format(
                "Unable to get timestamp for file '%s' (I/O error)",
                file.toString()));
@@ -922,7 +1012,7 @@ public class TeXOSQuery implements Serializable
          }
 
          // I/O error has occurred (already checked for file
-         // existence).
+         // existence and read access).
          debug(String.format(
                "Unable to get the size of file '%s' (I/O error)",
                file.toString()));
@@ -1153,6 +1243,7 @@ public class TeXOSQuery implements Serializable
      * Gets the path for the file's parent.
      * @param file The file.
      * @return The path.
+     * @since 1.1
      */
    public String parentPath(File file)
    {
@@ -1206,13 +1297,15 @@ public class TeXOSQuery implements Serializable
       return "";
    }
 
-    /**
-     * Gets the script for the given locale. Java only introduced
-     * support for language scripts in version 1.7, so this returns
-     * null here. The JRE7 support needs to override this method.
-     * @param locale The locale
-     * @return The language script associated with the given locale or null if not available
-     */ 
+   /**
+    * Gets the script for the given locale. Java only introduced
+    * support for language scripts in version 1.7, so this returns
+    * null here. The Java 7 and 8 support needs to override this method.
+    * @param locale The locale
+    * @return The language script associated with the given locale or 
+    * null if not available
+    * @since 1.2
+    */ 
    public String getScript(Locale locale)
    {
       return null;
@@ -1222,6 +1315,7 @@ public class TeXOSQuery implements Serializable
     * Gets the language tag for the given locale.
     * @param locale The locale or null for the default locale
     * @return The language tag
+    * @since 1.2
     */ 
    public String getLanguageTag(Locale locale)
    {
@@ -1323,8 +1417,9 @@ public class TeXOSQuery implements Serializable
 
       identifier = identifier.concat(".").concat(codeset);
 
-      // Find the script if available. This is used as the modifier part. Is
-      // there a standard for POSIX locale modifiers?
+      // Find the script if available. This is used as the modifier part
+      // but it's better to use a language tag if the script is
+      // needed.
 
       String script = getScript(locale);
 
@@ -1348,6 +1443,7 @@ public class TeXOSQuery implements Serializable
     * @param convertCodeset If true convert codeset to fit
     * inputenc.sty
     * @return the file encoding.
+    * @since 1.2
     */ 
    public String getCodeSet(boolean convertCodeset)
    {
@@ -1370,8 +1466,10 @@ public class TeXOSQuery implements Serializable
 
    /**
     * Gets the two-letter alpha region code from the numeric code.
+    * (Java doesn't seem to recognise the numeric codes.)
     * @param ISO 3166-1 numeric code
     * @return ISO 3166-1 alpha code
+    * @since 1.2
     */ 
    public String getRegionAlpha2Code(int code)
    {
@@ -1634,22 +1732,23 @@ public class TeXOSQuery implements Serializable
 
    /**
     * Gets the locale from the given language tag. Since Java didn't
-    * support BCP47 language tags until v1.7, we have can't use
-    * Locale.forLanguageTag(String) here. Only parse for language
+    * support BCP47 language tags until v1.7, we can't use
+    * Locale.forLanguageTag(String) here. (The Java 7 and 8 support
+    * will need to override this method.) Only parse for language
     * code, country code and variant. Grandfathered, irregular and private
     * tags not supported.
     * @param languageTag The language tag
     * @return The locale that closest matches the language tag
+    * @since 1.2
     */ 
    public Locale getLocale(String languageTag)
    {
       // The BCP47 syntax is described in 
       // https://tools.ietf.org/html/bcp47#section-2.1
       // This is a match for a subset of the regular syntax.
-      // Numeric country codes aren't recognised. Only the 
-      // language tag, the region and the variant are
+      // Only the language tag, the region and the variant are
       // captured.
-      // Note: named capturing groups introduced in Java 7, so we
+      // Note: named capturing groups was introduced in Java 7, so we
       // can't use them here.
       Pattern p = Pattern.compile(
         "(?:([a-z]{2,3}(?:-[a-z]{2,3})*))+(?:-[A-Z][a-z]{3})?(?:-([A-Z]{2}|[0-9]{3}))?(?:-([a-zA-Z0-9]{5,8}|[0-9][a-zA-Z0-9]{3}))?(?:-.)*");
@@ -1668,10 +1767,11 @@ public class TeXOSQuery implements Serializable
          }
          catch (NumberFormatException e)
          {
-            // ignore, alpha region code supplied
+            // ignore, alpha region code was supplied
          }
 
-         // Language won't be null as the pattern requires it.
+         // Language won't be null as the pattern requires it, but
+         // the region and variant might be.
 
          if (region == null)
          {
@@ -1700,7 +1800,7 @@ public class TeXOSQuery implements Serializable
 
    /**
     * Gets all numerical information for the given locale. If the
-    * given locale tag is null, the default locale is used. The
+    * given locale tag is null or empty, the default locale is used. The
     * information is returned with each item grouped to make it
     * easier to parse in TeX. This is an abridged version of
     * getLocaleData().
@@ -1708,10 +1808,12 @@ public class TeXOSQuery implements Serializable
     * the default locale
     * @return locale numerical information: language tag, 
     * number group separator, decimal separator, exponent separator,
-    * grouping conditional ("true" if locale uses number grouping),
+    * grouping conditional (1 if locale uses number grouping
+    * otherwise 0),
     * currency code (e.g. GBP), regional currency identifier (e.g. IMP),
     * currency symbol (e.g. \\wrp{£}), currency TeX code (e.g.
     * \\texosquerycurrency{pound}), monetary decimal separator.
+    * @since 1.2
     */
    public String getNumericalInfo(String localeTag)
    {
@@ -1789,12 +1891,12 @@ public class TeXOSQuery implements Serializable
        NumberFormat numFormat = NumberFormat.getNumberInstance(locale);
 
        return String.format(
-         "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+         "{%s}{%s}{%s}{%s}{%d}{%s}{%s}{%s}{%s}{%s}",
              getLanguageTag(locale),
              escapeText(fmtSyms.getGroupingSeparator()),
              escapeText(fmtSyms.getDecimalSeparator()),
              escapeText(fmtSyms.getExponentSeparator()), 
-             numFormat.isGroupingUsed(),// "true" or "false"
+             numFormat.isGroupingUsed() ? 1 : 0,
              escapeText(currencyCode),
              escapeText(localeCurrencyCode),
              escapeText(currency),
@@ -1807,6 +1909,7 @@ public class TeXOSQuery implements Serializable
     * provided by texosquery.tex.
     * @param currency The original currency string 
     * @return The TeX version
+    * @since 1.2
     */ 
    public String getTeXCurrency(String currency)
    {
@@ -1968,10 +2071,12 @@ public class TeXOSQuery implements Serializable
 
    /** Gets the standalone month names for the locale data.
     * These are only available for Java 8, so just return the 
-    * month names used in the date format instead.
+    * month names used in the date format instead. The JRE8 version
+    * needs to override this method.
     * @param cal The calendar
     * @param locale The locale
     * @return month names
+    * @since 1.2
     */  
    public String getStandaloneMonths(Calendar cal, Locale locale)
    {
@@ -1993,10 +2098,12 @@ public class TeXOSQuery implements Serializable
 
    /** Gets the standalone short month names for the locale data.
     * These are only available for Java 8, so just return the 
-    * month names used in the date format instead.
+    * month names used in the date format instead. The JRE8 version
+    * needs to override this method.
     * @param cal The calendar
     * @param locale The locale
     * @return short month names
+    * @since 1.2
     */  
    public String getStandaloneShortMonths(Calendar cal, Locale locale)
    {
@@ -2018,10 +2125,12 @@ public class TeXOSQuery implements Serializable
 
    /** Gets the standalone day names for the locale data.
     * These are only available for Java 8, so just return the 
-    * names used in the date format instead.
+    * names used in the date format instead. The JRE8 version
+    * needs to override this method.
     * @param cal The calendar
     * @param locale The locale
     * @return day of week names
+    * @since 1.2
     */  
    public String getStandaloneWeekdays(Calendar cal, Locale locale)
    {
@@ -2043,10 +2152,12 @@ public class TeXOSQuery implements Serializable
 
    /** Gets the standalone short day names for the locale data.
     * These are only available for Java 8, so just return the 
-    * names used in the date format instead.
+    * names used in the date format instead. The JRE8 version
+    * needs to override this method.
     * @param cal The calendar
     * @param locale The locale
     * @return day of week names
+    * @since 1.2
     */  
    public String getStandaloneShortWeekdays(Calendar cal, Locale locale)
    {
@@ -2068,15 +2179,17 @@ public class TeXOSQuery implements Serializable
 
    /**
     * Converts date/time pattern to a form that's easier for TeX to
-    * parse. This replaces the placeholders with <tt>\dtf{n}{c}</tt> where c
-    * is the placeholder character and n is the number of occurrence
-    * of c in the placeholder. (For example, "<tt>dd-MMM-yyyy</tt>" is
-    * converted to <tt>\dtf{2}{d}-\dtf{3}{M}-\dtf{4}{y}</tt>). The 
-    * query command \TeXOSQuery in texosquery.tex will expand \dtf
-    * to the longer \texosquerydtf to avoid conflict. This can then be
+    * parse. This replaces the placeholders with <tt>\\dtf{n}{c}</tt> where c
+    * is the placeholder character and n is the number of
+    * occurrences of c in the placeholder. (For example, 
+    * "<tt>dd-MMM-yyyy</tt>" is  converted to
+    * <tt>\\dtf{2}{d}-\\dtf{3}{M}-\\dtf{4}{y}</tt>). The 
+    * query command \\TeXOSQuery in texosquery.tex will expand \\dtf
+    * to the longer \\texosquerydtf to avoid conflict. This can then be
     * redefined as appropriate.
     * @param localeFormat The date/time pattern
     * @return TeX code
+    * @since 1.2
     */ 
    public String formatDateTimePattern(Format localeFormat)
    {
@@ -2128,7 +2241,8 @@ public class TeXOSQuery implements Serializable
                {
                   // literal '
                   builder.append("\\apo ");
-                  i++;
+                  i = nextIndex;
+                  offset = Character.charCount(nextCodePoint);
                }
             }
             else
@@ -2219,6 +2333,7 @@ public class TeXOSQuery implements Serializable
     * Converts numeric pattern to a form that's easier for TeX to parse. 
     * @param numFormat the numeric pattern
     * @return TeX code
+    * @since 1.2
     */ 
    public String formatNumberPattern(Format numFormat)
    {
@@ -2243,22 +2358,80 @@ public class TeXOSQuery implements Serializable
       String pattern = fmt.toPattern();
 
       // Is there a +ve;-ve sub-pattern pair?
+      // This is a bit awkward as a semi-colon could appear
+      // literally within a string.
 
-      Pattern p = Pattern.compile("(.*(?:[^'](?:'')+){0,1})(?:;(.*))?");
-      Matcher m = p.matcher(pattern);
+      String positive = null;
+      String negative = null;
 
-      if (!m.matches())
+      StringBuilder builder = new StringBuilder();
+      boolean inString = false;
+
+      for (int i = 0, n = pattern.length(), offset=1; i < n; i = i+offset)
       {
-         debug(String.format(
-              "Can't match number format pattern '%s' against regexp \"%s\"",
-               pattern, p));
-         return "";
+         int codepoint = pattern.codePointAt(i);
+         offset = Character.charCount(codepoint);
+
+         int nextIndex = i+offset;
+         int nextCodePoint = (nextIndex < n ? pattern.codePointAt(nextIndex):0);
+
+         if (inString)
+         {
+            if (codepoint == '\'')
+            {
+               builder.appendCodePoint(codepoint);
+
+               if (nextCodePoint == '\'')
+               {
+                  // literal '
+                  builder.appendCodePoint(nextCodePoint);
+                  i = nextIndex;
+                  offset = Character.charCount(nextCodePoint);
+               }
+               else
+               {
+                  inString = false;
+               }
+            }
+            else
+            {
+               builder.appendCodePoint(codepoint);
+            }
+         }
+         else if (codepoint == '\'')
+         {
+            inString = true;
+            builder.appendCodePoint(codepoint);
+         }
+         else if (codepoint == ';')
+         {
+            if (positive == null)
+            {
+               positive = builder.toString();
+               builder = new StringBuilder();
+            }
+            else
+            {
+               debug(String.format("too many ';' found in pattern '%s'", 
+                     pattern));
+            }
+         }
+         else
+         {
+            builder.appendCodePoint(codepoint);
+         }
       }
 
-      String positive = m.group(1);
-      String negative = m.group(2);
+      if (positive == null)
+      {
+         positive = builder.toString();
+      }
+      else if (builder.length() > 0)
+      {
+         negative = builder.toString();
+      }
 
-      if (negative == null || "".equals(negative))
+      if (negative == null)
       {
          return String.format("\\numfmt{%s}", 
            formatNumberSubPattern(positive));
@@ -2275,6 +2448,7 @@ public class TeXOSQuery implements Serializable
     * Converts the sub-pattern of a numeric format.
     * @param pattern The sub-pattern
     * @return TeX code
+    * @since 1.2
     */ 
    private String formatNumberSubPattern(String pattern)
    {
@@ -2320,6 +2494,7 @@ public class TeXOSQuery implements Serializable
     * symbol should be used
     * @param post The post-symbol pattern
     * @return TeX code
+    * @since 1.2
     */ 
    private String formatCurrencyPattern(String pre, boolean international,
       String post)
@@ -2394,11 +2569,12 @@ public class TeXOSQuery implements Serializable
     * Converts percentage format.
     * @param pre The pre-symbol pattern
     * @param post The post-symbol pattern
-    * @param prefixCs The control sequence to use if the symbol is a
+    * @param prefixCs The control sequence name to use if the symbol is a
     * prefix
-    * @param suffixCs The control sequence to use if the symbol is a
+    * @param suffixCs The control sequence name to use if the symbol is a
     * suffix
     * @return TeX code
+    * @since 1.2
     */ 
    private String formatPercentagePattern(String pre, String post,
      String prefixCs, String suffixCs)
@@ -2445,6 +2621,7 @@ public class TeXOSQuery implements Serializable
     * Converts the numeric format.
     * @param pattern The sub-pattern
     * @return TeX code
+    * @since 1.2
     */ 
    private String formatNumericPattern(String pattern)
    {
@@ -2489,6 +2666,7 @@ public class TeXOSQuery implements Serializable
     * Converts a decimal pattern.
     * @param pattern The pattern
     * @return TeX code
+    * @since 1.2
     */ 
    private String formatDecimalPattern(String pattern)
    {
@@ -2543,6 +2721,7 @@ public class TeXOSQuery implements Serializable
     * @param leadPadding Determines if leading padding needs taking
     * into account
     * @return TeX code
+    * @since 1.2
     */ 
    private String formatIntegerPattern(String pattern, boolean leadPadding)
    {
@@ -2568,7 +2747,8 @@ public class TeXOSQuery implements Serializable
                if (nextCodePoint != '\'')
                {
                   inString = false;
-                  i++;
+                  i = nextIndex;
+                  offset = Character.charCount(nextCodePoint);
                }
             }
          }
@@ -2615,7 +2795,8 @@ public class TeXOSQuery implements Serializable
               else if (nextCodePoint == '\'')
               {
                  builder.append("\\apo ");
-                 i++;
+                 i = nextIndex;
+                 offset = Character.charCount(nextCodePoint);
               }
               else
               {
@@ -2799,6 +2980,7 @@ public class TeXOSQuery implements Serializable
     * <li> number format, integer format, currency format,
     * percent format.
     * </ol>
+    * @since 1.2
     */
    public String getLocaleData(String localeTag)
    {
@@ -3066,11 +3248,10 @@ public class TeXOSQuery implements Serializable
              currency = "$";
           }
           // Transnistrian ruble omitted as it conflicts with ISO
-          // 4217 so omitted. There's also no country code for
+          // 4217. There's also no country code for
           // Transnistria. Other currencies don't have an associated
-          // region code (for example, Somaliland) or don't have an
-          // known unofficial currency (for example, Alderney).
-          // code.
+          // region code (for example, Somaliland) or don't have a
+          // known unofficial currency code (for example, Alderney).
        }
 
        // Convert known Unicode currency symbols to commands that
@@ -3084,11 +3265,11 @@ public class TeXOSQuery implements Serializable
        NumberFormat pcFormat = NumberFormat.getPercentInstance(locale);
 
        String numGroup = String.format(
-         "{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
+         "{%s}{%s}{%s}{%d}{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
              escapeText(fmtSyms.getGroupingSeparator()),
              escapeText(fmtSyms.getDecimalSeparator()),
              escapeText(fmtSyms.getExponentSeparator()), 
-             numFormat.isGroupingUsed(),// "true" or "false"
+             numFormat.isGroupingUsed() ? 1 : 0,
              escapeText(currencyCode),
              escapeText(localeCurrencyCode),
              escapeText(currency),
@@ -3230,6 +3411,7 @@ public class TeXOSQuery implements Serializable
      * Prints the information with optional grouping.
      * @param numActions Add grouping if actions &gt; 1
      * @param info Information to print
+     * @since 1.2
      */ 
    protected void print(int numActions, String info)
    {
@@ -3251,11 +3433,21 @@ public class TeXOSQuery implements Serializable
       }
    }
 
-   private QueryAction getAction(String name)
+   /**
+    * Find the action corresponding to the name (the command line
+    * switch). Once the action has been found, a copy must be
+    * returned since the same action may be used multiple times with
+    * different arguments.
+    * @param action The command line switch (either the short or long
+    * form)
+    * @return a copy of the predefined action or null if not found 
+    * @since 1.2
+    */ 
+   private QueryAction getAction(String action)
    {
       for (int i = 0; i < AVAILABLE_ACTIONS.length; i++)
       {
-         if (AVAILABLE_ACTIONS[i].isAction(name))
+         if (AVAILABLE_ACTIONS[i].isAction(action))
          {
             return AVAILABLE_ACTIONS[i].copy();
          }
@@ -3267,6 +3459,7 @@ public class TeXOSQuery implements Serializable
     /**
      * Process command line arguments.
      * @param args Command line arguments.
+     * @since 1.2
      */
    public void processArgs(String[] args)
    {
@@ -3313,7 +3506,7 @@ public class TeXOSQuery implements Serializable
             }
             else if (args[i+1].startsWith("-"))
             {
-               // Negative level not permitted, so next argument
+               // Negative debug value not permitted, so next argument
                // must be a switch.
                debugLevel = 1;
             }
@@ -3512,6 +3705,15 @@ public class TeXOSQuery implements Serializable
             return getDateTimeData();
          }
       },
+      new QueryAction("time-zones", "Z", 1, 0, "[locale]",
+         QueryActionType.LOCALE_ACTION,
+         "Display all available time zone information", 2)
+      {
+         public String action()
+         {
+            return getTimeZones(getOptionalArgument(0));
+         }
+      },
       new QueryAction("pdfdate", "d", 0, 1, "<file>",
          QueryActionType.FILE_ACTION, 
          "Display date stamp of <file> in PDF format")
@@ -3579,11 +3781,15 @@ public class TeXOSQuery implements Serializable
       }
    };
 
+   /**
+    * Application name.
+    */ 
    private String name;
     
    public static final int DEFAULT_COMPATIBLE=2;
+
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2016-11-11";
+   private static final String VERSION_DATE = "2016-11-23";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
@@ -3606,8 +3812,9 @@ public class TeXOSQuery implements Serializable
    private File texmfoutput = null;
 
    /**
-    * Debug level. (0 = no debugging, 1 or more print messages to
-    * STDERR.)
+    * Debug level. (0 = no debugging, 1 or more print error messages to
+    * STDERR, 2 or more include stack trace, 3 or more include
+    * informational messages.)
     */
    private int debugLevel = 0;
 
@@ -3619,7 +3826,7 @@ public class TeXOSQuery implements Serializable
    private int compatible = DEFAULT_COMPATIBLE;
 
    // TeX can only go up to 2147483647, so set the maximum number
-   // of digits provided to the number formatter. 
+   // of digits provided for the number formatter. 
 
    private static final int MAX_DIGIT_FORMAT=10;
 }

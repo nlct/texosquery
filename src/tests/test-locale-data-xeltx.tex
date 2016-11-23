@@ -220,7 +220,7 @@
   #2 (decimal separator)
   #3 (exponent symbol)
   #9 (monetary decimal separator).
-  Uses number grouping: #4.
+  Uses number grouping: \ifnum#4=1 true\else false\fi.
   Currency ISO~4217 code: #5
   (#6).
   % Support may be needed for any non-ASCII characters in #7

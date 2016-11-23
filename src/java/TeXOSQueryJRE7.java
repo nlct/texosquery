@@ -6,7 +6,7 @@ import java.util.Calendar;
 import java.io.Serializable;
 
 /**
- * Main class. Supports Java 1.7.
+ * Main class. Supports Java 7 onwards.
  * @author Nicola Talbot
  * @version 1.2
  * @since 1.2

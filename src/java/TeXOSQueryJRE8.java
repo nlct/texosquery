@@ -6,7 +6,7 @@ import java.util.Calendar;
 import java.util.Map;
 
 /**
- * Main class. Supports Java 1.8.
+ * Main class. Supports Java 8 onwards.
  * @author Nicola Talbot
  * @version 1.2
  * @since 1.2

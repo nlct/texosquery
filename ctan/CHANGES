@@ -1,4 +1,4 @@
-1.2:
+1.2 (2016/11/23):
 
  * Now has three .jar files depending on the Java installation:
 
@@ -65,6 +65,7 @@
   --locale-data [⟨locale⟩] / -D [⟨locale⟩]
   --numeric [⟨locale⟩] / -N [⟨locale⟩]
   --date-time / -M
+  --time-zones / -Z
 
   Options:
 

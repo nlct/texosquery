@@ -6,6 +6,10 @@ import java.io.ObjectInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 
+/**
+ * Class representing an action to be performed by the application.
+ * @since 1.2
+ */ 
 public abstract class QueryAction implements Serializable
 {
    public QueryAction()
@@ -188,8 +192,7 @@ public abstract class QueryAction implements Serializable
    protected abstract String action();
 
    /**
-    * Make a copy of this object. Is there a better way of doing
-    * this?
+    * Make a copy of this object.
     */ 
    public final QueryAction copy()
    {
@@ -211,7 +214,7 @@ public abstract class QueryAction implements Serializable
       }
    }
 
-   public void same(QueryAction action)
+   private void same(QueryAction action)
    {
       longName = action.longName;
       shortName = action.shortName;

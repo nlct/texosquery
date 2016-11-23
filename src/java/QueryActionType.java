@@ -1,6 +1,3 @@
-
-
-
 package com.dickimawbooks.texosquery;
 
 public enum QueryActionType

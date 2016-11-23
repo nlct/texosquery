@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * Main class. Supports Java 1.5+.
+ * Main class. Supports Java 5 onwards.
  * @author Nicola Talbot
  * @version 1.2
  * @since 1.2
