@@ -796,6 +796,40 @@ public class TeXOSQuery implements Serializable
    }
 
    /**
+    * Converts the day of week index returned by
+    * Calendar.DAY_OF_WEEK to Monday=1 based indexing.
+    * @param index the day of week index obtained from  Calendar.DAY_OF_WEEK
+    * @return index with Monday=1 as the base
+    * @since 1.2
+    */ 
+   private int getDayOfWeekIndex(int index)
+   {
+      switch (index)
+      {
+         case Calendar.MONDAY: return 1;
+         case Calendar.TUESDAY: return 2;
+         case Calendar.WEDNESDAY: return 3;
+         case Calendar.THURSDAY: return 4;
+         case Calendar.FRIDAY: return 5;
+         case Calendar.SATURDAY: return 6;
+         case Calendar.SUNDAY: return 7;
+      }
+
+      try
+      {
+        // this shouldn't happen
+        throw new IllegalArgumentException(
+          String.format("Invalid day of week index %d", index));
+      }
+      catch (Exception e)
+      {
+         debug(e.getMessage(), e);
+      }
+
+      return 0;
+   }
+
+   /**
     * Gets all the date-time data for the current date-time. 
     * @return data in format that can be read by \\texosqueryfmtdatetime
     * @since 1.2
@@ -843,7 +877,7 @@ public class TeXOSQuery implements Serializable
        cal.get(Calendar.DAY_OF_YEAR),
        cal.get(Calendar.DAY_OF_MONTH),
        cal.get(Calendar.DAY_OF_WEEK_IN_MONTH),
-       cal.get(Calendar.DAY_OF_WEEK),// Sunday=1, Monday=2, etc
+       getDayOfWeekIndex(cal.get(Calendar.DAY_OF_WEEK)),// Monday=1, etc
        cal.get(Calendar.AM_PM),
        hourH, hourk, hourK, hourh,
        cal.get(Calendar.MINUTE),
