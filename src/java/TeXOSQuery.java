@@ -843,7 +843,7 @@ public class TeXOSQuery implements Serializable
        cal.get(Calendar.DAY_OF_YEAR),
        cal.get(Calendar.DAY_OF_MONTH),
        cal.get(Calendar.DAY_OF_WEEK_IN_MONTH),
-       cal.get(Calendar.DAY_OF_WEEK),
+       cal.get(Calendar.DAY_OF_WEEK),// Sunday=1, Monday=2, etc
        cal.get(Calendar.AM_PM),
        hourH, hourk, hourK, hourh,
        cal.get(Calendar.MINUTE),
@@ -3789,7 +3789,7 @@ public class TeXOSQuery implements Serializable
    public static final int DEFAULT_COMPATIBLE=2;
 
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2016-11-23";
+   private static final String VERSION_DATE = "2016-11-24";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
