@@ -53,7 +53,7 @@
 \renewcommand{\meta@font@select}{\rmfamily\itshape}
 \makeatother
 
-\CheckSum{2488}
+\CheckSum{2881}
 
 \RecordChanges
 \PageIndex
@@ -69,6 +69,7 @@
 \newcommand*{\sty}[1]{\textsf{#1}}
 \newcommand*{\app}[1]{\texttt{#1}}
 \newcommand*{\file}[1]{\texttt{#1}}
+\providecommand*{\eTeX}{e\TeX}
 
 \newcommand*{\shortargfmt}[1]{\texttt{-#1}}
 \newcommand*{\longargfmt}[1]{\texttt{-{}-#1}}
@@ -93,7 +94,7 @@
 \glssetcategoryattribute{abbreviation}{nohyperfirst}{true}
 
 \setabbreviationstyle[noexpand]{short}
-\newabbreviation[category=noexpand]{IEFT}{IEFT}{Internet Engineering Task Force}
+\newabbreviation[category=noexpand]{IETF}{IETF}{Internet Engineering Task Force}
 \newabbreviation[category=noexpand]{BCP}{BCP}{Best Common Practice}
 \newabbreviation[category=noexpand]{POSIX}{POSIX}{Portable Operating
 System Interface}
@@ -184,12 +185,12 @@ Organization for Standardization}
 %is, the primary purpose of this application.
 %
 %Although the \gls{POSIX} environment variables, such as \verb|$LC_ALL|
-%are easy to read with \app{kpsewhich}, these days the \gls{IEFT}
+%are easy to read with \app{kpsewhich}, these days the \gls{IETF}
 %\gls{BCP}~47 language
 %tag is the more appropriate way of identifying a locale, so version
 %1.2 has added the \longarg{bcp47} function to support this.
 %The \sty{tracklang} package has similarly added
-%\cs{TrackLanguageTag}\marg{IEFT tag}.
+%\cs{TrackLanguageTag}\marg{IETF tag}.
 %
 %The \sty{locale} package occasionally referenced in this document
 %is still under development at the time of writing. The
@@ -503,7 +504,7 @@ Organization for Standardization}
 %\label{sec:locales}
 %The options that have a locale identifier as an argument need the
 %identifier formatted as a regular
-%\href{https://tools.ietf.org/html/bcp47}{IEFT BCP 47 language tag} that uses
+%\href{https://tools.ietf.org/html/bcp47}{IETF BCP 47 language tag} that uses
 %hyphens as separators. \gls{POSIX} style locales (with underscores
 %replaced by hyphens, for example \texttt{fr-BE.utf8@euro}) 
 %are only used as a return value in the \longarg{locale} and 
@@ -901,7 +902,7 @@ Organization for Standardization}
 %pound), KID (Kiribati dollar) and TVD (Tuvaluan dollar).
 %\item \meta{currency sym} the currency symbol. (This may sometimes be
 %the same as \meta{currency code}.) Non-ASCII characters will be
-%marked up with \cs{wrp} (see below).
+%marked up with \cs{twrp} (see below).
 %\item \meta{\TeX\ currency} the currency symbol using \TeX\ code
 %provided by \sty{texosquery}.
 %This is obtained by substituting known Unicode
@@ -920,7 +921,7 @@ Organization for Standardization}
 %
 %\item \meta{currency sep} the currency decimal separator.
 %\end{itemize}
-%The language tag should conform to \gls{IEFT} \gls{BCP}~47. See
+%The language tag should conform to \gls{IETF} \gls{BCP}~47. See
 %\url{http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html}
 %for further details. If you are using \app{texosquery-jre5},
 %only the language, region and variant elements will be recognised
@@ -932,13 +933,14 @@ Organization for Standardization}
 %\end{verbatim}
 %produces
 %\begin{verbatim}
-%{en-GB}{,}{.}{E}{1}{GBP}{GBP}{\wrp{£}}{\texosquerycurrency{pound}}{.}
+%{en-GB}{,}{.}{E}{1}{GBP}{GBP}{\twrp{£}}{\texosquerycurrency{pound}}{.}
 %\end{verbatim}
-%The \cs{wrp} command is used by \app{texosquery} to markup a
+%The \cs{twrp} command is used by \app{texosquery} to markup a
 %non-\gls{ASCII} character. This command is one of the shorthands only
 %defined within \cs{TeXOSQuery}. In this case it's a shortcut for
 %the command \cs{texosquerynonasciiwrap}. By default this just does its
-%argument, but it may be redefined to perform some other action.
+%argument, but it may be redefined to perform some other action such
+%as converting from one encoding to another.
 %
 %In most cases the \meta{regional currency code} will be the same
 %as \meta{currency} code. A few non-ambiguous unofficial codes
@@ -949,7 +951,7 @@ Organization for Standardization}
 %\end{verbatim}
 %produces
 %\begin{verbatim}
-%{en-IM}{,}{.}{E}{1}{GBP}{IMP}{M\wrp{£}}{M\texosquerycurrency{pound}}{.}
+%{en-IM}{,}{.}{E}{1}{GBP}{IMP}{M\twrp{£}}{M\texosquerycurrency{pound}}{.}
 %\end{verbatim}
 %
 %If Java doesn't support the given locale, the currency code will
@@ -1008,9 +1010,10 @@ Organization for Standardization}
 %The information supplied with this option is quite complex,
 %but it's used by the \sty{locale} package to set up all the 
 %required information for each locale used in the document. 
-%Any non-\gls{ASCII} characters are marked up with \cs{wrp},
+%Any non-\gls{ASCII} characters are marked up with \cs{twrp},
 %which is locally defined by \cs{TeXOSQuery} to expand to
-%\cs{texosquerynonasciiwrap}.
+%\cs{texosquerynonasciiwrap}. This allows for the need to convert
+%from one input encoding to another.
 %
 %The blocks are:
 %\begin{description}
@@ -1040,7 +1043,7 @@ Organization for Standardization}
 %texosquery -D fr-GB
 %\end{verbatim}
 %then \meta{language name} will be \texttt{French} and the \meta{locale
-%language name} will be \verb|fran\wrp{ç}ais| (note the non-ASCII
+%language name} will be \verb|fran\twrp{ç}ais| (note the non-ASCII
 %character has been marked up). The locale tag \verb|fr-GB|
 %indicates that I'm writing in French but I'm in the United Kingdom
 %(so the currency should be GBP).
@@ -1051,16 +1054,16 @@ Organization for Standardization}
 %The \meta{locale region name} is the region's name in the locale's language.
 %
 %So for me with \texttt{-D en-GB} I get
-%\verb|United\spc Kingdom| for both \meta{region name} and
+%\verb|United\tspc Kingdom| for both \meta{region name} and
 %\meta{locale region name}. This illustrates another of the
 %shorthand commands that \app{texosquery} uses that's only locally
-%defined within \cs{TeXOSQuery}. In this case, \cs{spc} just expands
+%defined within \cs{TeXOSQuery}. In this case, \cs{tspc} just expands
 %to a space. This is used to avoid accidentally discarding any
 %intentional spaces that might follow a command name or any
 %intentional consecutive spaces.
 %
 %If, however, I use \texttt{-D fr-GB} I still get 
-%\verb|United\spc Kingdom| in \meta{region name}, but \meta{locale
+%\verb|United\tspc Kingdom| in \meta{region name}, but \meta{locale
 %region name} is now \verb|Royaume-Uni|.
 %
 %The \meta{variant name} is the language's variant. For example,
@@ -1084,11 +1087,11 @@ Organization for Standardization}
 %\texttt{en-GB} the \meta{full date} is (assuming today is
 %2016-11-08):
 %\begin{verbatim}
-%Tuesday,\spc 8\spc November\spc 2016
+%Tuesday,\tspc 8\tspc November\tspc 2016
 %\end{verbatim}
 %The \meta{long date} is 
 %\begin{verbatim}
-%08\spc November\spc 2016
+%08\tspc November\tspc 2016
 %\end{verbatim}
 %The \meta{medium date} is
 %\begin{verbatim}
@@ -1105,11 +1108,11 @@ Organization for Standardization}
 %sets \texttt{java.locale.providers} to \texttt{CLDR,JRE} then I get
 %a slightly different result. The \meta{long date} is
 %\begin{verbatim}
-%8\spc November\spc 2016
+%8\tspc November\tspc 2016
 %\end{verbatim}
 %and the \meta{medium date} is
 %\begin{verbatim}
-%8\spc Nov\spc 2016
+%8\tspc Nov\tspc 2016
 %\end{verbatim}
 %The \meta{medium date} may be numeric or may be an abbreviated
 %form of \meta{long date}, depending on the language and the locale
@@ -1148,7 +1151,7 @@ Organization for Standardization}
 %For example, with \texttt{-D en-GB} I get the following 
 %pattern for the short date:
 %\begin{verbatim}
-%\dtf{2}{d}/\dtf{2}{M}/\dtf{2}{y}
+%\patdtf{2}{d}/\patdtf{2}{M}/\patdtf{2}{y}
 %\end{verbatim}
 %When parsed by \cs{TeXOSQuery}, this is internally converted to
 %\begin{verbatim}
@@ -1169,11 +1172,11 @@ Organization for Standardization}
 %As with the current date, the actual format depends on the locale
 %and the locale provider. For example, with \texttt{en-GB} I get:
 %\begin{verbatim}
-%{15:59:41\spc o\csq clock\spc GMT}{15:59:41\spc GMT}{15:59:41}{15:59}
+%{15:59:41\tspc o\csq clock\tspc GMT}{15:59:41\tspc GMT}{15:59:41}{15:59}
 %\end{verbatim}
 %with the \gls{JRE}. If I switch to \gls{CLDR} (\file{texosquery-jre8.sh}) I get:
 %\begin{verbatim}
-%{16:00:51\spc Greenwich\spc Mean\spc Time}{16:00:51\spc GMT}{16:00:51}{16:00}
+%{16:00:51\tspc Greenwich\tspc Mean\tspc Time}{16:00:51\tspc GMT}{16:00:51}{16:00}
 %\end{verbatim}
 %
 %\item \meta{time pattern block}
@@ -1185,7 +1188,7 @@ Organization for Standardization}
 %pattern}\marg{short time pattern}
 %
 %Again, when used with \cs{TeXOSQuery}, the short commands, such as
-%\cs{dtf}, are internally converted.
+%\cs{patdtf}, are internally converted.
 %They're not defined outside that scope.
 %
 %\item \meta{current date time block}
@@ -1213,7 +1216,7 @@ Organization for Standardization}
 %
 %The week day names (starting with Monday for consistency with
 %\sty{pgfcalendar}) in the locale's language. Non-\gls{ASCII} characters are marked up with
-%\cs{wrp}.
+%\cs{twrp}.
 %\begin{definition}
 %\marg{Monday}\marg{Tuesday}\marg{Wednesday}\marg{Thursday}\marg{Friday}\marg{Saturday}\marg{Sunday}
 %\end{definition}
@@ -1269,7 +1272,8 @@ Organization for Standardization}
 %and \meta{per mill sym}, which are the percent and
 %per-mill symbols, respectively. The percent symbol \verb|%| has its
 %category code changed to 12 by \cs{TeXOSQuery}. As with other
-%non-ASCII characters, the per-mill symbol will be marked up with \cs{wrp}.
+%non-ASCII characters, the per-mill symbol will be marked up with
+%\cs{twrp}.
 %
 %\item \meta{numeric patterns block}
 %
@@ -1280,7 +1284,7 @@ Organization for Standardization}
 %pattern}\marg{percentages pattern}
 %\end{definition}
 %As with the date and time patterns, when used with \cs{TeXOSQuery}, the
-%short commands, such as \cs{dgt}, are internally converted.
+%short commands, such as \cs{patdgt}, are internally converted.
 %They're not defined outside that scope.
 %
 %If a pattern is used directly in the text, it will expand to the
@@ -1546,7 +1550,7 @@ Organization for Standardization}
 %\cs{TeXOSQuery}\marg{cs}\{\shortarg{C}\}
 %\end{definition}
 %
-%The \gls{IEFT} \gls{BCP}~47 language tag (\shortarg{b} or \longarg{bcp47}) 
+%The \gls{IETF} \gls{BCP}~47 language tag (\shortarg{b} or \longarg{bcp47}) 
 %can be obtained using:
 %\DescribeMacro\TeXOSQueryLangTag
 %\begin{definition}
@@ -1612,8 +1616,7 @@ Organization for Standardization}
 %\end{definition}
 %Example usage:
 %\begin{verbatim}
-%\texosquerydefpattern{\pattern}{\dtf{2}{d}/\dtf{2}{M}/\dtf{4}{y}\spc
-%\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s}}
+%\texosquerydefpattern{\pattern}{\%2d/\%2M/\%4y \%2H:\%2m:\%2s}
 %
 %\TeXOSQueryDateTime{\datetimedata}
 %
@@ -1985,90 +1988,588 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
+%The results obtained from \app{texosquery} may be file names for
+%use in commands like \cs{input} or \cs{includegraphics} or they may
+%be text that needs typesetting (such as month names) or they may be
+%date-time patterns or numeric patterns or they may be PDF date-time
+%strings, which may need to have the category code of the initial
+%\qt{D} set to 12 for parsing commands that include this character
+%in the argument syntax.
+%
+%This means that we need to take special characters into account,
+%but the way they are dealt with vary according to context. For
+%example, \verb|#| needs to have the category code set to 12 if it's
+%part of a file name. If an image file is called, say,
+%\verb|test_imagefile#.png| then the following doesn't work:
+%\begin{verbatim}
+%\includegraphics{test\_imagefile\#}
+%\end{verbatim}
+%It needs to be
+%\begin{verbatim}
+%\includegraphics{test\string_imagefile\string#}
+%\end{verbatim}
+%or
+%\begin{verbatim}
+%\includegraphics{\detokenize{test_imagefile#}}
+%\end{verbatim}
+%The first two versions of \sty{texosquery} try to deal with this by
+%simply changing the category code of \verb|_| to 12 and getting
+%\app{texosquery} to replace all instances of \verb|#| with
+%\verb|\#|. This hash substitution doesn't work with the above image
+%example so version 1.2 introduced a new command that
+%\app{texosquery} could use instead of \verb|\#| that expands to
+%\verb|\string#|. This now solves the problem for file names that
+%are obtained through \app{texosquery}, but \app{texosquery} doesn't
+%solely return file names. It also returns text that needs
+%typesetting and it also returns numeric patterns, which in their
+%raw form include \verb|#| as a digit identifier.
+%
+%This means that we can't simply detokenize the result from
+%\app{texosquery}. Instead \app{texosquery} replaces problematic
+%characters with control sequences \emph{according to context}.
+%For example, \cs{texosqueryhash} is used in a file name context,
+%\cs{texosquerytexthash} is used in a textual context and
+%\cs{texosquerypatdigitnozero} in a numeric pattern context.
+%
+%These long control sequence names clutter the results when testing
+%the application directly in a terminal, so the Java code uses short
+%forms that are locally defined by \cs{TeXOSQuery} to expand to the
+%longer forms.
+%
 %\begin{macro}{\texosquerynonasciiwrap}
 %Allow a way to deal with non-ASCII characters returned by
-%\app{texosquery}. \cs{TeXOSQuery} locally defines \cs{wrp}
+%\app{texosquery}. \cs{TeXOSQuery} locally defines \cs{twrp}
 %to this command. By default this just does its argument
-%but may be redefined to provide some protection.
+%but may be redefined. For example, if the document uses a different
+%file encoding to Java, then this command might need to be redefined
+%to perform the appropriate conversion.
 %    \begin{macrocode}
 \def\texosquerynonasciiwrap#1{#1}
 %    \end{macrocode}
 %\end{macro}
-%Commands used in \cs{TeXOSQuery} for various escaped characters.
 %
-%\begin{macro}{\@texosquery@backslash}
+%\begin{macro}{\texosquerynonasciidetokwrap}
+%We also need to allow for non-ASCII characters in file names. In
+%this case the argument needs detokenizing. With \eTeX, we can
+%simply use \cs{detokenize} but we need to allow for plain
+%non-extended \TeX, so check for the existence of \cs{detokenize}
+%first.
+%    \begin{macrocode}
+\ifx\detokenize\undefined
+%    \end{macrocode}
+%This won't work for characters consisting of multiple octets,
+%but if users want UTF-8 support then they really need \eTeX\ at the
+%very least (but ideally \XeTeX\ or \LuaTeX).
+%    \begin{macrocode}
+  \def\texosquerynonasciidetokwrap#1{\string#1}
+\else
+  \def\texosquerynonasciidetokwrap#1{\detokenize{#1}}
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%Now define commands used in \cs{TeXOSQuery} for various escaped characters.
+%The literal versions are for file names. The textual versions are
+%for use within the document text. For completeness, all the ASCII
+%punctuation characters have both a literal and textual version.
+%
+%\begin{macro}{\texosquerybackslash}
 %Literal backslash.
 %    \begin{macrocode}
-\edef\@texosquery@backslash{\expandafter\@texosquery@gobble\string\\}
+\edef\texosquerybackslash{\expandafter\@texosquery@gobble\string\\}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@leftbrace}
+%\begin{macro}{\texosquerytextbackslash}
+%Textual backslash.
+%    \begin{macrocode}
+\ifx\textbackslash\undefined
+  \def\texosquerytextbackslash{\texosquerybackslash}
+\else
+  \def\texosquerytextbackslash{\noexpand\textbackslash}
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryleftbrace}
 %Literal left brace.
 %    \begin{macrocode}
-\edef\@texosquery@leftbrace{\expandafter\@texosquery@gobble\string\{}
+\edef\texosqueryleftbrace{\expandafter\@texosquery@gobble\string\{}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@rightbrace}
+%\begin{macro}{\texosquerytextleftbrace}
+%Textual left brace.
+%    \begin{macrocode}
+\def\texosquerytextleftbrace{\{}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryrightbrace}
 %Literal right brace.
 %    \begin{macrocode}
-\edef\@texosquery@rightbrace{\expandafter\@texosquery@gobble\string\}}
+\edef\texosqueryrightbrace{\expandafter\@texosquery@gobble\string\}}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@hash}
+%\begin{macro}{\texosquerytextrightbrace}
+%Textual right brace.
+%    \begin{macrocode}
+\def\texosquerytextrightbrace{\}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryhash}
 %Literal hash.
 %    \begin{macrocode}
-\edef\@texosquery@hash{\expandafter\@texosquery@gobble\string\#}
+\edef\texosqueryhash{\expandafter\@texosquery@gobble\string\#}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@grave}
+%\begin{macro}{\texosquerytexthash}
+%Textual hash.
+%    \begin{macrocode}
+\def\texosquerytexthash{\#}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryunderscore}
+%Literal underscore.
+%    \begin{macrocode}
+\edef\texosqueryunderscore{\expandafter\@texosquery@gobble\string\_}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextunderscore}
+%Textual underscore.
+%    \begin{macrocode}
+\def\texosquerytextunderscore{\_}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerybacktick}
 %Literal grave.
 %    \begin{macrocode}
-\edef\@texosquery@grave{\string`}
+\edef\texosquerybacktick{\string`}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@closequote}
-%Unexpanded apostrophe.
+%\begin{macro}{\texosquerytextbacktick}
+%Textual open quote.
 %    \begin{macrocode}
-\edef\@texosquery@closequote{\noexpand'}
+\def\texosquerytextbacktick{`}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@doublequote}
-%Unexpanded double-quote.
+%\begin{macro}{\texosqueryclosequote}
+%Literal apostrophe.
 %    \begin{macrocode}
-\def\@texosquery@doublequote{\noexpand"}
+\edef\texosqueryclosequote{\string'}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@openquote}
-%Unexpanded open quote.
+%\begin{macro}{\texosquerytextclosequote}
+%Textual apostrophe / single closing quote.
 %    \begin{macrocode}
-\def\@texosquery@openquote{\noexpand`}
+\def\texosquerytextclosequote{'}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@space}
-%Unexpanded space.
+%Protect against \sty{babel} shorthands etc.
+%
+%\begin{macro}{\texosquerydoublequote}
+%Literal double-quote.
 %    \begin{macrocode}
-\edef\@texosquery@space{\noexpand\space}
+\edef\texosquerydoublequote{\string"}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\@texosquery@literalspace}
+%\begin{macro}{\texosquerytextdoublequote}
+%Textual double-quote.
+%    \begin{macrocode}
+\def\texosquerytextdoublequote{"}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycolon}
+%Literal colon.
+%    \begin{macrocode}
+\edef\texosquerycolon{\string:}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextcolon}
+%Textual colon.
+%    \begin{macrocode}
+\def\texosquerytextcolon{:}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerysemicolon}
+%Literal semi-colon.
+%    \begin{macrocode}
+\edef\texosquerysemicolon{\string;}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextsemicolon}
+%Textual semi-colon.
+%    \begin{macrocode}
+\def\texosquerytextsemicolon{;}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryequals}
+%Literal equals.
+%    \begin{macrocode}
+\edef\texosqueryequals{\string=}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextequals}
+%Textual equals.
+%    \begin{macrocode}
+\def\texosquerytextequals{=}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryslash}
+%Literal slash.
+%    \begin{macrocode}
+\edef\texosqueryslash{\string/}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextslash}
+%Textual slash.
+%    \begin{macrocode}
+\def\texosquerytextslash{/}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryhyphen}
+%Literal hyphen.
+%    \begin{macrocode}
+\edef\texosqueryhyphen{\string-}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytexthyphen}
+%Textual hyphen.
+%    \begin{macrocode}
+\def\texosquerytexthyphen{-}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryplus}
+%Literal plus.
+%    \begin{macrocode}
+\edef\texosqueryplus{\string+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextplus}
+%Textual plus.
+%    \begin{macrocode}
+\def\texosquerytextplus{+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryperiod}
+%Literal period.
+%    \begin{macrocode}
+\edef\texosqueryperiod{\string.}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextperiod}
+%Textual period.
+%    \begin{macrocode}
+\def\texosquerytextperiod{.}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycomma}
+%Literal comma.
+%    \begin{macrocode}
+\edef\texosquerycomma{\string,}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextcomma}
+%Textual comma.
+%    \begin{macrocode}
+\def\texosquerytextcomma{,}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryopenparen}
+%Literal open bracket.
+%    \begin{macrocode}
+\edef\texosqueryopenparen{\string(}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextopenparen}
+%Textual open bracket.
+%    \begin{macrocode}
+\def\texosquerytextopenparen{(}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycloseparen}
+%Literal close bracket.
+%    \begin{macrocode}
+\edef\texosquerycloseparen{\string)}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextcloseparen}
+%Textual close bracket.
+%    \begin{macrocode}
+\def\texosquerytextcloseparen{)}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryopensq}
+%Literal open square bracket.
+%    \begin{macrocode}
+\edef\texosqueryopensq{\string[}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextopensq}
+%Textual open square bracket.
+%    \begin{macrocode}
+\def\texosquerytextopensq{[}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryclosesq}
+%Literal close square bracket.
+%    \begin{macrocode}
+\edef\texosqueryclosesq{\string]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextclosesq}
+%Textual close square bracket.
+%    \begin{macrocode}
+\def\texosquerytextclosesq{]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryasterisk}
+%Literal asterisk.
+%    \begin{macrocode}
+\edef\texosqueryasterisk{\string*}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextasterisk}
+%Textual asterisk.
+%    \begin{macrocode}
+\def\texosquerytextasterisk{*}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryatchar}
+%Literal at character.
+%    \begin{macrocode}
+\edef\texosqueryatchar{\string @}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextatchar}
+%Textual at character.
+%    \begin{macrocode}
+\def\texosquerytextatchar{@}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerybar}
+%Literal bar.
+%    \begin{macrocode}
+\edef\texosquerybar{\string|}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextbar}
+%Textual bar.
+%    \begin{macrocode}
+\ifx\undefined\textbar
+  \def\texosquerytextbar{|}
+\else
+  \def\texosquerytextbar{\ifmmode|\else\textbar\fi}
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerylessthan}
+%Literal less than.
+%    \begin{macrocode}
+\edef\texosquerylessthan{\string<}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextlessthan}
+%Textual less than.
+%    \begin{macrocode}
+\ifx\undefined\textless
+  \def\texosquerytextlessthan{<}
+\else
+  \def\texosquerytextlessthan{\ifmmode<\else\textless\fi}
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerygreaterthan}
+%Literal greater than.
+%    \begin{macrocode}
+\edef\texosquerygreaterthan{\string>}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextgreaterthan}
+%Textual greater than.
+%    \begin{macrocode}
+\ifx\undefined\textgreater
+  \def\texosquerytextgreaterthan{>}
+\else
+  \def\texosquerytextgreaterthan{\ifmmode<\else\textgreater\fi}
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytilde}
+%Literal tilde.
+%    \begin{macrocode}
+\edef\texosquerytilde{\string~}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytexttilde}
+%Textual tilde.
+%    \begin{macrocode}
+\ifx\textasciitilde\undefined
+  \def\texosquerytexttilde{\string~}
+\else
+  \def\texosquerytexttilde{\textasciitilde}
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerycircum}
+%Literal circumflex.
+%    \begin{macrocode}
+\edef\texosquerycircum{\string^}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextcircum}
+%Textual circumflex.
+%    \begin{macrocode}
+\ifx\textasciicircum\undefined
+  \def\texosquerytextcircum{\string^}
+\else
+  \def\texosquerytextcircum{\textasciicircum}
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryampersand}
+%Literal ampersand.
+%    \begin{macrocode}
+\edef\texosqueryampersand{\string&}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextampersand}
+%Textual ampersand.
+%    \begin{macrocode}
+\def\texosquerytextampersand{\&}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerydollar}
+%Literal dollar. (This could just be defined as \verb|\string$|, but
+%that plays havoc with the syntax highlighting!)
+%    \begin{macrocode}
+\edef\texosquerydollar{\expandafter\@texosquery@gobble\string\$}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextdollar}
+%Textual dollar.
+%    \begin{macrocode}
+\def\texosquerytextdollar{\$}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerypercent}
+%Literal percent.
+%    \begin{macrocode}
+\edef\texosquerypercent{\expandafter\@texosquery@gobble\string\%}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextpercent}
+%Textual percent.
+%    \begin{macrocode}
+\def\texosquerytextpercent{\%}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryexclam}
+%Literal exclamation.
+%    \begin{macrocode}
+\edef\texosqueryexclam{\string!}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextexclam}
+%Textual exclamation.
+%    \begin{macrocode}
+\def\texosquerytextexclam{!}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosqueryquestion}
+%Literal question mark.
+%    \begin{macrocode}
+\edef\texosqueryquestion{\string?}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextquestion}
+%Textual question mark.
+%    \begin{macrocode}
+\def\texosquerytextquestion{?}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\begin{macro}{\texosqueryliteralspace}
 %Literal space.
 %    \begin{macrocode}
-\edef\@texosquery@literalspace{\expandafter\string\space}
+\edef\texosqueryliteralspace{\expandafter\string\space}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\texosquerytextspace}
+%Textual space. (Don't allow it to expand while it's being fetched
+%from \cs{texosquery} just in case it disappears.)
+%    \begin{macrocode}
+\def\texosquerytextspace{\noexpand\space}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@D}
 %The \verb|D| identifier in PDF date-time formats need to have
-%category code 12.
+%category code 12. This is only used by methods that return results
+%in the form:
+%
+%\verb|D:|\meta{YYYY}\meta{MM}\marg{DD}\meta{HH}\meta{mm}\meta{ss}\meta{TZh}\verb|'|\meta{TZm}\verb|'|
 %    \begin{macrocode}
 \edef\@texosquery@D{\string D}
 %    \end{macrocode}
@@ -2078,47 +2579,102 @@ Organization for Standardization}
 %Enable shortcut commands.
 %    \begin{macrocode}
 \def\@texosquery@enableshortcs{%
-     \def\dtf{\noexpand\texosquerydtf}%
-     \def\pmnumfmt{\noexpand\texosquerypatplusminus}%
-     \def\numfmt{\noexpand\texosquerypatnum}%
-     \def\sinumfmt{\noexpand\texosquerypatsinum}%
-     \def\decfmt{\noexpand\texosquerypatdec}%
-     \def\intfmt{\noexpand\texosquerypatint}%
-     \def\pcur{\noexpand\texosquerypatprefixcurrency}%
-     \def\picur{\noexpand\texosquerypatprefixicurrency}%
-     \def\scur{\noexpand\texosquerypatsuffixcurrency}%
-     \def\sicur{\noexpand\texosquerypatsuffixicurrency}%
-     \def\str{\noexpand\texosquerypatstr}%
-     \def\apo{\noexpand\texosquerypatquote}%
-     \def\spc{\noexpand\texosquerypatspc}%
-     \def\dgt{\noexpand\texosquerypatdigit}%
-     \def\dgtnz{\noexpand\texosquerypatdigitnozero}%
-     \def\dpt{\noexpand\texosquerypatdecimalpoint}%
-     \def\msg{\noexpand\texosquerypatminus}%
-     \def\ngp{\noexpand\texosquerypatgroupsep}%
-     \def\ppct{\noexpand\texosquerypatprefixpercent}%
-     \def\spct{\noexpand\texosquerypatsuffixpercent}%
-     \def\ppml{\noexpand\texosquerypatprefixpermill}%
-     \def\spml{\noexpand\texosquerypatsuffixpermill}%
+%    \end{macrocode}
+%Thesre are for the date-time and numeric patterns.
+%    \begin{macrocode}
+     \def\patdtf{\noexpand\texosquerydtf}%
+     \def\patpmnumfmt{\noexpand\texosquerypatplusminus}%
+     \def\patnumfmt{\noexpand\texosquerypatnum}%
+     \def\patsinumfmt{\noexpand\texosquerypatsinum}%
+     \def\patdecfmt{\noexpand\texosquerypatdec}%
+     \def\patpcur{\noexpand\texosquerypatprefixcurrency}%
+     \def\patpicur{\noexpand\texosquerypatprefixicurrency}%
+     \def\patscur{\noexpand\texosquerypatsuffixcurrency}%
+     \def\patsicur{\noexpand\texosquerypatsuffixicurrency}%
+     \def\patstr{\noexpand\texosquerypatstr}%
+     \def\patapo{\noexpand\texosquerypatquote}%
+     \def\patdgt{\noexpand\texosquerypatdigit}%
+     \def\patdgtnz{\noexpand\texosquerypatdigitnozero}%
+     \def\patmsg{\noexpand\texosquerypatminus}%
+     \def\patngp{\noexpand\texosquerypatgroupsep}%
+     \def\patppct{\noexpand\texosquerypatprefixpercent}%
+     \def\patspct{\noexpand\texosquerypatsuffixpercent}%
+     \def\patppml{\noexpand\texosquerypatprefixpermill}%
+     \def\patspml{\noexpand\texosquerypatsuffixpermill}%
 %    \end{macrocode}
 %Hook to adjust the processing of non-ASCII characters.
 %    \begin{macrocode}
-     \def\wrp{\texosquerynonasciiwrap}%
+     \def\twrp{\texosquerynonasciiwrap}%
+     \def\fwrp{\texosquerynonasciidetokwrap}%
 %    \end{macrocode}
 %Locally redefine some more commands that may occur in 
 %\app{texosquery}'s return value (via the \texttt{escapeSpChars}
 %method in \file{TeXOSQuery.java}).
 %    \begin{macrocode}
-     \let\bks\@texosquery@backslash
-     \let\lbr\@texosquery@leftbrace
-     \let\rbr\@texosquery@rightbrace
-     \let\hsh\@texosquery@hash
-     \let\grv\@texosquery@grave
-     \let\csq\@texosquery@closequote
-     \let\dqt\@texosquery@doublequote
-     \let\osq\@texosquery@openquote
-     \let\spc\@texosquery@space
-     \let\lspc\@texosquery@literalspace
+     \let\fbks\texosquerybackslash
+     \let\tbks\texosquerytextbackslash
+     \let\flbr\texosqueryleftbrace
+     \let\flbr\texosquerytextleftbrace
+     \let\frbr\texosqueryrightbrace
+     \let\trbr\texosquerytextrightbrace
+     \let\fhsh\texosqueryhash
+     \let\thsh\texosquerytexthash
+     \let\fusc\texosqueryunderscore
+     \let\tusc\texosquerytextunderscore
+     \let\fgrv\texosquerybacktick
+     \let\tgrv\texosquerytextbacktick
+     \let\fcsq\texosqueryclosequote
+     \let\tcsq\texosquerytextclosequote
+     \let\fdqt\texosquerydoublequote
+     \let\tdqt\texosquerytextdoublequote
+     \let\fspc\texosqueryliteralspace
+     \let\tspc\texosquerytextspace
+     \let\fcln\texosquerycolon
+     \let\tcln\texosquerytextcolon
+     \let\fscl\texosquerysemicolon
+     \let\tscl\texosquerytextsemicolon
+     \let\feql\texosqueryequals
+     \let\teql\texosquerytextequals
+     \let\fhyp\texosqueryhyphen
+     \let\thyp\texosquerytexthyphen
+     \let\fpls\texosqueryplus
+     \let\tpls\texosquerytextplus
+     \let\ftld\texosquerytilde
+     \let\ttld\texosquerytexttilde
+     \let\fcir\texosquerycircum
+     \let\tcir\texosquerytextcircum
+     \let\famp\texosqueryampersand
+     \let\famp\texosquerytextampersand
+     \let\fslh\texosqueryslash
+     \let\tslh\texosquerytextslash
+     \let\fpct\texosquerypercent
+     \let\tpct\texosquerytextpercent
+     \let\fexc\texosqueryexclam
+     \let\texc\texosquerytextexclam
+     \let\fque\texosqueryquestion
+     \let\tque\texosquerytextquestion
+     \let\fles\texosquerylessthan
+     \let\tles\texosquerytextlessthan
+     \let\fgre\texosquerygreaterthan
+     \let\tgre\texosquerytextgreaterthan
+     \let\fdol\texosquerydollar
+     \let\tdol\texosquerytextdollar
+     \let\fdot\texosqueryperiod
+     \let\tdot\texosquerytextperiod
+     \let\fcom\texosquerycomma
+     \let\tcom\texosquerytextcomma
+     \let\fopb\texosqueryopenparen
+     \let\topb\texosquerytextopenparen
+     \let\fclb\texosquerycloseparen
+     \let\tclb\texosquerytextcloseparen
+     \let\fosb\texosqueryopensq
+     \let\tosb\texosquerytextopensq
+     \let\fcsb\texosqueryclosesq
+     \let\tcsb\texosquerytextclosesq
+     \let\fast\texosqueryasterisk
+     \let\tast\texosquerytextasterisk
+     \let\fatc\texosqueryatchar
+     \let\tatc\texosquerytextatchar
      \let\pdfd\@texosquery@D
 }
 %    \end{macrocode}
@@ -2739,6 +3295,248 @@ Organization for Standardization}
 %\subsubsection{Pattern Formats}
 %\label{sec:patternformats}
 %There are two basic types of patterns: date/time or numeric.
+%A pattern is stored in a control sequence using custom markup
+%that's easier for \TeX\ to parse than it would be to parse
+%strings in the form \verb|YYYY-MM| or \verb|#,##0|. This internal
+%pattern format can be obtained through capturing the output
+%of \app{texosquery}'s \shortarg{D} action, but patterns can also be
+%constructed using
+%\begin{definition}
+%\cs{texosquerydefpattern}\marg{cs}\marg{pattern specs}
+%\end{definition}
+%The pattern is stored in \cs{cs}. The \meta{pattern specs} depend
+%on whether a date-time or numeric pattern is required.
+%For a date-time pattern, each date/time element is identified 
+%using
+%\begin{definition}
+%\cs{texosquerydtf}\marg{n}\marg{identifier}
+%\end{definition}
+%where \meta{identifier} identifies the element type (such as
+%\verb|M| for month or \verb|s| for seconds) and \meta{n}
+%indicates how the element should be formatted, where \meta{n}
+%is an integer from 1 to 4. For example if \meta{n} is 2
+%and \meta{identifier} is \verb|M|, then this indicates the
+%\verb|MM| format, which produces a two-digit number.
+%
+%Since it's rather cumbersome to keep typing \cs{texosquerydtf}
+%and it can make for rather hard to read code,
+%\cs{texosquerydefpattern} locally redefines \verb|\%| to expand to
+%\cs{texosquerydtf}. This means that if you do, for example:
+%\begin{verbatim}
+%\texosquerydefpattern{\pattern}{\%2d/\%2M/\%4y}
+%\end{verbatim}
+%then \cs{pattern} is defined to
+%\begin{verbatim}
+%\texosquerydtf 2d/\texosquerydtf 2M/\texosquerydtf 4y 
+%\end{verbatim}
+%When simply used within the document, this just expands to the
+%pattern format. For example:
+%\begin{verbatim}
+%Pattern: \pattern.
+%\end{verbatim}
+%will display \qt{Pattern: dd/MM/yyyy} in the PDF. However,
+%when used with \cs{texosqueryfmtdatetime}, the definition
+%of \cs{texosquerydtf} changes to reproduce the required 
+%date/time element.
+%
+%For example:
+%\begin{verbatim}
+%\texosquerydefpattern{\pattern}{\%2d/\%2M/\%4y \%2H:\%2m:\%2s \%2Z}
+%
+%Pattern: \pattern.
+%
+%\TeXOSQueryDateTime{\datetimedata}
+%
+%\ifx\datetimedata\empty
+% Query Failed!
+%\else
+% \expandafter\texosqueryfmtdatetime\expandafter\pattern\datetimedata
+%\fi
+%\end{verbatim}
+%
+%The numeric patterns are rather more complicated. The
+%\meta{pattern specs} now needs to use the following formats:
+%
+%\begin{definition}
+%\cs{texosquerypatnum}\marg{+ve/-ve numeric pattern}
+%\end{definition}
+%This is a numeric pattern applied to a number regardless of
+%whether the number is positive or negative. (If negative, the
+%minus sign is automatically inserted.) This is rather a long
+%and cumbersome command to type, so \cs{texosquerydefpattern}
+%locally defines \cs{numfmt} to expand to it.
+%
+%\begin{definition}
+%\cs{texosquerypatplusminus}\marg{+ve numeric pattern}\marg{-ve numeric
+%pattern}
+%\end{definition}
+%This provides a pattern \meta{+ve numeric pattern} to use if the
+%number is positive and a patter \meta{-ve numeric pattern} to use
+%if the number is negative. Again \cs{texosquerydefpattern}
+%locally defines a shortcut, \cs{pmnumfmt}, to expand to this
+%command.
+%
+%\begin{definition}
+%\cs{texosquerypatsinum}\marg{decimal pattern}\marg{mantissa
+%pattern}
+%\end{definition}
+%This provides a pattern to use for SI numbers where \meta{decimal
+%pattern} is a pattern for the decimal number part (before the
+%exponent symbol) and \meta{mantissa} is the pattern for the integer
+%part in the mantissa (after the exponent symbol).
+%The locally defined shortcut is \cs{sinumfmt}. The \meta{decimal
+%pattern} will typically be in the form:
+%\begin{definition}
+%\cs{texosquerypatdec}\marg{integer pattern}\marg{fraction pattern}
+%\end{definition}
+%This indicates a decimal pattern where the \meta{integer pattern}
+%is applied to the part before the decimal separator and
+%\meta{fraction pattern} is applied to the part after the separator. The shortcut is \cs{decfmt}.
+%
+%\begin{definition}
+%\cs{texosquerypatprefixcurrency}\marg{decimal pattern}\marg{text}
+%\end{definition}
+%This indicates a currency pattern with a prefixed currency symbol where \meta{text} is inserted
+%before the currency symbol. The shortcut is \cs{pcur}.
+%The \meta{decimal pattern} will typically use
+%\cs{texosquerypatdec}\marg{int}\meta{frac}. (Similarly for the
+%following.)
+%
+%\begin{definition}
+%\cs{texosquerypatprefixicurrency}\marg{decimal pattern}\marg{text}
+%\end{definition}
+%This indicates an international currency pattern with a prefixed
+%international currency symbol where \meta{text} is inserted
+%before the symbol. The shortcut is \cs{picur}.
+%
+%\begin{definition}
+%\cs{texosquerypatsuffixcurrency}\marg{decimal pattern}\marg{text}
+%\end{definition}
+%This indicates a currency pattern with a suffixed international
+%currency symbol where \meta{text} is inserted
+%after the currency symbol. The shortcut is \cs{scur}.
+%
+%\begin{definition}
+%\cs{texosquerypatsuffixicurrency}\marg{decimal pattern}\marg{text}
+%\end{definition}
+%This indicates an international currency pattern with a suffixed
+%international currency symbol where \meta{text} is inserted
+%after the symbol. The shortcut is \cs{sicur}.
+%
+%\begin{definition}
+%\cs{texosquerypatprefixpercent}\marg{decimal pattern}\marg{text}
+%\end{definition}
+%This indicates a percentage pattern with a prefixed percent symbol where \meta{text} is inserted
+%before the symbol. The shortcut is \cs{ppct}.
+%
+%\begin{definition}
+%\cs{texosquerypatsuffixpercent}\marg{decimal pattern}\marg{text}
+%\end{definition}
+%This indicates a percentage pattern with a suffixed percent symbol where \meta{text} is inserted
+%after the symbol. The shortcut is \cs{spct}.
+%
+%\begin{definition}
+%\cs{texosquerypatprefixpermill}\marg{decimal pattern}\marg{text}
+%\end{definition}
+%This indicates a per-mill pattern with a prefixed per-mill symbol where \meta{text} is inserted
+%before the symbol. The shortcut is \cs{ppml}.
+%
+%\begin{definition}
+%\cs{texosquerypatsuffixpermill}\marg{decimal pattern}\marg{text}
+%\end{definition}
+%This indicates a per-mill pattern with a suffixed per-mill symbol where \meta{text} is inserted
+%after the symbol. The shortcut is \cs{spml}.
+%
+%The integer parts \meta{integer part}, \meta{fraction part}
+%and \meta{mantissa} must have \emph{exactly} ten digit identifiers.
+%(\TeX\ can't reach 11 digit numbers.) There are two types
+%of digit identifiers:
+%\begin{definition}
+%\cs{texosquerypatdigit}
+%\end{definition}
+%This indicates a digit that must be displayed, even if it's not
+%significant (for example a leading zero). The shortcut command is \verb|\0| (backslash zero).
+%
+%\begin{definition}
+%\cs{texosquerypatdigitnozero}
+%\end{definition}
+%This indicates a digit that should only be displayed if it's
+%significant. (For example, if it's a leading zero, it's not shown.)
+%The shortcut command is \verb|\#| (backslash hash).
+%
+%The number group separator can be inserted using
+%\begin{definition}
+%\cs{texosquerypatgroupsep}
+%\end{definition}
+%The shortcut command is \verb|\,| (backslash comma).
+%
+%The sign can be inserted using
+%\begin{definition}
+%\cs{texosquerypatminus}
+%\end{definition}
+%This ensures the sign is displayed even if the number is positive.
+%The shortcut command is \verb|\-| (backslash hyphen).
+%
+%Here's an example of a decimal pattern:
+%\begin{verbatim}
+%\texosquerydefpattern{\numpattern}{%
+% \numfmt{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\#\#\#\#\#\#\#\#\#}}}
+%\end{verbatim}
+%The pattern can be applied to a number using \cs{texosqueryfmtnumber}:
+%\begin{verbatim}
+%\texosqueryfmtnumber{\numpattern}{123}{4567}{2}
+%\end{verbatim}
+%which produces: 12,345.67 (the group and decimal separators can be
+%redefined as appropriate).
+%
+%Here's an example of a scientific number:
+%\begin{verbatim}
+%\texosquerydefpattern{\sinumpattern}{%
+% \sinumfmt
+% {\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\#\#\#\#\#\#\#\#\#}}%
+% {\-\#\#\#\#\#\#\#\#\0\0}%
+%}
+%\end{verbatim}
+%The pattern can be applied to a number:
+%\begin{verbatim}
+%\texosqueryfmtnumber{\sinumpattern}{1}{234567}{3}
+%\end{verbatim}
+%which produces: 1.234567E+03
+%
+%Here's an integer pattern:
+%\begin{verbatim}
+%\texosquerydefpattern{\intpattern}{%
+% \patnumfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}}
+%\end{verbatim}
+%The pattern applied to a number:
+%\begin{verbatim}
+%\texosqueryfmtnumber{\intpattern}{123}{4567}{2}
+%\end{verbatim}
+%which produces: 12,345 (the fractional part has been omitted).
+%
+%Here's a currency pattern that applies a different format for
+%positive and negative numbers:
+%\begin{verbatim}
+%\texosquerydefpattern{\curpattern}{%
+% \pmnumfmt
+% {\pcur{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\0\#\#\#\#\#\#\#\#}}{}}%
+% {\pcur{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\0\#\#\#\#\#\#\#\#}}{\-}}}
+%\end{verbatim}
+%This uses the \meta{text} part of \cs{pcur} to insert the sign
+%before the currency symbol (but only for negative values).
+%\begin{verbatim}
+%\texosqueryfmtnumber{\curpattern}{-1234567}{0}{0}
+%\end{verbatim}
+%This produces: $-$\$12,345,678.00 (again the symbol and separators
+%can be redefined as appropriate).
+%
+%Here's an example of a percentage pattern:
+%\begin{verbatim}
+%\texosquerydefpattern{\pcpattern}{%
+% \numfmt{\spct{\#\,\#\#\#\,\#\#\#\,\#\#\0}{}}}
+%\end{verbatim}
+%The pattern can similarly be applied to a number using
+%\cs{texosqueryfmtnumber}.
 %
 %\begin{macro}{\texosquerydtf}
 %Date/time format placeholder. The second argument is the
@@ -2777,12 +3575,6 @@ Organization for Standardization}
 \def\texosquerypatquote{''}
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\texosquerypatspc}
-%Literal space contained in number format.
-%    \begin{macrocode}
-\def\texosquerypatspc{ }
-%    \end{macrocode}
-%\end{macro}
 %Number format place holders.
 %\begin{macro}{\texosquerypatplusminus}
 %    \begin{macrocode}
@@ -2802,11 +3594,6 @@ Organization for Standardization}
 %\begin{macro}{\texosquerypatdec}
 %    \begin{macrocode}
 \def\texosquerypatdec#1#2{#1.#2}
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\texosquerypatint}
-%    \begin{macrocode}
-\def\texosquerypatint#1{#1}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatprefixcurrency}
@@ -2884,28 +3671,43 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\@texosquery@pattern@shortcuts}
+%Provide much shorter cuts for the convenience of directly defining
+%patterns with \cs{texosquerydefpattern}.
+%\changes{1.2}{2016-11-24}{new}
+%    \begin{macrocode}
+\def\@texosquery@pattern@shortcuts{%
+   \def\%{\noexpand\texosquerydtf}%
+   \def\0{\noexpand\texosquerypatdigit}%
+   \def\#{\noexpand\texosquerypatdigitnozero}%
+   \def\-{\noexpand\texosquerypatminus}%
+   \def\,{\noexpand\texosquerypatgroupsep}%
+   \def\numfmt{\noexpand\texosquerypatnum}%
+   \def\pmnumfmt{\noexpand\texosquerypatplusminus}%
+   \def\sinumfmt{\noexpand\texosquerypatsinum}%
+   \def\decfmt{\noexpand\texosquerypatdec}%
+   \def\pcur{\noexpand\texosquerypatprefixcurrency}%
+   \def\picur{\noexpand\texosquerypatprefixicurrency}%
+   \def\scur{\noexpand\texosquerypatsuffixcurrency}%
+   \def\sicur{\noexpand\texosquerypatsuffixicurrency}%
+   \def\ppct{\noexpand\texosquerypatprefixpercent}%
+   \def\spct{\noexpand\texosquerypatsuffixpercent}%
+   \def\ppml{\noexpand\texosquerypatprefixpermill}%
+   \def\spml{\noexpand\texosquerypatsuffixpermill}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\texosquerydefpattern}
 %Define a new pattern using the shortcut markup. The first argument
 %is the name of the control sequence in which to store the pattern
-%provided in the second argument.
+%provided in the second argument. Be careful of any fragile commands
+%within the second argument. They will need protecting!
 %\changes{1.2}{2016-11-24}{new}
 %    \begin{macrocode}
 \def\texosquerydefpattern#1#2{%
  \begingroup
-    \@texosquery@enableshortcs
-    \catcode`\-=12\relax
-    \catcode`\_=12\relax
-    \catcode`\^=12\relax
-    \catcode`\~=12\relax
-    \catcode`\$=12\relax
-    \catcode`\&=12\relax
-    \catcode`\.=12\relax
-    \catcode`\/=12\relax
-    \catcode`\:=12\relax
-    \catcode`\"=12\relax
-    \catcode`\'=12\relax
-    \catcode`\;=12\relax
-    \catcode`\%=12\relax
+  \@texosquery@pattern@shortcuts
   \@texosquery@edef\x{\endgroup\def\noexpand#1{#2}}\x
 }
 %    \end{macrocode}
@@ -3201,7 +4003,6 @@ Organization for Standardization}
   \let\texosquerydtf\@texosquery@fmt@dtf
   \let\texosquerypatstr\texosquerypatfmtstr
   \let\texosquerypatquote\texosquerypatfmtquote
-  \let\texosquerypatspc\texosquerypatfmtspc
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4219,12 +5020,10 @@ Organization for Standardization}
   \begingroup
    \let\texosquerypatstr\texosquerypatfmtstr
    \let\texosquerypatquote\texosquerypatfmtquote
-   \let\texosquerypatspc\texosquerypatfmtspc
    \let\texosquerypatplusminus\texosquerypatfmt@plusminus
    \let\texosquerypatnum\texosquerypatfmt@num
    \let\texosquerypatsinum\texosquerypatfmt@sinum
    \let\texosquerypatdec\texosquerypatfmt@dec
-   \let\texosquerypatint\texosquerypatfmt@int
    \let\texosquerypatprefixcurrency\texosquery@patfmt@prefixcurrency
    \let\texosquerypatprefixicurrency\texosquery@patfmt@prefixicurrency
    \let\texosquerypatsuffixcurrency\texosquery@patfmt@suffixcurrency
@@ -4505,11 +5304,6 @@ Organization for Standardization}
 %\begin{macro}{\texosquerypatfmtquote}
 %    \begin{macrocode}
 \def\texosquerypatfmtquote{'}
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\texosquerypatfmtspc}
-%    \begin{macrocode}
-\def\texosquerypatfmtspc{ }
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmt@plusminus}

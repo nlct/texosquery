@@ -6,3 +6,5 @@ texosquery.tex
 *.pdf
 *.dvi
 test file with spaces.tex
+test-imagefile.tex
+test_imagefile#.png

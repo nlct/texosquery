@@ -2,8 +2,7 @@
 
 \input texosquery
 
-\texosquerydefpattern{\DTpattern}{\dtf{2}{d}/\dtf{2}{M}/\dtf{4}{y}\spc
-\dtf{2}{H}:\dtf{2}{m}:\dtf{2}{s} \dtf{2}{Z}}
+\texosquerydefpattern{\DTpattern}{\%2d/\%2M/\%4y \%2H:\%2m:\%2s \%2Z}
 
 Pattern: {\tt \DTpattern}
 
@@ -15,29 +14,25 @@ Pattern: {\tt \DTpattern}
  \expandafter\texosqueryfmtdatetime\expandafter\DTpattern\datetimedata
 \fi
 
-\texosquerydefpattern{\numpattern}{\numfmt{\decfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz \dgtnz
-\ngp \dgtnz \dgtnz \dgt }{\dgtnz \dgtnz \dgtnz \dgtnz \dgtnz \dgtnz
-\dgtnz \dgtnz \dgtnz \dgtnz }}}
+\texosquerydefpattern{\numpattern}{%
+ \numfmt{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\#\#\#\#\#\#\#\#\#}}}
 
-\texosquerydefpattern{\sinumpattern}{\sinumfmt{\decfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz \dgtnz
-\ngp \dgtnz \dgtnz \dgt }{\dgtnz \dgtnz \dgtnz \dgtnz \dgtnz \dgtnz
-\dgtnz \dgtnz \dgtnz \dgtnz }}{\msg\dgtnz \dgtnz \dgtnz \dgtnz \dgtnz \dgtnz
-\dgtnz \dgtnz \dgt \dgt }}
+\texosquerydefpattern{\sinumpattern}{%
+ \sinumfmt
+ {\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\#\#\#\#\#\#\#\#\#}}%
+ {\-\#\#\#\#\#\#\#\#\0\0}%
+}
 
+\texosquerydefpattern{\intpattern}{%
+ \numfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}}
 
-\texosquerydefpattern{\intpattern}{\numfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz
-\ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz \dgt
-}}
+\texosquerydefpattern{\curpattern}{%
+ \pmnumfmt
+ {\pcur{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\0\#\#\#\#\#\#\#\#}}{}}%
+ {\pcur{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\0\#\#\#\#\#\#\#\#}}{\-}}}
 
-\texosquerydefpattern{\curpattern}{\pmnumfmt{\pcur{\decfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz
-\dgtnz \ngp \dgtnz \dgtnz \dgt }{\dgt \dgt \dgtnz \dgtnz \dgtnz
-\dgtnz \dgtnz \dgtnz \dgtnz \dgtnz }}{}}{\pcur{\decfmt{\dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz
-\dgtnz \ngp \dgtnz \dgtnz \dgt }{\dgt \dgt \dgtnz \dgtnz \dgtnz
-\dgtnz \dgtnz \dgtnz \dgtnz \dgtnz }}{\msg}}}
-
-\texosquerydefpattern{\pcpattern}{\numfmt{\spct{\dgtnz
-\ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz \dgtnz \ngp \dgtnz \dgtnz \dgt
-}{}}}
+\texosquerydefpattern{\pcpattern}{%
+ \numfmt{\spct{\#\,\#\#\#\,\#\#\#\,\#\#\0}{}}}
 
 Numeric patterns.
 

@@ -121,7 +121,7 @@ public class TeXOSQuery implements Serializable
    {
       if (debugLevel >= level)
       {
-         System.err.println(String.format("%s: %s", name, message));
+         System.err.println(String.format("[%s] %s", name, message));
       }
    }
 
@@ -254,7 +254,7 @@ public class TeXOSQuery implements Serializable
                else
                {
                   // This shouldn't occur, but just in case...
-                  debug(String.format("Invalid openin_any value '%s'",
+                  debug(String.format("Invalid openin_any value: %s",
                      result));
                   openin = OPENIN_P;
                }
@@ -289,21 +289,21 @@ public class TeXOSQuery implements Serializable
                   if (!texmfoutput.exists())
                   {
                      debug(String.format(
-                           "TEXMFOUTPUT (%s) doesn't exist, ignoring",
+                           "TEXMFOUTPUT doesn't exist, ignoring: %s",
                            texmfoutput.toString()));
                      texmfoutput = null;
                   }
                   else if (!texmfoutput.isDirectory())
                   {
                      debug(String.format(
-                           "TEXMFOUTPUT (%s) isn't a directory, ignoring",
+                           "TEXMFOUTPUT isn't a directory, ignoring: %s",
                            texmfoutput.toString()));
                      texmfoutput = null;
                   }
                   else if (!texmfoutput.canRead())
                   {
                      debug(String.format(
-                           "TEXMFOUTPUT (%s) doesn't have read permission, ignoring",
+                           "TEXMFOUTPUT doesn't have read permission, ignoring: %s",
                            texmfoutput.toString()));
                      texmfoutput = null;
                   }
@@ -334,8 +334,8 @@ public class TeXOSQuery implements Serializable
               if (file.isAbsolute())
               {
                  debug(String.format(
-                   "Read access for file '%s' forbidden by openin_any=%c (has absolute path outside TEXMFOUTPUT)",
-                   file, openin));
+                   "Read access forbidden by openin_any=%c (has absolute path outside TEXMFOUTPUT): %s",
+                   openin, file));
                  return false;
               }
 
@@ -347,8 +347,8 @@ public class TeXOSQuery implements Serializable
                  // disallow going to parent directories
 
                  debug(String.format(
-                   "Read access for file '%s' forbidden by openin_any=%c (outside cwd path)",
-                   file, openin));
+                   "Read access forbidden by openin_any=%c (outside cwd path): %s",
+                   openin, file));
                  return false;
               }
 
@@ -359,15 +359,15 @@ public class TeXOSQuery implements Serializable
               {
                  // hidden file so not permitted
                  debug(String.format(
-                   "Read access for file '%s' forbidden by openin_any=%c (hidden file)",
-                   file, openin));
+                   "Read access forbidden by openin_any=%c (hidden file): %s",
+                   openin, file));
                  return false;
               }
 
             break;
             default:
               // this shouldn't happen, but just in case...
-              debug(String.format("Invalid openin value %d", openin));
+              debug(String.format("Invalid openin value: %d", openin));
               // don't allow, something's gone badly wrong
               return false;
          }
@@ -378,7 +378,7 @@ public class TeXOSQuery implements Serializable
       catch (Exception e)
       {
          // Catch all exceptions
-         debug(String.format("isReadPermitted(%s) failed", file), e);
+         debug(String.format("Read permission check failed: %s", file), e);
 
          // Can't permit read if something's gone wrong here.
          return false;
@@ -403,40 +403,51 @@ public class TeXOSQuery implements Serializable
       {
          // The security manager doesn't permit access to this property.
 
-         debug(String.format("unable to access '%s' property", propName), e);
+         debug(String.format("Unable to access property: %s", propName), e);
          return defValue;
       }
    }
 
     /**
-     * Escapes problematic characters from string.
-     * Except for the hash, TeX's special characters shouldn't need escaping.
-     * The definition of \\TeXOSQuery in texosquery.tex changes the category
-     * code for the standard special characters (and a few others) except 
-     * hash, curly braces and backslash. 
+     * Escapes problematic characters from a string that will be
+     * expanded when input by TeX's shell escape.
      * 
      * Some of the methods in this class return TeX code. Those
      * returned values shouldn't be escaped as it would interfere
      * with the code, so just use this method on information
-     * directly obtained from Java.
+     * directly obtained from Java. This will typically be either
+     * file names (in which case the characters within the string
+     * must all be "letter" or "other") or regular text for use in
+     * the document (such as dates or times, in which case the
+     * characters may be active to allow them to be correctly
+     * typeset). The date-time and numeric patterns (such as "YYYY-MM-DD"
+     * or "#,##0.0") are dealt with elsewhere as they need different treatment.
      *
-     * \\TeXOSQuery locally defines \\bks (literal backslash), 
-     * \\lbr (literal left brace), \\rbr (literal right brace), 
-     * \\hsh (literal hash), \\grv (literal grave), \\lspc (literal
-     * space, catcode 12), \\spc (regular space), \\csq (close single quote),
-     * \\dqt (double quote) and \\osq (open single quote).
+     * \\TeXOSQuery locally defines commands for characters
+     * used in file names (catcode 12). These are all in the form
+     * \\fxxx (such as \\fhsh for a literal hash).
+     *
+     * We also have commands for characters intended for use in document
+     * text, which shouldn't be interpreted literally. These are all
+     * in the form \\txxx (such as \\thsh which should expand to
+     * \#).
+     *
+     * The regular space \\tspc guards against a space occurring after
+     * a character that needs to be converted to a control sequence.
+     * (For example "# 1" becomes "\\thsh \tspc 1")
+     * There's also a literal space \\fspc to guard against spaces
+     * in file names.
      *
      * This should take care of any insane file-naming schemes, such
      * as "<tt>bad file name#1.tex</tt>", "<tt>stupid {file} name.tex</tt>",
      * "<tt>spaced    out  file #2.tex</tt>", "<tt>file's stupid name.tex</tt>"
      *
-     * The regular space \\spc guards against a space occurring after
-     * a character that needs to be converted to a control sequence.
-     *
      * To help protect against input encoding problems, non-ASCII
-     * characters are wrapped in \\wrp. \\TeXOSQuery locally redefines
-     * this to \\@texosquery@nonascii@wrap which may be used to
-     * provide some protection or conversion, if required.
+     * characters are wrapped in \\twrp (regular text) or \\fwrp
+     * (file names). \\TeXOSQuery locally redefines these to
+     * \\texosquerynonasciiwrap and \\texosquerynonasciidetokwrap 
+     * which may be used to provide some protection or conversion from one
+     * encoding to another, if required.
      *
      * @param string Input string.
      * @param isRegularText true if the string represents text (for example, 
@@ -503,11 +514,12 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Escapes character include punctuation.
-     * \\TeXOSQuery sets the catcode to 12 for the following:
-     * <pre>- _ ^ ~ $ &amp; . / : " ' ; %</pre>
-     * so we don't need to worry about them when processing 
-     * file names, but some of them will need conversion for regular
-     * text.
+     * All ASCII punctuation characters have a literal and textual
+     * command to represent them in file names and document text,
+     * respectively. The literal (file name) commands are prefixed
+     * with "f" and the textual commands are prefixed with "t".
+     * None of the control codes should appear in any of the
+     * results, but they are checked for completeness.
      * @param codePoint Input code point.
      * @param isRegularText true if the character is in a string representing
      * text, set to false if string is a file name etc
@@ -516,26 +528,73 @@ public class TeXOSQuery implements Serializable
      */
    public String escapeSpChars(int codepoint, boolean isRegularText)
    {
+      return escapeSpChars(codepoint, isRegularText ? "t" : "f");
+   }
+
+    /**
+     * Escapes character include punctuation.
+     * As above but with the prefix supplied.
+     * @param codePoint Input code point.
+     * @param prefix The control sequence name prefix.
+     * @return String with character escaped.
+     * @since 1.2
+     */
+   public String escapeSpChars(int codepoint, String prefix)
+   {
       switch (codepoint)
       {
-         case '\\': return "\\bks ";
-         case '{': return "\\lbr ";
-         case '}': return "\\rbr ";
-         case '#': return isRegularText ? "\\#" : "\\hsh ";
-         case '_': return isRegularText ? "\\_" : "_";
-         case '\'': return isRegularText ? "\\csq " : "'";
-         case '`': return isRegularText ? "\\osq " : "\\grv ";
-         case '"': return isRegularText ? "\\dqt " : "\"";
-         case ' ': return isRegularText ? "\\spc " : "\\lspc ";
+         case '!': return String.format("\\%sexc ", prefix);
+         case '"': return String.format("\\%sdqt ", prefix);
+         case '#': return String.format("\\%shsh ", prefix);
+         case '$': return String.format("\\%sdol ", prefix);
+         case '%': return String.format("\\%spct ", prefix);
+         case '&': return String.format("\\%samp ", prefix);
+         case '\'': return String.format("\\%scsq ", prefix);
+         case '(': return String.format("\\%sopb ", prefix);
+         case ')': return String.format("\\%sclb ", prefix);
+         case '*': return String.format("\\%sast ", prefix);
+         case '+': return String.format("\\%spls ", prefix);
+         case ',': return String.format("\\%scom ", prefix);
+         case '-': return String.format("\\%shyp ", prefix);
+         case '.': return String.format("\\%sdot ", prefix);
+         case '/': return String.format("\\%sslh ", prefix);
+         case ':': return String.format("\\%scln ", prefix);
+         case ';': return String.format("\\%sscl ", prefix);
+         case '<': return String.format("\\%sles ", prefix);
+         case '=': return String.format("\\%seql ", prefix);
+         case '>': return String.format("\\%sgre ", prefix);
+         case '?': return String.format("\\%sque ", prefix);
+         case '@': return String.format("\\%satc ", prefix);
+         case '[': return String.format("\\%sosb ", prefix);
+         case '\\': return String.format("\\%sbks ", prefix);
+         case ']': return String.format("\\%scsb ", prefix);
+         case '^': return String.format("\\%scir ", prefix);
+         case '_': return String.format("\\%susc ", prefix);
+         case '`': return String.format("\\%sgrv ", prefix);
+         case '{': return String.format("\\%slbr ", prefix);
+         case '}': return String.format("\\%srbr ", prefix);
+         case '~': return String.format("\\%stld ", prefix);
+         // These next few cases (before ' ') shouldn't occur, but
+         // check for them anyway.
+         case 0x007F: return ""; // delete control
+         case 0x0009: // tab (fall through to space)
+         case 0x000A: // lf
+         case 0x000C: // ff
+         case 0x000D: // cr
+         case ' ': return String.format("\\%sspc ", prefix);
          default:
 
-           if (codepoint >= 32 && codepoint <= 126)
+           if (codepoint < 32)
+           {
+              return ""; // strip control characters
+           }
+           else if (codepoint >= 32 && codepoint <= 126)
            {
               return String.format("%c", codepoint);
            }
            else
            {
-              return String.format("\\wrp{%c}", codepoint);
+              return String.format("\\%swrp{%c}", prefix, codepoint);
            }
       }
    }
@@ -614,7 +673,7 @@ public class TeXOSQuery implements Serializable
          }
          catch (NullPointerException e)
          {
-            debug("null file name passed to toTeXPath()", e);
+            debug("null file name", e);
          }
 
          return "";
@@ -649,13 +708,25 @@ public class TeXOSQuery implements Serializable
          }
          catch (NullPointerException e)
          {
-            debug("null file name passed to fromTeXPath()", e);
+            debug("null file name", e);
          }
 
          return "";
       }
 
-      // Unescape hash
+      // Allow the user to use \# to represent a hash in the file
+      // name. This method is only used on filenames that have been
+      // passed by the user to this application. This isn't trying
+      // to unescape escapeSpChars. For example, they might've done
+      // \TeXOSQuery{\result}{-p imagefile\#1.png}
+      // Other special characters have the catcodes changed by
+      // \TeXOSQuery, except for \ { and }. If they have that kind
+      // of weird file naming system they'll have to detokenize the
+      // argument first. For example
+      // \def\myweirdfilename{image{file}.png}
+      // \@onelevel@sanitize\myweirdfilename
+      // \TeXOSQuery{\result}{-p \myweirdfilename}
+
       filename = filename.replaceAll("\\#", "#");
 
       // If the OS uses backslash as the directory divider,
@@ -819,7 +890,7 @@ public class TeXOSQuery implements Serializable
       {
         // this shouldn't happen
         throw new IllegalArgumentException(
-          String.format("Invalid day of week index %d", index));
+          String.format("Invalid day of week index: %d", index));
       }
       catch (Exception e)
       {
@@ -950,15 +1021,24 @@ public class TeXOSQuery implements Serializable
    {
        String tz = String.format("%1$tz", calendar);
 
-       // Need to ensure "D" has category code 12
-
-       return String.format(
-               "%s:%2$tY%2$tm%2td%2$tH%2$tM%2$tS%3$s'%4$s'",
-               compatible < 2 ? "D" : "\\pdfd ",
+       if (compatible < 2)
+       {
+          return String.format(
+               "D:%1$tY%1$tm%1td%1$tH%1$tM%1$tS%2$s'%3$s'",
                calendar,
                tz.substring(0, 3),
-               tz.substring(3)
-       );
+               tz.substring(3));
+       }
+       else
+       {
+          // Need to ensure D : and ' have category code 12
+
+          return String.format(
+               "\\pdfd\\fcln %1$tY%1$tm%1td%1$tH%1$tM%1$tS%2$s\\fcsq %3$s\\fcsq ",
+               calendar,
+               tz.substring(0, 3),
+               tz.substring(3));
+       }
    }
 
    /**
@@ -1845,7 +1925,7 @@ public class TeXOSQuery implements Serializable
     * grouping conditional (1 if locale uses number grouping
     * otherwise 0),
     * currency code (e.g. GBP), regional currency identifier (e.g. IMP),
-    * currency symbol (e.g. \\wrp{£}), currency TeX code (e.g.
+    * currency symbol (e.g. \\twrp{&0x00A3;}), currency TeX code (e.g.
     * \\texosquerycurrency{pound}), monetary decimal separator.
     * @since 1.2
     */
@@ -1883,19 +1963,19 @@ public class TeXOSQuery implements Serializable
            || countryCode.equals("831"))
           {// Guernsey
              localeCurrencyCode = "GGP";
-             currency = "£";
+             currency = POUND_STRING;
           }
           else if (countryCode.equals("JE") || countryCode.equals("JEY")
            || countryCode.equals("832"))
           {// Jersey
              localeCurrencyCode = "JEP";
-             currency = "£";
+             currency = POUND_STRING;
           }
           else if (countryCode.equals("IM") || countryCode.equals("IMN")
            || countryCode.equals("833"))
           {// Isle of Man
              localeCurrencyCode = "IMP";
-             currency = "M£";
+             currency = String.format("M%s", POUND_STRING);
           }
           else if (countryCode.equals("KI") || countryCode.equals("KIR")
            || countryCode.equals("296"))
@@ -2213,12 +2293,12 @@ public class TeXOSQuery implements Serializable
 
    /**
     * Converts date/time pattern to a form that's easier for TeX to
-    * parse. This replaces the placeholders with <tt>\\dtf{n}{c}</tt> where c
+    * parse. This replaces the placeholders with <tt>\\patdtf{n}{c}</tt> where c
     * is the placeholder character and n is the number of
     * occurrences of c in the placeholder. (For example, 
     * "<tt>dd-MMM-yyyy</tt>" is  converted to
-    * <tt>\\dtf{2}{d}-\\dtf{3}{M}-\\dtf{4}{y}</tt>). The 
-    * query command \\TeXOSQuery in texosquery.tex will expand \\dtf
+    * <tt>\\patdtf{2}{d}-\\patdtf{3}{M}-\\patdtf{4}{y}</tt>). The 
+    * query command \\TeXOSQuery in texosquery.tex will expand \\patdtf
     * to the longer \\texosquerydtf to avoid conflict. This can then be
     * redefined as appropriate.
     * @param localeFormat The date/time pattern
@@ -2274,7 +2354,7 @@ public class TeXOSQuery implements Serializable
                else
                {
                   // literal '
-                  builder.append("\\apo ");
+                  builder.append("\\patapo ");
                   i = nextIndex;
                   offset = Character.charCount(nextCodePoint);
                }
@@ -2298,13 +2378,13 @@ public class TeXOSQuery implements Serializable
                   if (prev != 0)
                   {
                      builder.append(String.format(
-                         "\\dtf{%d}{%c}", fieldLen, prev));
+                         "\\patdtf{%d}{%c}", fieldLen, prev));
                      prev = 0;
                      fieldLen = 0;
                   }
 
                   // start of the string
-                  builder.append("\\str{");
+                  builder.append("\\patstr{");
                   inString = true;
 
                break;
@@ -2345,7 +2425,7 @@ public class TeXOSQuery implements Serializable
                  else
                  {
                      builder.append(String.format(
-                       "\\dtf{%d}{%c}%s", fieldLen, prev, 
+                       "\\patdtf{%d}{%c}%s", fieldLen, prev, 
                        escapeText(codepoint)));
                  }
                  prev = 0;
@@ -2357,7 +2437,7 @@ public class TeXOSQuery implements Serializable
       if (prev != 0)
       {
          builder.append(String.format(
-           "\\dtf{%d}{%c}", fieldLen, prev));
+           "\\patdtf{%d}{%c}", fieldLen, prev));
       }
 
       return builder.toString();
@@ -2467,12 +2547,12 @@ public class TeXOSQuery implements Serializable
 
       if (negative == null)
       {
-         return String.format("\\numfmt{%s}", 
+         return String.format("\\patnumfmt{%s}", 
            formatNumberSubPattern(positive));
       }
       else
       {
-         return String.format("\\pmnumfmt{%s}{%s}", 
+         return String.format("\\patpmnumfmt{%s}{%s}", 
            formatNumberSubPattern(positive),
            formatNumberSubPattern(negative));
       }
@@ -2512,8 +2592,8 @@ public class TeXOSQuery implements Serializable
          boolean percent = ("%".equals(m.group(2)));
 
          return formatPercentagePattern(m.group(1), m.group(3),
-          percent ? "ppct" : "ppml", 
-          percent ? "spct" : "spml");
+          percent ? "patppct" : "patppml", 
+          percent ? "patspct" : "patspml");
       }
 
       // must be a number
@@ -2540,11 +2620,11 @@ public class TeXOSQuery implements Serializable
          // currency symbol is a suffix
          if (international)
          {
-            return String.format("\\sicur{%s}{}", pre);
+            return String.format("\\patsicur{%s}{}", pre);
          }
          else
          {
-            return String.format("\\scur{%s}{}", pre);
+            return String.format("\\patscur{%s}{}", pre);
          }
       }
       else if (pre == null || "".equals(pre))
@@ -2555,11 +2635,11 @@ public class TeXOSQuery implements Serializable
 
          if (international)
          {
-            return String.format("\\picur{%s}{}", post);
+            return String.format("\\patpicur{%s}{}", post);
          }
          else
          {
-            return String.format("\\pcur{%s}{}", post);
+            return String.format("\\patpcur{%s}{}", post);
          }
       }
       else
@@ -2576,11 +2656,11 @@ public class TeXOSQuery implements Serializable
             // text
             if (international)
             {
-               return String.format("\\sicur{%s}{%s}", pre, post);
+               return String.format("\\patsicur{%s}{%s}", pre, post);
             }
             else
             {
-               return String.format("\\scur{%s}{%s}", pre, post);
+               return String.format("\\patscur{%s}{%s}", pre, post);
             }
          }
          else
@@ -2589,11 +2669,11 @@ public class TeXOSQuery implements Serializable
             // text
             if (international)
             {
-               return String.format("\\picur{%s}{%s}", post, pre);
+               return String.format("\\patpicur{%s}{%s}", post, pre);
             }
             else
             {
-               return String.format("\\pcur{%s}{%s}", post, pre);
+               return String.format("\\patpcur{%s}{%s}", post, pre);
             }
          }
       }
@@ -2691,7 +2771,7 @@ public class TeXOSQuery implements Serializable
          return formatDecimalPattern(pre);
       }
 
-      return String.format("\\sinumfmt{%s}{%s}",
+      return String.format("\\patsinumfmt{%s}{%s}",
         formatDecimalPattern(pre),
         formatIntegerPattern(post, true));
    }
@@ -2733,7 +2813,7 @@ public class TeXOSQuery implements Serializable
          return formatIntegerPattern(pre, true);
       }
 
-      return String.format("\\decfmt{%s}{%s}",
+      return String.format("\\patdecfmt{%s}{%s}",
         formatIntegerPattern(pre, true),
         formatIntegerPattern(post, false));
    }
@@ -2747,8 +2827,8 @@ public class TeXOSQuery implements Serializable
     * in the pattern beyond that are discarded. This means defining
     * a command that effectively takes 10 arguments (with a bit of
     * trickery to get around the 9-arg maximum). Each digit can then
-    * be rendered using either \dgt (always display the digit)
-    * or \dgtnz (only display the digit if it isn't zero).
+    * be rendered using either \patdgt (always display the digit)
+    * or \patdgtnz (only display the digit if it isn't zero).
     * These short commands will be converted to longer ones that are
     * less likely to cause conflict when \TeXOSQuery is used.
     * @param pattern The pattern
@@ -2824,11 +2904,11 @@ public class TeXOSQuery implements Serializable
               {
                  inString = true;
 
-                 builder.append("\\str{");
+                 builder.append("\\patstr{");
               }
               else if (nextCodePoint == '\'')
               {
-                 builder.append("\\apo ");
+                 builder.append("\\patapo ");
                  i = nextIndex;
                  offset = Character.charCount(nextCodePoint);
               }
@@ -2854,19 +2934,19 @@ public class TeXOSQuery implements Serializable
 
                     for ( ; digitIndex > digitCount; digitIndex--)
                     {
-                       builder.append("\\dgtnz ");
+                       builder.append("\\patdgtnz ");
 
                        if (groupCount > 0 && ((digitIndex-1) % groupCount) == 0)
                        {
-                          builder.append("\\ngp ");
+                          builder.append("\\patngp ");
                        }
                     }
 
-                    builder.append("\\dgt ");
+                    builder.append("\\patdgt ");
                  }
                  else
                  {
-                    builder.append("\\dgt ");
+                    builder.append("\\patdgt ");
                  }
 
                  digitIndex--;
@@ -2882,19 +2962,19 @@ public class TeXOSQuery implements Serializable
                  }
                  else if (digitIndex == digitCount)
                  {
-                    builder.append("\\dgt ");
+                    builder.append("\\patdgt ");
 
                     // not enough digit markers in the pattern
                     // pad with #
 
                     for ( ; digitIndex < MAX_DIGIT_FORMAT; digitIndex++)
                     {
-                       builder.append("\\dgtnz ");
+                       builder.append("\\patdgtnz ");
                     }
                  }
                  else
                  {
-                    builder.append("\\dgt ");
+                    builder.append("\\patdgt ");
                  }
               }
             break;
@@ -2914,19 +2994,19 @@ public class TeXOSQuery implements Serializable
 
                     for ( ; digitIndex > digitCount; digitIndex--)
                     {
-                       builder.append("\\dgtnz ");
+                       builder.append("\\patdgtnz ");
 
                        if (groupCount > 0 && ((digitIndex-1) % groupCount) == 0)
                        {
-                          builder.append("\\ngp ");
+                          builder.append("\\patngp ");
                        }
                     }
 
-                    builder.append("\\dgtnz ");
+                    builder.append("\\patdgtnz ");
                  }
                  else
                  {
-                    builder.append("\\dgtnz ");
+                    builder.append("\\patdgtnz ");
                  }
 
                  digitIndex--;
@@ -2942,30 +3022,30 @@ public class TeXOSQuery implements Serializable
                  }
                  else if (digitIndex == digitCount)
                  {
-                    builder.append("\\dgtnz ");
+                    builder.append("\\patdgtnz ");
 
                     // not enough digit markers in the pattern
                     // pad with #
 
                     for ( ; digitIndex < MAX_DIGIT_FORMAT; digitIndex++)
                     {
-                       builder.append("\\dgtnz ");
+                       builder.append("\\patdgtnz ");
                     }
                  }
                  else
                  {
-                    builder.append("\\dgtnz ");
+                    builder.append("\\patdgtnz ");
                  }
               }
             break;
             case '-':
-              builder.append("\\msg ");
+              builder.append("\\patmsg ");
             break;
             case ',':
 
               if (digitIndex <= digitCount)
               {
-                 builder.append("\\ngp ");
+                 builder.append("\\patngp ");
               }
 
             break;
@@ -3009,7 +3089,7 @@ public class TeXOSQuery implements Serializable
     * decimal separator, exponent separator, grouping flag, ISO 4217 currency
     * identifier (e.g. GBP), region currency identifier (usually the same as
     * the ISO 4217 code, but may be an unofficial currency code, such as IMP),
-    * currency symbol (e.g. £), TeX currency symbol, monetary decimal separator,
+    * currency symbol (e.g. &0x00A3;), TeX currency symbol, monetary decimal separator,
     * percent symbol, per mill symbol.
     * <li> number format, integer format, currency format,
     * percent format.
@@ -3255,19 +3335,19 @@ public class TeXOSQuery implements Serializable
            || countryCode.equals("831"))
           {// Guernsey
              localeCurrencyCode = "GGP";
-             currency = "£";
+             currency = POUND_STRING;
           }
           else if (countryCode.equals("JE") || countryCode.equals("JEY")
            || countryCode.equals("832"))
           {// Jersey
              localeCurrencyCode = "JEP";
-             currency = "£";
+             currency = POUND_STRING;
           }
           else if (countryCode.equals("IM") || countryCode.equals("IMN")
            || countryCode.equals("833"))
           {// Isle of Man
              localeCurrencyCode = "IMP";
-             currency = "M£";
+             currency = String.format("M%s", POUND_STRING);
           }
           else if (countryCode.equals("KI") || countryCode.equals("KIR")
            || countryCode.equals("296"))
@@ -3491,7 +3571,9 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
-     * Process command line arguments.
+     * Process command line arguments. Options must come before
+     * actions. (The copied QueryAction objects retain the settings
+     * from the time of their creation.)
      * @param args Command line arguments.
      * @since 1.2
      */
@@ -3530,10 +3612,22 @@ public class TeXOSQuery implements Serializable
          }
          else if (args[i].equals("--nodebug"))
          {
+            if (actions.size() > 0)
+            {
+               System.err.println("Options must come before actions.");
+               System.exit(0);
+            }
+
             debugLevel = 0;
          }
          else if (args[i].equals("--debug"))
          {
+            if (actions.size() > 0)
+            {
+               System.err.println("Options must come before actions.");
+               System.exit(0);
+            }
+
             if (i == args.length-1)
             {
                debugLevel = 1;
@@ -3562,6 +3656,12 @@ public class TeXOSQuery implements Serializable
          }
          else if (args[i].equals("--compatible"))
          {
+            if (actions.size() > 0)
+            {
+               System.err.println("Options must come before actions.");
+               System.exit(0);
+            }
+
             if (i == args.length-1)
             {
                System.err.println("--compatible <level> expected");
@@ -3854,7 +3954,7 @@ public class TeXOSQuery implements Serializable
 
    /**
     * Compatibility mode. Version 1.2 replaces escapeHash with
-    * escapeSpChars, which switches to using \\hsh etc. Provide a
+    * escapeSpChars, which switches to using \\fhsh etc. Provide a
     * mode to restore the previous behaviour.
     */ 
    private int compatible = DEFAULT_COMPATIBLE;
@@ -3863,4 +3963,10 @@ public class TeXOSQuery implements Serializable
    // of digits provided for the number formatter. 
 
    private static final int MAX_DIGIT_FORMAT=10;
+
+   // Pound symbol
+   private static final char POUND_CHAR=0x00A3;
+
+   // Pound symbols as a string
+   private static final String POUND_STRING=""+POUND_CHAR;
 }

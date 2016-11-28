@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# This bash script is just for testing the development
+# texosquery.jar file. When installing the working application,
+# please use the texosquery.sh script bundled in texosquery.dtx
+
 bindir=`dirname $0`
 java -jar "$bindir/texosquery.jar" "$@"
 

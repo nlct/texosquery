@@ -51,7 +51,7 @@ public abstract class QueryAction implements Serializable
      QueryActionType type, String description)
    {
       this(longForm, shortForm, numOptional, numRequired, 
-           syntax, type, description, TeXOSQuery.DEFAULT_COMPATIBLE);
+           syntax, type, description, 0);
    }
 
    public QueryAction(String longForm, String shortForm,
@@ -259,5 +259,5 @@ public abstract class QueryAction implements Serializable
    private String[] optionalArgs=null;
    private QueryActionType type;
    private String description;
-   private int minCompatibility;
+   private int minCompatibility=0;
 }
