@@ -1,3 +1,21 @@
+/*
+    Copyright (C) 2016 Nicola L.C. Talbot
+    www.dickimaw-books.com
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+*/
 package com.dickimawbooks.texosquery;
 
 import java.io.BufferedReader;
@@ -121,7 +139,7 @@ public class TeXOSQuery implements Serializable
    {
       if (debugLevel >= level)
       {
-         System.err.println(String.format("[%s] %s", name, message));
+         System.err.println(String.format("%s: %s", name, message));
       }
    }
 
@@ -409,7 +427,7 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
-     * Escapes problematic characters from a string that will be
+     * Escapes potentially problematic characters from a string that will be
      * expanded when input by TeX's shell escape.
      * 
      * Some of the methods in this class return TeX code. Those
@@ -574,14 +592,14 @@ public class TeXOSQuery implements Serializable
          case '{': return String.format("\\%slbr ", prefix);
          case '}': return String.format("\\%srbr ", prefix);
          case '~': return String.format("\\%stld ", prefix);
-         // These next few cases (before ' ') shouldn't occur, but
+         case ' ': return String.format("\\%sspc ", prefix);
+         // These next few cases shouldn't occur, but
          // check for them anyway.
          case 0x007F: return ""; // delete control
-         case 0x0009: // tab (fall through to space)
-         case 0x000A: // lf
+         case 0x0009: return "^^I";// tab
+         case 0x000A: // lf (fall through to cr)
          case 0x000C: // ff
-         case 0x000D: // cr
-         case ' ': return String.format("\\%sspc ", prefix);
+         case 0x000D: return " "; // cr
          default:
 
            if (codepoint < 32)
@@ -590,10 +608,13 @@ public class TeXOSQuery implements Serializable
            }
            else if (codepoint >= 32 && codepoint <= 126)
            {
+              // ASCII letters and digits (all ASCII punctuation
+              // dealt with above).
               return String.format("%c", codepoint);
            }
            else
            {
+              // Outside Basic Latin set.
               return String.format("\\%swrp{%c}", prefix, codepoint);
            }
       }
@@ -714,31 +735,43 @@ public class TeXOSQuery implements Serializable
          return "";
       }
 
-      // Allow the user to use \# to represent a hash in the file
-      // name. This method is only used on filenames that have been
-      // passed by the user to this application. This isn't trying
-      // to unescape escapeSpChars. For example, they might've done
-      // \TeXOSQuery{\result}{-p imagefile\#1.png}
-      // Other special characters have the catcodes changed by
-      // \TeXOSQuery, except for \ { and }. If they have that kind
-      // of weird file naming system they'll have to detokenize the
-      // argument first. For example
-      // \def\myweirdfilename{image{file}.png}
-      // \@onelevel@sanitize\myweirdfilename
-      // \TeXOSQuery{\result}{-p \myweirdfilename}
+      // The file name may contain awkward characters. For example,
+      // the user may have a file called imagefile#1.png and
+      // they're trying to do, say,
+      // \TeXOSQuery{\result}{-p imagefile#1.png}
+      // If the shell escape is using bash, the hash will be
+      // interpreted as a comment character, so the argument
+      // received by texosquery will actually be "imagefile"
+      // since the "#1.png" part will be interpreted as a comment.
 
-      filename = filename.replaceAll("\\#", "#");
+      // The user can protect the # from the shell using
+      // \TeXOSQuery{\result}{-p imagefile\string\#1.png}
+      // which bash will pass as 'imagefile#1.png', but
+      // perhaps another type of shell might pass it literally
+      // as 'imagefile\#1.png', so the following allows for
+      // that by simply stripping all backslashes from the file name.
+      // (The file name is always supplied with forward slashes as
+      // the directory divider regardless of the operating system.
+      // We can substitute the divider at this point as well.)
+ 
+      StringBuilder builder = new StringBuilder();
 
-      // If the OS uses backslash as the directory divider,
-      // convert all forward slashes to backslashes. Again we need
-      // four backslashes to represent a single literal backslash.
-
-      if (File.separatorChar == BACKSLASH)
+      for (int i = 0, n = filename.length(); i < n; )
       {
-         filename = filename.replaceAll("/", "\\\\");
+         int codepoint = filename.codePointAt(i);
+         i += Character.charCount(codepoint);
+
+         if (codepoint == '/')
+         {
+            builder.appendCodePoint(File.separatorChar);
+         }
+         else if (codepoint != BACKSLASH)
+         {
+            builder.appendCodePoint(codepoint);
+         }
       }
 
-      return filename;
+      return builder.toString();
    }
 
     /**
@@ -3923,7 +3956,7 @@ public class TeXOSQuery implements Serializable
    public static final int DEFAULT_COMPATIBLE=2;
 
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2016-11-24";
+   private static final String VERSION_DATE = "2016-11-29";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
