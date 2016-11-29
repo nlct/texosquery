@@ -1,4 +1,4 @@
-1.2 (2016/11/24):
+1.2 (2016/11/29):
 
  * Now has three .jar files depending on the Java installation:
 
@@ -71,7 +71,7 @@
 
   --debug [⟨n⟩]
   --nodebug
-  --compatible ⟨n⟩
+  --compatible ⟨n⟩ / -compat ⟨n⟩
 
   * When accessing file information, the TEXMF openin_any
     setting is first checked to determine if read access is 
@@ -81,7 +81,7 @@
     internally converted when read in by \TeXOSQuery. For
     example "texosquery -n" now returns
 
-    \pdfd :20161113161156+00'00'
+    \pdfd \fcln 20161113161156\fpls 00\fcsq 00\fcsq 
 
     instead of
 

@@ -714,7 +714,12 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
-     * Converts the TeX path back to the OS representation.
+     * Converts the TeX path to the OS representation.
+     * The file name will typically be passed as a parameter through
+     * \\TeXOSQuery so it will have forward slashes as the directory
+     * divider regardless of the OS (as per \\input and
+     * \\includegraphics). This method converts the TeX file name
+     * into one that's valid for the OS.
      * @param filename The filename string.
      * @return The OS representation.
      */
@@ -733,6 +738,16 @@ public class TeXOSQuery implements Serializable
          }
 
          return "";
+      }
+
+      if (compatible < 2)
+      {
+         if (File.separatorChar == BACKSLASH)
+         {
+            return filename.replaceAll("/", "\\\\");
+         }
+
+         return filename;
       }
 
       // The file name may contain awkward characters. For example,
@@ -756,16 +771,33 @@ public class TeXOSQuery implements Serializable
  
       StringBuilder builder = new StringBuilder();
 
-      for (int i = 0, n = filename.length(); i < n; )
+      for (int i = 0, n = filename.length(), offset=1; i < n; i+=offset)
       {
          int codepoint = filename.codePointAt(i);
-         i += Character.charCount(codepoint);
+         offset = Character.charCount(codepoint);
+
+         int nextIndex = i+offset;
+         int nextCodePoint = (nextIndex<n ? filename.codePointAt(nextIndex):0);
 
          if (codepoint == '/')
          {
             builder.appendCodePoint(File.separatorChar);
          }
-         else if (codepoint != BACKSLASH)
+         if (codepoint == BACKSLASH)
+         {
+            // Would anyone really want a literal backslash in a
+            // file name? Allow a double backslash to represent a
+            // literal backslash but only if the OS directory
+            // divider isn't a backslash. Otherwise discard
+            // this character.
+
+            if (File.separatorChar != BACKSLASH && nextCodePoint == BACKSLASH)
+            {
+               builder.appendCodePoint(codepoint);
+               offset = Character.charCount(nextCodePoint);
+            }
+         }
+         else
          {
             builder.appendCodePoint(codepoint);
          }
@@ -1064,13 +1096,20 @@ public class TeXOSQuery implements Serializable
        }
        else
        {
-          // Need to ensure D : and ' have category code 12
+          // Need to ensure D : + or - and ' have category code 12
+          // The simplest way to deal with this is to process
+          // everything after the "D" to escapeFileName since
+          // the sign is hidden in the format.
 
-          return String.format(
-               "\\pdfd\\fcln %1$tY%1$tm%1td%1$tH%1$tM%1$tS%2$s\\fcsq %3$s\\fcsq ",
+          return String.format("\\pdfd %s",
+             escapeFileName(
+               String.format(
+               ":%1$tY%1$tm%1td%1$tH%1$tM%1$tS%2$s'%3$s'",
                calendar,
                tz.substring(0, 3),
-               tz.substring(3));
+               tz.substring(3))
+             )); 
+
        }
    }
 
@@ -1181,7 +1220,11 @@ public class TeXOSQuery implements Serializable
     /**
      * Gets the list of files from a directory. This uses
      * getFilterFileList to filter out files prohibited by the
-     * openin_any setting.
+     * openin_any setting. Note that the separator isn't escaped as
+     * the user may want some actual TeX code. For example, the
+     * separator might need to be a double backslash.
+     * The user will need to take the appropriate precautions
+     * to protect it from expansion during the shell escape.
      * @param separator Separator.
      * @param directory Directory.
      * @return List as a string.
