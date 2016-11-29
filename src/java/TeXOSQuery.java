@@ -3493,7 +3493,7 @@ public class TeXOSQuery implements Serializable
       System.out.println("\t2: additionally display stack trace.");
       System.out.println();
 
-      System.out.println("--compatible <n>");
+      System.out.println("--compatible <n> or -compat <n>");
       System.out.println("\tCompatibility setting.");
       System.out.println("\t<n> should be \"latest\" (default) or an integer:");
 
@@ -3687,7 +3687,7 @@ public class TeXOSQuery implements Serializable
                }
             }
          }
-         else if (args[i].equals("--compatible"))
+         else if (args[i].equals("--compatible") || args[i].equals("-compat"))
          {
             if (actions.size() > 0)
             {

@@ -123,7 +123,7 @@ Organization for Standardization}
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2016-11-24 (v1.2)}
+%\date{2016-11-29 (v1.2)}
 %\maketitle
 %
 %\begin{abstract}
@@ -593,7 +593,8 @@ Organization for Standardization}
 %written to STDERR. If \meta{n} $\geq 2$, any exceptions encountered
 %will additionally write the stack trace to STDERR. If \meta{n}
 %$\geq 3$ non-error informational messages are included.
-%\item[\longarg{compatible} \meta{n}] Set the compatibility mode.
+%\item[\longarg{compatible} \meta{n} or \shortarg{compat} \meta{n}]
+%Set the compatibility mode.
 %The argument should be either a non-negative integer (0 for version
 %1.0, 1 for version 1.1, etc) or the keyword \texttt{latest} to
 %indicate the latest version (default). Note that the compatibility
@@ -1460,6 +1461,31 @@ Organization for Standardization}
 %\fi
 %\end{verbatim}
 %(Make sure you have at least v1.1 for this to work correctly.)
+%
+%\begin{important}
+%Take care of characters that have a special meaning to your shell.
+%For example, bash interprets \verb|#| as a comment. For example, if
+%you have a file called \texttt{image\#1.png}, then you can't simply
+%do
+%\begin{verbatim}
+%\TeXOSQuery{\result}{-p image#1.png}
+%\end{verbatim}
+%since bash will pass this as
+%\begin{verbatim}
+%texosquery.sh -p image
+%\end{verbatim}
+%(The \verb|#1.png| part is treated as a comment.) Nor can you do
+%\begin{verbatim}
+%\TeXOSQuery{\result}{-p image\#1.png}
+%\end{verbatim}
+%as \TeX\ will replace the \verb|\#| with \verb|#| when passing the
+%command invocation to the shell. The only way to deal with this
+%situation is to do
+%\begin{verbatim}
+%\TeXOSQuery{\result}{-p image\string\#1.png}
+%\end{verbatim}
+%to protect the \verb|#| character from both \TeX\ and the shell.
+%\end{important}
 %
 %Dry run mode is determined by the conditional
 %\DescribeMacro\ifTeXOSQueryDryRun
