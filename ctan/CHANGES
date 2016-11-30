@@ -62,16 +62,23 @@
 
   --bcp47 / -b
   --codeset-lcs / -C
-  --locale-data [⟨locale⟩] / -D [⟨locale⟩]
-  --numeric [⟨locale⟩] / -N [⟨locale⟩]
+  --locale-data / -D 
+  --numeric / -N 
   --date-time / -M
   --time-zones / -Z
+  --list-dir / -ld
+  --list-regular / -lr
+  --filterlist-dir / -fd
+  --filterlist-regular / -fr
 
   Options:
 
   --debug [⟨n⟩]
   --nodebug
   --compatible ⟨n⟩ / -compat ⟨n⟩
+
+  * Actions --list (-i) and --filterlist (-f) now have an
+    optional argument to indicate the sort order.
 
   * When accessing file information, the TEXMF openin_any
     setting is first checked to determine if read access is 

@@ -1,7 +1,6 @@
 \input docstrip
 
 \preamble
-
  texosquery
  Copyright 2016 Nicola Talbot
 
@@ -22,6 +21,17 @@
  Additionally, the Java application texosquery.jar and bash script
  texosquery
 \endpreamble
+
+%The following is to prevent a blank line from appearing
+%at the start of the bash scripts (which occurs when simply using
+%\nopreamble).
+
+\ifx\@gobble\undefined
+ \def\@gobble#1{}
+\fi
+\def\literalhash{\expandafter\@gobble\string\#}
+
+\def\bashpreamble{\literalhash !/bin/sh}
 
 \askforoverwritefalse
 
@@ -47,17 +57,17 @@
   }
   \file{texosquery.sh}%
   {%
-    \nopreamble\nopostamble
+    \usepreamble\bashpreamble\nopostamble
     \from{texosquery.dtx}{texosquery.sh}%
   }
   \file{texosquery-jre5.sh}%
   {%
-    \nopreamble\nopostamble
+    \usepreamble\bashpreamble\nopostamble
     \from{texosquery.dtx}{texosquery-jre5.sh}%
   }
   \file{texosquery-jre8.sh}%
   {%
-    \nopreamble\nopostamble
+    \usepreamble\bashpreamble\nopostamble
     \from{texosquery.dtx}{texosquery-jre5.sh}%
   }
   \file{texosquery.bat}%

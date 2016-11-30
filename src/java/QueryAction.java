@@ -105,6 +105,23 @@ public abstract class QueryAction implements Serializable
    {
       invokedName = args[index++];
 
+      if (required > 0)
+      {
+         requiredArgs = new String[required];
+      }
+
+      for (int i = 0; i < required; i++)
+      {
+         if (index >= args.length)
+         {
+            throw new IllegalArgumentException(String.format(
+              "Invalid syntax for action '%s'.%nExpected: %s",
+              invokedName, getUsage(invokedName)));
+         }
+
+         requiredArgs[i] = args[index++];
+      }
+
       optionalProvided = 0;
 
       if (optional > 0)
@@ -121,23 +138,6 @@ public abstract class QueryAction implements Serializable
          }
 
          optionalArgs[optionalProvided++] = args[index++];
-      }
-
-      if (required > 0)
-      {
-         requiredArgs = new String[required];
-      }
-
-      for (int i = 0; i < required; i++)
-      {
-         if (index >= args.length)
-         {
-            throw new IllegalArgumentException(String.format(
-              "Invalid syntax for action '%s'.%nExpected: %s",
-              invokedName, getUsage(invokedName)));
-         }
-
-         requiredArgs[i] = args[index++];
       }
 
       return index;

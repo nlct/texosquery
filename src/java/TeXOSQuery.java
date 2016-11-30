@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.DecimalFormatSymbols;
@@ -1217,6 +1218,19 @@ public class TeXOSQuery implements Serializable
       return "";
    }
 
+   /**
+    * Sort the given list of file names.
+    * @param list The list of file names to be sort
+    * @param directory The directory in which the files are
+    * contained
+    * @param sortType How to order the list
+    */ 
+    public void sortFileList(String[] list, File directory, 
+      FileSortType sortType)
+    {
+       Arrays.sort(list, new FileSortComparator(directory, sortType));
+    }
+
     /**
      * Gets the list of files from a directory. This uses
      * getFilterFileList to filter out files prohibited by the
@@ -1227,11 +1241,14 @@ public class TeXOSQuery implements Serializable
      * to protect it from expansion during the shell escape.
      * @param separator Separator.
      * @param directory Directory.
+     * @param sortType How to sort the file list
+     * @param listType The type of files to include in the list
      * @return List as a string.
      */
-   public String getFileList(String separator, File directory)
+   public String getFileList(String separator, File directory, 
+            FileSortType sortType, FileListType listType)
    {
-      return getFilterFileList(separator, ".*", directory);
+      return getFilterFileList(separator, ".*", directory, sortType, listType);
    }
 
     /**
@@ -1241,10 +1258,13 @@ public class TeXOSQuery implements Serializable
      * @param separator Separator.
      * @param regex Regular expression.
      * @param directory Directory.
+     * @param sortType How to sort the file list
+     * @param listType The type of files to include in the list
      * @return Filtered list as string.
      */
    public String getFilterFileList(String separator,
-            final String regex, File directory)
+            final String regex, File directory, 
+            FileSortType sortType, final FileListType listType)
    {
       if (directory == null)
       {
@@ -1301,12 +1321,31 @@ public class TeXOSQuery implements Serializable
                      return false;
                   }
 
+                  switch (listType)
+                  {
+                     case FILE_LIST_DIRECTORIES_ONLY:
+
+                        if (!file.isDirectory()) return false;
+
+                     break;
+                     case FILE_LIST_REGULAR_FILES_ONLY:
+
+                        if (file.isDirectory()) return false;
+
+                     break;
+                  }
+
                   return name.matches(regex);
                }
             });
 
          if (list != null)
          {
+            if (sortType != FileSortType.FILE_SORT_DEFAULT)
+            {
+               sortFileList(list, directory, sortType);
+            }
+
             for (int i = 0; i < list.length; i++)
             {
                if (i > 0)
@@ -3942,26 +3981,88 @@ public class TeXOSQuery implements Serializable
             return getFileLength(fileFromTeXPath(getRequiredArgument(0)));
          }
       },
-      new QueryAction("list", "i", 0, 2, "<sep> <dir>",
+      new QueryAction("list", "i", 1, 2, "<sep> <dir> [<sort>]",
          QueryActionType.FILE_ACTION,
-         "Display list of all files in <dir> separated by <sep>")
+         String.format("Display list of all files in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
+           (Object[])FileSortComparator.getFileSortOptions()))
       {
          public String action()
          {
             return getFileList(getRequiredArgument(0),
-              new File(fromTeXPath(getRequiredArgument(1))));
+              new File(fromTeXPath(getRequiredArgument(1))),
+                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileListType.FILE_LIST_ANY);
          }
       },
-      new QueryAction("filterlist", "f", 0, 3, "<sep> <regex> <dir>",
+      new QueryAction("filterlist", "f", 1, 3, "<sep> <regex> <dir> [<sort>]",
          QueryActionType.FILE_ACTION, 
-         "Display list of files in <dir> that fully match <regex> separated by <sep>")
+         String.format("Display list of files in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s", 
+           (Object[])FileSortComparator.getFileSortOptions()))
       {
          public String action()
          {
             return getFilterFileList(
                   getRequiredArgument(0), 
                   getRequiredArgument(1), 
-                  new File(fromTeXPath(getRequiredArgument(2))));
+                  new File(fromTeXPath(getRequiredArgument(2))),
+                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileListType.FILE_LIST_ANY);
+         }
+      },
+      new QueryAction("list-dir", "ld", 1, 2, "<sep> <dir> [<sort>]",
+         QueryActionType.FILE_ACTION,
+         String.format("Display list of all sub-directories in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
+           (Object[])FileSortComparator.getFileSortOptions()))
+      {
+         public String action()
+         {
+            return getFileList(getRequiredArgument(0),
+              new File(fromTeXPath(getRequiredArgument(1))),
+                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileListType.FILE_LIST_DIRECTORIES_ONLY);
+         }
+      },
+      new QueryAction("filterlist-dir", "fd", 1, 3, "<sep> <regex> <dir> [<sort>]",
+         QueryActionType.FILE_ACTION, 
+         String.format("Display list of sub-directories in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s", 
+           (Object[])FileSortComparator.getFileSortOptions()))
+      {
+         public String action()
+         {
+            return getFilterFileList(
+                  getRequiredArgument(0), 
+                  getRequiredArgument(1), 
+                  new File(fromTeXPath(getRequiredArgument(2))),
+                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileListType.FILE_LIST_DIRECTORIES_ONLY);
+         }
+      },
+      new QueryAction("list-regular", "lr", 1, 2, "<sep> <dir> [<sort>]",
+         QueryActionType.FILE_ACTION,
+         String.format("Display list of all regular files in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
+           (Object[])FileSortComparator.getFileSortOptions()))
+      {
+         public String action()
+         {
+            return getFileList(getRequiredArgument(0),
+              new File(fromTeXPath(getRequiredArgument(1))),
+                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileListType.FILE_LIST_REGULAR_FILES_ONLY);
+         }
+      },
+      new QueryAction("filterlist-regular", "fr", 1, 3, "<sep> <regex> <dir> [<sort>]",
+         QueryActionType.FILE_ACTION, 
+         String.format("Display list of regular files in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s", 
+           (Object[])FileSortComparator.getFileSortOptions()))
+      {
+         public String action()
+         {
+            return getFilterFileList(
+                  getRequiredArgument(0), 
+                  getRequiredArgument(1), 
+                  new File(fromTeXPath(getRequiredArgument(2))),
+                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileListType.FILE_LIST_REGULAR_FILES_ONLY);
          }
       },
       new QueryAction("uri", "u", 0, 1, "<file>",
@@ -3999,7 +4100,7 @@ public class TeXOSQuery implements Serializable
    public static final int DEFAULT_COMPATIBLE=2;
 
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2016-11-29";
+   private static final String VERSION_DATE = "2016-11-30";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 

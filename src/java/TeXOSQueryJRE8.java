@@ -22,6 +22,8 @@ import java.util.Locale;
 import java.util.Locale.Builder;
 import java.util.Calendar;
 import java.util.Map;
+import java.util.Arrays;
+import java.io.File;
 
 /**
  * Main class. Supports Java 8 onwards.
@@ -289,6 +291,12 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
       return builder.toString();
    }
 
+   @Override
+   public void sortFileList(String[] list, File directory, 
+      FileSortType sortType)
+   {
+      Arrays.parallelSort(list, new FileSortComparator(directory, sortType));
+   }
 
    /**
     * Main method.
