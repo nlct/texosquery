@@ -898,14 +898,14 @@ Organization for Standardization}
 %to \verb|[^\.].*|. (Remember that you'll need to use \cs{string}
 %when using the shell escape, as noted below.)
 %
-%\subsubsection{Action \shortarg{ld} \meta{sep} \meta{dir}
+%\subsubsection{Action \shortarg{id} \meta{sep} \meta{dir}
 %\oarg{sort} or \longarg{list-dir}
 %\meta{sep} \meta{dir} \oarg{sort}}
 %
 %This action is like \longarg{list} but only includes sub-directories
 %of \meta{dir}. 
 %
-%\subsubsection{Action \shortarg{lr} \meta{sep} \meta{dir}
+%\subsubsection{Action \shortarg{ir} \meta{sep} \meta{dir}
 %\oarg{sort} or \longarg{list-regular}
 %\meta{sep} \meta{dir} \oarg{sort}}
 %
@@ -1891,12 +1891,12 @@ Organization for Standardization}
 %will store a comma-separated list of all the files contained in the
 %current directory in the control sequence \cs{result}.
 %
-%To omit directories (\shortarg{lr} or \longarg{list-regular}):
+%To omit directories (\shortarg{ir} or \longarg{list-regular}):
 %\DescribeMacro\TeXOSQueryRegularFileList
 %\begin{definition}
 %\cs{TeXOSQueryRegularFileList}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
-%To omit regular files (\shortarg{ld} or \longarg{list-dir}):
+%To omit regular files (\shortarg{id} or \longarg{list-dir}):
 %\DescribeMacro\TeXOSQuerySubDirFileList
 %\begin{definition}
 %\cs{TeXOSQuerySubDirList}\marg{cs}\marg{sep}\marg{dir}
@@ -3964,7 +3964,7 @@ Organization for Standardization}
 %List all regular files.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileList#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -3973,7 +3973,7 @@ Organization for Standardization}
 %List all sub-directories.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirList#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -3983,7 +3983,7 @@ Organization for Standardization}
 %List all regular files sorted by date.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListDateAsc#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{date}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{date}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -3993,7 +3993,7 @@ Organization for Standardization}
 %List all sub-directories sorted by date.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListDateAsc#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{date}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{date}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4003,7 +4003,7 @@ Organization for Standardization}
 %List all regular files sorted by date in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListDateDes#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{date\string-des}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{date\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4013,7 +4013,7 @@ Organization for Standardization}
 %List all sub-directories sorted by date in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListDateDes#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{date\string-des}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{date\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4023,7 +4023,7 @@ Organization for Standardization}
 %List all regular files sorted by size.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListSizeAsc#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{size}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{size}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4033,7 +4033,7 @@ Organization for Standardization}
 %List all sub-directories sorted by size.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListSizeAsc#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{size}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{size}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4043,7 +4043,7 @@ Organization for Standardization}
 %List all regular files sorted by size in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListSizeDes#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{size\string-des}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{size\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4053,7 +4053,7 @@ Organization for Standardization}
 %List all sub-directories sorted by size in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListSizeDes#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{size\string-des}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{size\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4063,7 +4063,7 @@ Organization for Standardization}
 %List all regular files sorted by file name.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListNameAsc#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{name}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{name}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4073,7 +4073,7 @@ Organization for Standardization}
 %List all sub-directories sorted by file name.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListNameAsc#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{name}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{name}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4083,7 +4083,7 @@ Organization for Standardization}
 %List all regular files sorted by file name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListNameDes#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{name\string-des}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{name\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4093,7 +4093,7 @@ Organization for Standardization}
 %List all sub-directories sorted by name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListNameDes#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{name\string-des}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{name\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4103,7 +4103,7 @@ Organization for Standardization}
 %List all regular files sorted by file case-insensitive name.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListNameIgnoreCaseAsc#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{iname}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{iname}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4113,7 +4113,7 @@ Organization for Standardization}
 %List all sub-directories sorted by file case-insensitive name.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListNameIgnoreCaseAsc#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{iname}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{iname}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4123,7 +4123,7 @@ Organization for Standardization}
 %List all regular files sorted by file case-insensitive name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListNameIgnoreCaseDes#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{iname\string-des}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{iname\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4133,7 +4133,7 @@ Organization for Standardization}
 %List all sub-directories sorted by case-insensitive name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListNameIgnoreCaseDes#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{iname\string-des}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{iname\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4143,7 +4143,7 @@ Organization for Standardization}
 %List all regular files sorted by file extension.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListExtAsc#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{ext}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{ext}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4153,7 +4153,7 @@ Organization for Standardization}
 %List all sub-directories sorted by file extension.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListExtAsc#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{ext}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{ext}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4163,7 +4163,7 @@ Organization for Standardization}
 %List all regular files sorted by file extension in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListExtDes#1#2#3{%
- \@texosquery@filelist{#1}{-lr}{#2}{#3}{ext\string-des}%
+ \@texosquery@filelist{#1}{-ir}{#2}{#3}{ext\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}
@@ -4173,7 +4173,7 @@ Organization for Standardization}
 %List all sub-directories sorted by extension in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListExtDes#1#2#3{%
- \@texosquery@filelist{#1}{-ld}{#2}{#3}{ext\string-des}%
+ \@texosquery@filelist{#1}{-id}{#2}{#3}{ext\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}

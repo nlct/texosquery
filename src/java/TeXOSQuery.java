@@ -4009,7 +4009,7 @@ public class TeXOSQuery implements Serializable
                   FileListType.FILE_LIST_ANY);
          }
       },
-      new QueryAction("list-dir", "ld", 1, 2, "<sep> <dir> [<sort>]",
+      new QueryAction("list-dir", "id", 1, 2, "<sep> <dir> [<sort>]",
          QueryActionType.FILE_ACTION,
          String.format("Display list of all sub-directories in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
            (Object[])FileSortComparator.getFileSortOptions()))
@@ -4037,7 +4037,7 @@ public class TeXOSQuery implements Serializable
                   FileListType.FILE_LIST_DIRECTORIES_ONLY);
          }
       },
-      new QueryAction("list-regular", "lr", 1, 2, "<sep> <dir> [<sort>]",
+      new QueryAction("list-regular", "ir", 1, 2, "<sep> <dir> [<sort>]",
          QueryActionType.FILE_ACTION,
          String.format("Display list of all regular files in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
            (Object[])FileSortComparator.getFileSortOptions()))
