@@ -596,13 +596,13 @@ Organization for Standardization}
 %
 %Available options (must come before actions):
 %\begin{description}
-%\item[\shortarg{h} or \longarg{help}] Displays help message and
+%\item[\shortarg{h} or \longarg{help} or \shortarg{help}] Displays help message and
 %exits.
-%\item[\shortarg{v} or \longarg{version}] Displays version
+%\item[\shortarg{v} or \longarg{version} or \shortarg{version}] Displays version
 %information and exits.
 %\item[\longarg{nodebug}] No debugging information. Only command
 %line syntax errors are written to STDERR. (Default.)
-%\item[\longarg{debug} \oarg{n}] Set the debugging level, where
+%\item[\longarg{debug} \oarg{n} or \shortarg{debug} \oarg{n}] Set the debugging level, where
 %\meta{n} is a non-negative integer.
 %If \meta{n} is omitted, 1 is assumed. If \meta{n} is 0, then
 %debugging information is suppressed (equivalent to
@@ -771,9 +771,10 @@ Organization for Standardization}
 %
 %This action displays the current date and time in PDF format. For example 
 %\begin{verbatim}
-%\pdfd \fcln 20160704131006\fpls 01\fcsq 00\fcsq
+%\pdfd \fcln 20160704131006\fpls 01\fapo 00\fapo
 %\end{verbatim}
-%This uses the shorthand tags \cs{pdfd}, \cs{fcln}, \cs{fpls} and \cs{fcsq} that 
+%This uses the shorthand tags \cs{pdfd}, \cs{fcln}, \cs{fpls} and
+%\cs{fapo} that 
 %are locally redefined by
 %\cs{TeXOSQuery} to produce a \texttt{D}, a colon (\texttt{:}), a
 %plus sign (\texttt{+}) and an apostrophe (\verb|'|) with the category code set
@@ -916,7 +917,8 @@ Organization for Standardization}
 %\oarg{sort}}
 %
 %This action is like \longarg{list} but only lists those files whose name 
-%matches the regular expression given in \meta{regex}. Note that
+%matches the
+%\href{http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html}{regular expression} given in \meta{regex}. Note that
 %since this uses Java's \texttt{String.matches} method this tests for a
 %\emph{complete} match on the file name (not including directory path). For example,
 %if \meta{regexp} is \texttt{foo.*}, it will only match files whose
@@ -924,6 +926,12 @@ Organization for Standardization}
 %match but \texttt{barfoo} won't). Use \texttt{.*foo.*} to match all
 %files that contain \texttt{foo} in the name (so \texttt{foobar} and
 %\texttt{barfoo} will both match).
+%
+%\begin{important}
+%You can't have an empty regular expression. You can use the regular
+%expression \texttt{.*} to match all files (which is what
+%\longarg{list} does).
+%\end{important}
 %
 %As from version 1.2, this action now has an optional argument
 %\meta{sort}, which indicates how to sort the returned list. The
@@ -1525,7 +1533,7 @@ Organization for Standardization}
 %\end{verbatim}
 %produces
 %\begin{verbatim}
-%\pdfd \fcln 20161129221559\fpls 00\fcsq 00\fcsq 
+%\pdfd \fcln 20161129221559\fpls 00\fapo 00\fapo 
 %\end{verbatim}
 %but when used with
 %\begin{verbatim}
@@ -3214,8 +3222,8 @@ Organization for Standardization}
      \let\tusc\texosquerytextunderscore
      \let\fgrv\texosquerybacktick
      \let\tgrv\texosquerytextbacktick
-     \let\fcsq\texosqueryclosequote
-     \let\tcsq\texosquerytextclosequote
+     \let\fapo\texosqueryclosequote
+     \let\tapo\texosquerytextclosequote
      \let\fdqt\texosquerydoublequote
      \let\tdqt\texosquerytextdoublequote
      \let\fspc\texosqueryliteralspace
@@ -3226,8 +3234,8 @@ Organization for Standardization}
      \let\tscl\texosquerytextsemicolon
      \let\feql\texosqueryequals
      \let\teql\texosquerytextequals
-     \let\fhyp\texosqueryhyphen
-     \let\thyp\texosquerytexthyphen
+     \let\fhyn\texosqueryhyphen
+     \let\thyn\texosquerytexthyphen
      \let\fpls\texosqueryplus
      \let\tpls\texosquerytextplus
      \let\ftld\texosquerytilde

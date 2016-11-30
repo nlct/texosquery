@@ -96,7 +96,7 @@ public class TeXOSQuery implements Serializable
          if (stream == null)
          {
             throw new IOException(String.format(
-             "Unable to open input stream from \"kpsewhich '%s'\" process",
+             "Unable to open input stream from process: kpsewhich '%s'",
              arg));
          }
 
@@ -123,7 +123,7 @@ public class TeXOSQuery implements Serializable
          // kpsewhich failed.
 
          throw new IOException(String.format(
-           "\"kpsewhich '%s'\" failed with exit code %d", arg, exitCode));
+           "\"kpsewhich '%s'\" failed with exit code: %d", arg, exitCode));
       }
 
       return line;
@@ -132,6 +132,9 @@ public class TeXOSQuery implements Serializable
     /**
      * Print message if in debug mode. Message is printed to STDERR
      * if the debug level is greater than or equal to the given level.
+     * Debugging messages are all written to STDERR rather than
+     * STDOUT so they show up in the transcript rather than being
+     * captured by the shell escape.
      * @param message Debugging message.
      * @param level Debugging level.
      * @since 1.2
@@ -146,13 +149,25 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Print message if in debug mode. Message is printed to STDERR
-     * if the debug level is greater than 0.
+     * if the debug level is 1 or more.
      * @param message Debugging message.
      * @since 1.2
      */
    public void debug(String message)
    {
       debug(message, 1);
+   }
+    
+    /**
+     * Message if in debug mode. This is for information rather than
+     * errors. The message is printed to STDERR if the debug level
+     * is 3 or more.
+     * @param message Debugging message.
+     * @since 1.2
+     */
+   public void info(String message)
+   {
+      debug(message, 3);
    }
     
     /**
@@ -224,6 +239,34 @@ public class TeXOSQuery implements Serializable
       }
 
       return false;
+   }
+
+   /**
+    * Determine if the given file is hidden.
+    * Java's File.isHidden() method seems to consider "." and ".."
+    * as hidden directories, so this method converts the file to a
+    * canonical path before testing.
+    * @param file The file to check
+    * @return True if the file is considered hidden. 
+     * @since 1.2
+    */ 
+   private boolean isHidden(File file)
+   {
+      try
+      {
+         return (new File(file.getCanonicalPath())).isHidden();
+      }
+      catch (IOException e)
+      {
+         // file can't be converted to a canonical path, so
+         // consider it hidden
+
+         debug(String.format(
+           "Unable to convert file to a canonical path: ", 
+           file.toString()), e);
+      }
+
+      return true;
    }
 
     /**
@@ -363,8 +406,6 @@ public class TeXOSQuery implements Serializable
 
               if (file.getParentFile() != null && !isFileInTree(file, cwd))
               {
-                 // disallow going to parent directories
-
                  debug(String.format(
                    "Read access forbidden by openin_any=%c (outside cwd path): %s",
                    openin, file));
@@ -374,7 +415,7 @@ public class TeXOSQuery implements Serializable
             // no break, fall through to restricted check
             case OPENIN_R:
 
-              if (file.isHidden())
+              if (isHidden(file))
               {
                  // hidden file so not permitted
                  debug(String.format(
@@ -406,7 +447,7 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Gets the given system property or the default value.
-     * Returns empty if the property isn't set or can't be accessed.
+     * Returns the default value if the property isn't set or can't be accessed.
      * @param propName The property name
      * @param defValue The default value
      * @return The property value or the default if unavailable
@@ -439,12 +480,19 @@ public class TeXOSQuery implements Serializable
      * must all be "letter" or "other") or regular text for use in
      * the document (such as dates or times, in which case the
      * characters may be active to allow them to be correctly
-     * typeset). The date-time and numeric patterns (such as "YYYY-MM-DD"
+     * typeset, such as UTF-8 characters with inputenc.sty).
+     *
+     * The date-time and numeric patterns (such as "YYYY-MM-DD"
      * or "#,##0.0") are dealt with elsewhere as they need different treatment.
      *
      * \\TeXOSQuery locally defines commands for characters
      * used in file names (catcode 12). These are all in the form
-     * \\fxxx (such as \\fhsh for a literal hash).
+     * \\fxxx (such as \\fhsh for a literal hash). Since the
+     * texosquery.tex code is designed to be generic we can't assume
+     * the eTeX \\detokenize primitive is available. This does,
+     * however, assume that the document author hasn't changed the
+     * category codes of the ASCII alphanumerics, but that ought to
+     * be a safe assumption.
      *
      * We also have commands for characters intended for use in document
      * text, which shouldn't be interpreted literally. These are all
@@ -453,13 +501,14 @@ public class TeXOSQuery implements Serializable
      *
      * The regular space \\tspc guards against a space occurring after
      * a character that needs to be converted to a control sequence.
-     * (For example "# 1" becomes "\\thsh \tspc 1")
+     * (For example "# 1" becomes "\\thsh \\tspc 1")
      * There's also a literal space \\fspc to guard against spaces
      * in file names.
      *
      * This should take care of any insane file-naming schemes, such
-     * as "<tt>bad file name#1.tex</tt>", "<tt>stupid {file} name.tex</tt>",
-     * "<tt>spaced    out  file #2.tex</tt>", "<tt>file's stupid name.tex</tt>"
+     * as <tt>bad~file name#1.tex</tt>, <tt>stupid {file} name.tex</tt>,
+     * <tt style="white-space: pre;">spaced    out  file #2.tex</tt>,
+     * <tt>file's stupid name.tex</tt>.
      *
      * To help protect against input encoding problems, non-ASCII
      * characters are wrapped in \\twrp (regular text) or \\fwrp
@@ -467,6 +516,13 @@ public class TeXOSQuery implements Serializable
      * \\texosquerynonasciiwrap and \\texosquerynonasciidetokwrap 
      * which may be used to provide some protection or conversion from one
      * encoding to another, if required.
+     * 
+     * For example, the language "fran&#231;ais" would be returned as
+     * "fran\\twrp{&#231;}ais", which can be typeset directly with
+     * XeTeX or LuaTeX or through active characters with
+     * inputenc.sty, but the directory called <tt>Fran&#231;cois</tt> would be
+     * returned as <tt>Fran\\fwrp{&#231;}cois</tt>, which will try to
+     * detokenize the &#231; character.
      *
      * @param string Input string.
      * @param isRegularText true if the string represents text (for example, 
@@ -532,7 +588,7 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
-     * Escapes character include punctuation.
+     * Escapes the given Unicode character.
      * All ASCII punctuation characters have a literal and textual
      * command to represent them in file names and document text,
      * respectively. The literal (file name) commands are prefixed
@@ -551,7 +607,7 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
-     * Escapes character include punctuation.
+     * Escapes the given Unicode character.
      * As above but with the prefix supplied.
      * @param codePoint Input code point.
      * @param prefix The control sequence name prefix.
@@ -568,13 +624,13 @@ public class TeXOSQuery implements Serializable
          case '$': return String.format("\\%sdol ", prefix);
          case '%': return String.format("\\%spct ", prefix);
          case '&': return String.format("\\%samp ", prefix);
-         case '\'': return String.format("\\%scsq ", prefix);
+         case '\'': return String.format("\\%sapo ", prefix);
          case '(': return String.format("\\%sopb ", prefix);
          case ')': return String.format("\\%sclb ", prefix);
          case '*': return String.format("\\%sast ", prefix);
          case '+': return String.format("\\%spls ", prefix);
          case ',': return String.format("\\%scom ", prefix);
-         case '-': return String.format("\\%shyp ", prefix);
+         case '-': return String.format("\\%shyn ", prefix);
          case '.': return String.format("\\%sdot ", prefix);
          case '/': return String.format("\\%sslh ", prefix);
          case ':': return String.format("\\%scln ", prefix);
@@ -635,6 +691,7 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Escapes hash from input character.
+     * No longer required.
      * @param c Input character.
      * @return String with hash escaped.
      */
@@ -666,14 +723,13 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
-     * Gets the OS version. This may contain an underscore, but we
-     * don't need to worry about that as \\TeXOSQuery changes the
-     * category code for <tt>_</tt> before parsing the result of texosquery.
+     * Gets the OS version. This may contain an underscore, so treat
+     * it like a file name.
      * @return The OS version as string.
      */
    public String getOSversion()
    {
-      return getSystemProperty("os.version", "");
+      return escapeFileName(getSystemProperty("os.version", ""));
    }
 
     /**
@@ -767,8 +823,8 @@ public class TeXOSQuery implements Serializable
       // as 'imagefile\#1.png', so the following allows for
       // that by simply stripping all backslashes from the file name.
       // (The file name is always supplied with forward slashes as
-      // the directory divider regardless of the operating system.
-      // We can substitute the divider at this point as well.)
+      // the directory divider regardless of the operating system.)
+      // We can substitute the divider at this point as well.
  
       StringBuilder builder = new StringBuilder();
 
@@ -795,6 +851,15 @@ public class TeXOSQuery implements Serializable
             if (File.separatorChar != BACKSLASH && nextCodePoint == BACKSLASH)
             {
                builder.appendCodePoint(codepoint);
+               i = nextIndex;
+               offset = Character.charCount(nextCodePoint);
+            }
+            else if (nextCodePoint == '/')
+            {
+               // Would anyone want a literal forward slash? Allow a
+               // slash to be escaped just in case.
+               builder.appendCodePoint('/');
+               i = nextIndex;
                offset = Character.charCount(nextCodePoint);
             }
          }
@@ -844,7 +909,7 @@ public class TeXOSQuery implements Serializable
          catch (Exception exception)
          {
             // Catch all exceptions
-            debug(String.format("kpsewhich couldn't find the file '%s'",
+            debug(String.format("kpsewhich couldn't find the file: %s",
                                 filename),
                   exception);
 
@@ -866,7 +931,7 @@ public class TeXOSQuery implements Serializable
 
       if (!isReadPermitted(dir))
       {
-         debug("read access not permitted for the home directory");
+         debug("Read access not permitted for the home directory");
          return "";
       }
 
@@ -885,7 +950,7 @@ public class TeXOSQuery implements Serializable
       if (!isReadPermitted(dir))
       {
          // perhaps the current directory is hidden?
-         debug("read access not permitted for the current directory");
+         debug("Read access not permitted for the current directory");
          return "";
       }
 
@@ -911,7 +976,8 @@ public class TeXOSQuery implements Serializable
 
       if (!isReadPermitted(dir))
       {
-         debug(String.format("read access not permitted for '%s'", dir));
+         debug(String.format("Read access not permitted for directory: %s", 
+           dir));
          return "";
       }
 
@@ -935,7 +1001,7 @@ public class TeXOSQuery implements Serializable
    /**
     * Converts the day of week index returned by
     * Calendar.DAY_OF_WEEK to Monday=1 based indexing.
-    * @param index the day of week index obtained from  Calendar.DAY_OF_WEEK
+    * @param index the day of week index obtained from Calendar.DAY_OF_WEEK
     * @return index with Monday=1 as the base
     * @since 1.2
     */ 
@@ -1098,7 +1164,7 @@ public class TeXOSQuery implements Serializable
        else
        {
           // Need to ensure D : + or - and ' have category code 12
-          // The simplest way to deal with this is to process
+          // The simplest way to deal with this is to pass
           // everything after the "D" to escapeFileName since
           // the sign is hidden in the format.
 
@@ -1126,14 +1192,14 @@ public class TeXOSQuery implements Serializable
          if (!file.exists())
          {
             debug(String.format(
-                 "Unable to get timestamp for file '%s' (no such file)",
+                 "Unable to get timestamp for file (no such file): %s",
                  file.toString()));
             return "";
          }
 
          if (!isReadPermitted(file))
          {
-            debug(String.format("No read access for '%s'", file));
+            debug(String.format("No read access for file: %s", file));
             return "";
          }
         
@@ -1148,9 +1214,11 @@ public class TeXOSQuery implements Serializable
          }
 
          // I/O error has occurred (already checked for file
-         // existence and read permission).
+         // existence and read permission, so it's something weird).
+         // Perhaps the file is corrupt or the user has an eccentric OS that
+         // doesn't support file modification timestamps.
          debug(String.format(
-               "Unable to get timestamp for file '%s' (I/O error)",
+               "Unable to get timestamp for file (I/O error): %s",
                file.toString()));
       }
       catch (Exception exception)
@@ -1159,7 +1227,7 @@ public class TeXOSQuery implements Serializable
          // exception.
 
          debug(String.format(
-              "Unable to get timestamp for file '%s'",
+              "Unable to get timestamp for file: %s",
               file.toString()),
               exception);
       }
@@ -1180,36 +1248,26 @@ public class TeXOSQuery implements Serializable
          if (!file.exists())
          {
             debug(String.format(
-              "Unable to get the size of file '%s' (no such file)",
+              "Unable to get the size of file (no such file): %s",
               file.toString()));
             return "";
          }
         
          if (!isReadPermitted(file))
          {
-            debug(String.format("No read access for '%s'", file));
+            debug(String.format("No read access for file: %s", file));
             return "";
          }
         
-         long length = file.length();
+         return String.format("%d", file.length());
 
-         if (length > ZERO)
-         {
-            return String.format("%d", length);
-         }
-
-         // I/O error has occurred (already checked for file
-         // existence and read access).
-         debug(String.format(
-               "Unable to get the size of file '%s' (I/O error)",
-               file.toString()));
       }
       catch (Exception exception)
       {
          // Catch all possible exceptions, including security
          // exceptions.
 
-         debug(String.format("Unable to get the size of file '%s'",
+         debug(String.format("Unable to get the size of file: %s",
                file.toString()),
                exception);
       }
@@ -1219,8 +1277,9 @@ public class TeXOSQuery implements Serializable
    }
 
    /**
-    * Sort the given list of file names.
-    * @param list The list of file names to be sort
+    * Sort the given list of file names. Java 8 has a better sort
+    * method so this is overridden in the TeXOSQueryJRE8 class.
+    * @param list The list of file names to be sorted
     * @param directory The directory in which the files are
     * contained
     * @param sortType How to order the list
@@ -1253,8 +1312,9 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Gets a filtered list of files from directory.
-     * This is pretty much the same as above but filters the file
-     * list.
+     * Files with read access prohibited by openin_any or the OS are
+     * omitted from the list. The regular expression is anchored,
+     * so ".*foo" will only match file names that end with "foo".
      * @param separator Separator.
      * @param regex Regular expression.
      * @param directory Directory.
@@ -1277,7 +1337,7 @@ public class TeXOSQuery implements Serializable
       if (!directory.exists())
       {
          debug(String.format(
-               "Unable to list contents of '%s' (no such directory)",
+               "Unable to list contents (no such directory): %s",
                directory.toString()));
          return "";
       }
@@ -1285,14 +1345,14 @@ public class TeXOSQuery implements Serializable
       if (!directory.isDirectory())
       {
          debug(String.format(
-               "Unable to list contents of '%s' (not a directory)",
+               "Unable to list contents (not a directory): %s",
                directory.toString()));
          return "";
       }
 
       if (!isReadPermitted(directory))
       {
-         debug(String.format("No read access for '%s'", directory));
+         debug(String.format("No read access for directory: %s", directory));
          return "";
       }
         
@@ -1317,7 +1377,7 @@ public class TeXOSQuery implements Serializable
  
                   if (!isReadPermitted(file))
                   {
-                     debug(String.format("No read access for '%s'", file));
+                     debug(String.format("No read access for file: %s", file));
                      return false;
                   }
 
@@ -1370,7 +1430,7 @@ public class TeXOSQuery implements Serializable
       catch (Exception exception)
       {
          // Catch all possible exceptions
-         debug(String.format("Unable to list contents of '%s' using regex '%s'",
+         debug(String.format("Unable to list contents of '%s' using regex: %s",
                directory.toString(), regex),
                exception);
       }
@@ -1380,10 +1440,7 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
-     * Gets the file URI. This may contain % characters, but
-     * \TeXOSQuery changes the category code before parsing the
-     * result. We shouldn't have to worry about any other special
-     * characters as they should be %-encoded.
+     * Gets the file URI. 
      * @param file The file.
      * @return The URI.
      */
@@ -1398,24 +1455,24 @@ public class TeXOSQuery implements Serializable
 
       if (!file.exists())
       {
-         debug(String.format("can't obtain URI of file '%s' (no such file)",
+         debug(String.format("can't obtain URI of file (no such file): %s",
             file.toString()));
          return "";
       }
         
       if (!isReadPermitted(file))
       {
-         debug(String.format("No read access for '%s'", file));
+         debug(String.format("No read access for file: %s", file));
          return "";
       }
         
       try
       {
-         return file.toURI().toString();
+         return escapeFileName(file.getCanonicalFile().toURI().toString());
       }
       catch (Exception exception)
       {
-         debug(String.format("can't obtain URI of file '%s'", file.toString()),
+         debug(String.format("Can't obtain URI of file: %s", file.toString()),
           exception);
       }
 
@@ -1440,7 +1497,7 @@ public class TeXOSQuery implements Serializable
       if (!file.exists())
       {
          debug(String.format(
-           "can't obtain full file path for '%s' (no such file)",
+           "Can't obtain full file path (no such file): %s",
            file.toString()));
          return "";
       }
@@ -1448,7 +1505,7 @@ public class TeXOSQuery implements Serializable
       if (!isReadPermitted(file))
       {
           debug(String.format(
-            "can't obtain full file path for '%s' (no read access)",
+            "Can't obtain full file path (no read access): %s",
             file.toString()));
           return "";
       }
@@ -1460,7 +1517,7 @@ public class TeXOSQuery implements Serializable
       catch (Exception exception)
       {
          debug(String.format(
-           "can't obtain full file path for '%s'", file.toString()),
+           "Can't obtain full path for file: %s", file.toString()),
             exception);
       }
 
@@ -1486,7 +1543,7 @@ public class TeXOSQuery implements Serializable
       if (!file.exists())
       {
          debug(String.format(
-           "can't obtain full file path for parent of '%s' (no such file)",
+           "Can't obtain full parent path for file (no such file): %s",
            file.toString()));
          return "";
       }
@@ -1494,7 +1551,7 @@ public class TeXOSQuery implements Serializable
       if (!isReadPermitted(file))
       {
           debug(String.format(
-            "can't obtain full file path for '%s' (no read access)",
+            "Can't obtain full path for file (no read access): %s",
             file.toString()));
           return "";
       }
@@ -1505,10 +1562,12 @@ public class TeXOSQuery implements Serializable
 
          if (parent == null)
          {
-            // No parent? If getCanonicalFile fails it throws
+            // No parent? If getCanonicalFile fails it throws an
             // exception, so no parent would presumably mean the
-            // root directory. Not sure we should allow that so
-            // return empty.
+            // file's in the root directory.
+
+            debug(String.format(
+              "No parent found for file: %s", file.toString()));
             return "";
          }
 
@@ -1518,7 +1577,7 @@ public class TeXOSQuery implements Serializable
       catch (Exception exception)
       {
          debug(String.format(
-           "can't obtain full file path for parent of '%s'", file.toString()),
+           "Can't obtain full parent path for file: %s", file.toString()),
            exception);
       }
 
@@ -1589,7 +1648,8 @@ public class TeXOSQuery implements Serializable
      * a better chance of being recognised by inputenc.sty. For
      * example, UTF-8 will be converted to utf8. None of TeX's
      * special characters should occur in any of the locale
-     * information.
+     * information, but we'd better treat it like a file name just in
+     * case.
      * @param locale The provided locale.
      * @param convertCodeset Boolean value to convert the code set.
      * @return String representation.
@@ -1611,7 +1671,7 @@ public class TeXOSQuery implements Serializable
       {
           // No language provided for the locale. The language
           // part will be omitted from the returned string.
-         debug("locale has no language", 3);
+         debug(String.format("No language for locale: %s", locale.toString()));
       }
       else
       {
@@ -1624,8 +1684,9 @@ public class TeXOSQuery implements Serializable
       {
          // No country is associated with the locale. The
          // country part will be omitted from the returned
-         // string.
-         debug("locale has no region", 3);
+         // string. This is just information, not an error.
+
+         info(String.format("No region for locale: %s", locale.toString()));
       }
       else
       {
@@ -1655,7 +1716,10 @@ public class TeXOSQuery implements Serializable
       if (script == null || "".equals(script))
       {
          // Script information is missing. Ignore it.
-         debug("no script available for locale", 3);
+         // This is just an advisory message.
+
+         info(String.format("No script available for locale: %s",
+             locale.toString()));
       }
       else
       {
@@ -1664,11 +1728,12 @@ public class TeXOSQuery implements Serializable
          identifier = identifier.concat("@").concat(script);
       }
 
-      return identifier;
+      return escapeFileName(identifier);
    }
 
    /**
-    * Gets default file encoding.
+    * Gets default file encoding. (Don't escape it here or it will cause
+    * a problem when called in getLocale.)
     * @param convertCodeset If true convert codeset to fit
     * inputenc.sty
     * @return the file encoding.
@@ -1956,6 +2021,7 @@ public class TeXOSQuery implements Serializable
       }
 
       // not recognised, return the code as a string
+      debug(String.format("Unrecognised numeric region code: %d", code));
       return String.format("%d", code);
    }
 
@@ -2019,7 +2085,7 @@ public class TeXOSQuery implements Serializable
          return new Locale(language, region, variant);
       }
 
-      debug(String.format("Can't parse language tag '%s'", languageTag));
+      debug(String.format("Can't parse language tag: %s", languageTag));
 
       // strip anything to a hyphen and try that
       String[] split = languageTag.split("-", 1);
@@ -2107,9 +2173,8 @@ public class TeXOSQuery implements Serializable
           // Transnistrian ruble omitted as it conflicts with ISO
           // 4217 so omitted. There's also no country code for
           // Transnistria. Other currencies don't have an associated
-          // region code (for example, Somaliland) or don't have an
-          // known unofficial currency (for example, Alderney).
-          // code.
+          // region code (for example, Somaliland) or don't have a
+          // known unofficial currency code (for example, Alderney).
        }
 
        // Convert known Unicode currency symbols to commands that
@@ -2436,7 +2501,7 @@ public class TeXOSQuery implements Serializable
       catch (Exception e)
       {
          // this shouldn't happen
-         debug(String.format("invalid argument '%s'", localeFormat), e);
+         debug(String.format("invalid argument: %s", localeFormat), e);
          return "";
       }
 
@@ -2580,7 +2645,7 @@ public class TeXOSQuery implements Serializable
       catch (Exception e)
       {
          // this shouldn't happen
-         debug(String.format("invalid argument '%s'", numFormat), e);
+         debug(String.format("invalid argument: %s", numFormat), e);
          return "";
       }
 
@@ -2641,7 +2706,7 @@ public class TeXOSQuery implements Serializable
             }
             else
             {
-               debug(String.format("too many ';' found in pattern '%s'", 
+               debug(String.format("Too many ; found in pattern: %s", 
                      pattern));
             }
          }
@@ -2688,7 +2753,8 @@ public class TeXOSQuery implements Serializable
 
       // Is this currency?
 
-      Pattern p = Pattern.compile("(.*(?:[^'](?:'')+){0,1})(¤{1,2})(.*)");
+      Pattern p = Pattern.compile("(.*(?:[^'](?:'')+){0,1})("+CURRENCY_CHAR
+        +"{1,2})(.*)");
       Matcher m = p.matcher(pattern);
 
       if (m.matches())
@@ -2699,7 +2765,7 @@ public class TeXOSQuery implements Serializable
 
       // Is this a percentage?
 
-      p = Pattern.compile("(.*(?:[^'](?:'')+){0,1})([%‰])(.*)");
+      p = Pattern.compile("(.*(?:[^'](?:'')+){0,1})([%"+PERMILLE_CHAR+"])(.*)");
       m = p.matcher(pattern);
 
       if (m.matches())
@@ -2867,7 +2933,7 @@ public class TeXOSQuery implements Serializable
       if (!m.matches())
       {
          debug(String.format(
-             "Can't match number format sub-pattern '%s' against regexp \"%s\"",
+             "Can't match number format sub-pattern '%s' against regexp: %s",
               pattern, p));
          return "";
       } 
@@ -2908,7 +2974,7 @@ public class TeXOSQuery implements Serializable
       if (!m.matches())
       {
          debug(String.format(
-             "Can't match decimal pattern '%s' against regexp \"%s\"",
+             "Can't match decimal pattern '%s' against regexp: %s",
               pattern, p));
          return "";
       } 
@@ -2935,17 +3001,19 @@ public class TeXOSQuery implements Serializable
 
 
    /**
-    * Converts an integer pattern. The aim here is to have a number
+    * Convert an integer pattern. The aim here is to have a number
     * formatting command defined in TeX that will be passed a number
     * with either leading or trailing zeros padded to 10 digits.
     * TeX can't handle numbers higher than 2147483647, so any digits
     * in the pattern beyond that are discarded. This means defining
     * a command that effectively takes 10 arguments (with a bit of
     * trickery to get around the 9-arg maximum). Each digit can then
-    * be rendered using either \patdgt (always display the digit)
-    * or \patdgtnz (only display the digit if it isn't zero).
+    * be rendered using either \\patdgt (always display the digit)
+    * or \\patdgtnz (only display the digit if it isn't zero).
     * These short commands will be converted to longer ones that are
-    * less likely to cause conflict when \TeXOSQuery is used.
+    * less likely to cause conflict when \\TeXOSQuery is used.
+    * (See the "Pattern Formats" section of the documented code for
+    * more details.)
     * @param pattern The pattern
     * @param leadPadding Determines if leading padding needs taking
     * into account
@@ -3555,11 +3623,11 @@ public class TeXOSQuery implements Serializable
       System.out.println("Options:");
       System.out.println();
 
-      System.out.println("-h or --help");
+      System.out.println("-h or --help or -help");
       System.out.println("\tDisplay this help message and exit.");
       System.out.println();
 
-      System.out.println("-v or --version");
+      System.out.println("-v or --version or -version");
       System.out.println("\tDisplay version information and exit.");
       System.out.println();
 
@@ -3567,7 +3635,7 @@ public class TeXOSQuery implements Serializable
       System.out.println("\tNo debugging messages (default)");
       System.out.println();
 
-      System.out.println("--debug <n>");
+      System.out.println("--debug <n> or -debug <n>");
       System.out.println("\tDisplay debugging messages on STDOUT.");
       System.out.println("\t<n> should be an integer:");
       System.out.println("\t0: no debugging (same as --nodebug)");
@@ -3715,12 +3783,14 @@ public class TeXOSQuery implements Serializable
                System.exit(1);
             }
          }
-         else if (args[i].equals("-h") || args[i].equals("--help"))
+         else if (args[i].equals("-h") || args[i].equals("--help")
+            || args[i].equals("-help"))
          {
             syntax();
             System.exit(0);
          }
-         else if (args[i].equals("-v") || args[i].equals("--version"))
+         else if (args[i].equals("-v") || args[i].equals("--version") 
+           || args[i].equals("-version"))
          {
             version();
             System.exit(0);
@@ -3729,17 +3799,19 @@ public class TeXOSQuery implements Serializable
          {
             if (actions.size() > 0)
             {
-               System.err.println("Options must come before actions.");
+               System.err.println(String.format(
+                 "Options must come before actions. Found option: %s", args[i]));
                System.exit(0);
             }
 
             debugLevel = 0;
          }
-         else if (args[i].equals("--debug"))
+         else if (args[i].equals("--debug") || args[i].equals("-debug"))
          {
             if (actions.size() > 0)
             {
-               System.err.println("Options must come before actions.");
+               System.err.println(String.format(
+                  "Options must come before actions. Found option: %s",args[i] ));
                System.exit(0);
             }
 
@@ -3764,7 +3836,7 @@ public class TeXOSQuery implements Serializable
                catch (NumberFormatException e)
                {
                   System.err.println(String.format(
-                    "Debug level '%s' not recognised", args[i]));
+                    "Invalid debug level: %s", args[i]));
                   System.exit(1);
                }
             }
@@ -3773,13 +3845,15 @@ public class TeXOSQuery implements Serializable
          {
             if (actions.size() > 0)
             {
-               System.err.println("Options must come before actions.");
+               System.err.println(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
                System.exit(0);
             }
 
             if (i == args.length-1)
             {
-               System.err.println("--compatible <level> expected");
+               System.err.println(String.format(
+                 "%s <level> expected", args[i]));
                System.exit(1);
             }
 
@@ -3798,8 +3872,8 @@ public class TeXOSQuery implements Serializable
                catch (NumberFormatException e)
                {
                   System.err.println(String.format(
-                   "Invalid --compatible argument '%s'. (\"latest\" or %d to %d required)",
-                   args[i], 0, DEFAULT_COMPATIBLE));
+                   "Invalid %s argument (\"latest\" or %d to %d required): %s",
+                   args[i-1], 0, DEFAULT_COMPATIBLE, args[i]));
                   System.exit(1);
                }
             }
@@ -3807,7 +3881,7 @@ public class TeXOSQuery implements Serializable
          else
          {
              System.err.println(String.format(
-               "Unknown option '%s'. Try %s --help", args[i], name));
+               "Unknown option: %s%nTry %s --help", args[i], name));
              System.exit(1);
          }
       }
@@ -3817,7 +3891,7 @@ public class TeXOSQuery implements Serializable
       if (numActions == 0)
       {
          System.err.println(String.format(
-           "One or more actions required. Try %s --help", name));
+           "One or more actions required.%nTry %s --help", name));
          System.exit(1);
       }
 
@@ -3830,7 +3904,7 @@ public class TeXOSQuery implements Serializable
          catch (Throwable e)
          {
             System.err.println(e.getMessage());
-            debug(String.format("Action '%s' failed", action.getInvokedName()),
+            debug(String.format("Action failed: %s", action.getInvocation()),
               e);
             System.exit(1);
          }
@@ -3916,7 +3990,7 @@ public class TeXOSQuery implements Serializable
       {
          public String action()
          {
-            return getCodeSet(true);
+            return escapeFileName(getCodeSet(true));
          }
       },
       new QueryAction("bcp47", "b", QueryActionType.LOCALE_ACTION,
@@ -4146,4 +4220,10 @@ public class TeXOSQuery implements Serializable
 
    // Pound symbols as a string
    private static final String POUND_STRING=""+POUND_CHAR;
+
+   // Per mille symbol
+   private static final char PERMILLE_CHAR=0x2030;
+
+   // Currency symbol
+   private static final char CURRENCY_CHAR=0x00A4;
 }

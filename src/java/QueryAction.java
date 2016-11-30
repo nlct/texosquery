@@ -158,6 +158,45 @@ public abstract class QueryAction implements Serializable
       return requiredArgs[index];
    }
 
+   public String getInvocation()
+   {
+      StringBuilder builder = new StringBuilder(getInvokedName());
+
+      if (requiredArgs != null)
+      {
+         for (String arg : requiredArgs)
+         {
+            if (arg.contains(" "))
+            {
+               builder.append(String.format(" '%s'", 
+                  arg.replaceAll("'", "\\\\'")));
+            }
+            else
+            {
+               builder.append(String.format(" %s", arg));
+            }
+         }
+      }
+
+      if (optionalArgs != null)
+      {
+         for (String arg : optionalArgs)
+         {
+            if (arg.contains(" "))
+            {
+               builder.append(String.format(" '%s'", 
+                  arg.replaceAll("'", "\\\\'")));
+            }
+            else
+            {
+               builder.append(String.format(" %s", arg));
+            }
+         }
+      }
+
+      return builder.toString();
+   }
+
    public String getInvokedName()
    {
       return invokedName;
