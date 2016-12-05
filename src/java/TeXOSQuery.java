@@ -2184,15 +2184,18 @@ public class TeXOSQuery implements Serializable
 
        NumberFormat numFormat = NumberFormat.getNumberInstance(locale);
 
+       // Currency codes should always be three letter upper case
+       // A-Z characters, so no need to escape them.
+
        return String.format(
          "{%s}{%s}{%s}{%s}{%d}{%s}{%s}{%s}{%s}{%s}",
-             getLanguageTag(locale),
+             escapeFileName(getLanguageTag(locale)),
              escapeText(fmtSyms.getGroupingSeparator()),
              escapeText(fmtSyms.getDecimalSeparator()),
              escapeText(fmtSyms.getExponentSeparator()), 
              numFormat.isGroupingUsed() ? 1 : 0,
-             escapeText(currencyCode),
-             escapeText(localeCurrencyCode),
+             currencyCode,
+             localeCurrencyCode,
              escapeText(currency),
              texCurrency,// already escaped
              escapeText(fmtSyms.getMonetaryDecimalSeparator()));
@@ -2200,7 +2203,10 @@ public class TeXOSQuery implements Serializable
 
    /**
     * Gets the currency with known symbols replaced by TeX commands
-    * provided by texosquery.tex.
+    * provided by texosquery.tex. Some of the conditions in this
+    * method test for archaic currency symbols. It seems very
+    * unlikely that any of those cases would actually occur, but
+    * they're included for completeness.
     * @param currency The original currency string 
     * @return The TeX version
     * @since 1.2
@@ -2214,149 +2220,113 @@ public class TeXOSQuery implements Serializable
          int codepoint = currency.codePointAt(i);
          i += Character.charCount(codepoint);
 
-         if (codepoint == 0x0024)
+         switch (codepoint)
          {
-            builder.append("\\texosquerycurrency{dollar}");
-         }
-         else if (codepoint == 0x00A2)
-         {
-            builder.append("\\texosquerycurrency{cent}");
-         }
-         else if (codepoint == 0x00A3)
-         {
-            builder.append("\\texosquerycurrency{pound}");
-         }
-         else if (codepoint == 0x00A4)
-         {
-            builder.append("\\texosquerycurrency{sign}");
-         }
-         else if (codepoint == 0x00A5)
-         {
-            builder.append("\\texosquerycurrency{yen}");
-         }
-         else if (codepoint == 0x20A0)
-         {
-            builder.append("\\texosquerycurrency{ecu}");
-         }
-         else if (codepoint == 0x20A1)
-         {
-            builder.append("\\texosquerycurrency{colon}");
-         }
-         else if (codepoint == 0x20A2)
-         {
-            builder.append("\\texosquerycurrency{cruzeiro}");
-         }
-         else if (codepoint == 0x20A3)
-         {
-            builder.append("\\texosquerycurrency{franc}");
-         }
-         else if (codepoint == 0x20A4)
-         {
-            builder.append("\\texosquerycurrency{lira}");
-         }
-         else if (codepoint == 0x20A5)
-         {
-            builder.append("\\texosquerycurrency{mill}");
-         }
-         else if (codepoint == 0x20A6)
-         {
-            builder.append("\\texosquerycurrency{naira}");
-         }
-         else if (codepoint == 0x20A7)
-         {
-            builder.append("\\texosquerycurrency{peseta}");
-         }
-         else if (codepoint == 0x20A8)
-         {
-            builder.append("\\texosquerycurrency{rupee}");
-         }
-         else if (codepoint == 0x20A9)
-         {
-            builder.append("\\texosquerycurrency{won}");
-         }
-         else if (codepoint == 0x20AA)
-         {
-            builder.append("\\texosquerycurrency{newsheqel}");
-         }
-         else if (codepoint == 0x20AB)
-         {
-            builder.append("\\texosquerycurrency{dong}");
-         }
-         else if (codepoint == 0x20AC)
-         {
-            builder.append("\\texosquerycurrency{euro}");
-         }
-         else if (codepoint == 0x20AD)
-         {
-            builder.append("\\texosquerycurrency{kip}");
-         }
-         else if (codepoint == 0x20AE)
-         {
-            builder.append("\\texosquerycurrency{tugrik}");
-         }
-         else if (codepoint == 0x20AF)
-         {
-            builder.append("\\texosquerycurrency{drachma}");
-         }
-         else if (codepoint == 0x20B0)
-         {
-            builder.append("\\texosquerycurrency{germanpenny}");
-         }
-         else if (codepoint == 0x20B1)
-         {
-            builder.append("\\texosquerycurrency{peso}");
-         }
-         else if (codepoint == 0x20B2)
-         {
-            builder.append("\\texosquerycurrency{guarani}");
-         }
-         else if (codepoint == 0x20B3)
-         {
-            builder.append("\\texosquerycurrency{austral}");
-         }
-         else if (codepoint == 0x20B4)
-         {
-            builder.append("\\texosquerycurrency{hryvnia}");
-         }
-         else if (codepoint == 0x20B5)
-         {
-            builder.append("\\texosquerycurrency{cedi}");
-         }
-         else if (codepoint == 0x20B6)
-         {
-            builder.append("\\texosquerycurrency{livretournois}");
-         }
-         else if (codepoint == 0x20B7)
-         {
-            builder.append("\\texosquerycurrency{spesmilo}");
-         }
-         else if (codepoint == 0x20B8)
-         {
-            builder.append("\\texosquerycurrency{tenge}");
-         }
-         else if (codepoint == 0x20B9)
-         {
-            builder.append("\\texosquerycurrency{rupee}");
-         }
-         else if (codepoint == 0x20BA)
-         {
-            builder.append("\\texosquerycurrency{turkishlira}");
-         }
-         else if (codepoint == 0x20BB)
-         {
-            builder.append("\\texosquerycurrency{nordicmark}");
-         }
-         else if (codepoint == 0x20BC)
-         {
-            builder.append("\\texosquerycurrency{manat}");
-         }
-         else if (codepoint == 0x20BD)
-         {
-            builder.append("\\texosquerycurrency{ruble}");
-         }
-         else
-         {
-            builder.append(escapeText(codepoint));
+            case DOLLAR_CHAR:
+               builder.append("\\texosquerycurrency{dollar}");
+            break;
+            case CENT_CHAR:
+               builder.append("\\texosquerycurrency{cent}");
+            break;
+            case POUND_CHAR:
+               builder.append("\\texosquerycurrency{pound}");
+            break;
+            case CURRENCY_CHAR:
+               builder.append("\\texosquerycurrency{sign}");
+            break;
+            case YEN_CHAR:
+               builder.append("\\texosquerycurrency{yen}");
+            break;
+            case ECU_CHAR:
+               builder.append("\\texosquerycurrency{ecu}");
+            break;
+            case COLON_CURRENCY_CHAR:
+               builder.append("\\texosquerycurrency{colon}");
+            break;
+            case CRUZEIRO_CHAR:
+               builder.append("\\texosquerycurrency{cruzeiro}");
+            break;
+            case FRANC_CHAR:
+               builder.append("\\texosquerycurrency{franc}");
+            break;
+            case LIRA_CHAR:
+               builder.append("\\texosquerycurrency{lira}");
+            break;
+            case MILL_CURRENCY_CHAR:
+               builder.append("\\texosquerycurrency{mill}");
+            break;
+            case NAIRA_CHAR:
+               builder.append("\\texosquerycurrency{naira}");
+            break;
+            case PESETA_CHAR:
+               builder.append("\\texosquerycurrency{peseta}");
+            break;
+            case LEGACY_RUPEE_CHAR:
+            case RUPEE_CHAR:
+               builder.append("\\texosquerycurrency{rupee}");
+            break;
+            case WON_CHAR:
+               builder.append("\\texosquerycurrency{won}");
+            break;
+            case NEW_SHEQEL_CHAR:
+               builder.append("\\texosquerycurrency{newsheqel}");
+            break;
+            case DONG_CHAR:
+               builder.append("\\texosquerycurrency{dong}");
+            break;
+            case EURO_CHAR:
+               builder.append("\\texosquerycurrency{euro}");
+            break;
+            case KIP_CHAR:
+               builder.append("\\texosquerycurrency{kip}");
+            break;
+            case TUGRIK_CHAR:
+               builder.append("\\texosquerycurrency{tugrik}");
+            break;
+            case DRACHMA_CHAR:
+               builder.append("\\texosquerycurrency{drachma}");
+            break;
+            case GERMAN_PENNY_CHAR:
+               builder.append("\\texosquerycurrency{germanpenny}");
+            break;
+            case PESO_CHAR:
+               builder.append("\\texosquerycurrency{peso}");
+            break;
+            case GUARANI_CHAR:
+               builder.append("\\texosquerycurrency{guarani}");
+            break;
+            case AUSTRAL_CHAR:
+               builder.append("\\texosquerycurrency{austral}");
+            break;
+            case HRYVNIA_CHAR:
+               builder.append("\\texosquerycurrency{hryvnia}");
+            break;
+            case CEDI_CHAR:
+               builder.append("\\texosquerycurrency{cedi}");
+            break;
+            case LIVRE_TOURNOIS_CHAR:
+               builder.append("\\texosquerycurrency{livretournois}");
+            break;
+            case SPESMILO_CHAR:
+               builder.append("\\texosquerycurrency{spesmilo}");
+            break;
+            case TENGE_CHAR:
+               builder.append("\\texosquerycurrency{tenge}");
+            break;
+            case TURKISH_LIRA_CHAR:
+               builder.append("\\texosquerycurrency{turkishlira}");
+            break;
+            case NORDIC_MARK_CHAR:
+               builder.append("\\texosquerycurrency{nordicmark}");
+            break;
+            case MANAT_CHAR:
+               builder.append("\\texosquerycurrency{manat}");
+            break;
+            case RUBLE_CHAR:
+               builder.append("\\texosquerycurrency{ruble}");
+            break;
+            default: 
+               builder.append(escapeText(codepoint));
          }
       }
 
@@ -2411,7 +2381,8 @@ public class TeXOSQuery implements Serializable
 
       for (int i = 0; i < 12; i++)
       {
-         shortMonthNamesGroup.append(String.format("{%s}", names[i]));
+         shortMonthNamesGroup.append(String.format("{%s}", 
+           escapeText(names[i])));
       }
 
       return shortMonthNamesGroup.toString();
@@ -2435,13 +2406,13 @@ public class TeXOSQuery implements Serializable
       // Be consistent with pgfcalendar:
 
       return String.format("{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
-          names[Calendar.MONDAY],
-          names[Calendar.TUESDAY],
-          names[Calendar.WEDNESDAY],
-          names[Calendar.THURSDAY],
-          names[Calendar.FRIDAY],
-          names[Calendar.SATURDAY],
-          names[Calendar.SUNDAY]);
+          escapeText(names[Calendar.MONDAY]),
+          escapeText(names[Calendar.TUESDAY]),
+          escapeText(names[Calendar.WEDNESDAY]),
+          escapeText(names[Calendar.THURSDAY]),
+          escapeText(names[Calendar.FRIDAY]),
+          escapeText(names[Calendar.SATURDAY]),
+          escapeText(names[Calendar.SUNDAY]));
    }
 
    /** Gets the standalone short day names for the locale data.
@@ -2462,13 +2433,13 @@ public class TeXOSQuery implements Serializable
       // Be consistent with pgfcalendar:
 
       return String.format("{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
-          names[Calendar.MONDAY],
-          names[Calendar.TUESDAY],
-          names[Calendar.WEDNESDAY],
-          names[Calendar.THURSDAY],
-          names[Calendar.FRIDAY],
-          names[Calendar.SATURDAY],
-          names[Calendar.SUNDAY]);
+          escapeText(names[Calendar.MONDAY]),
+          escapeText(names[Calendar.TUESDAY]),
+          escapeText(names[Calendar.WEDNESDAY]),
+          escapeText(names[Calendar.THURSDAY]),
+          escapeText(names[Calendar.FRIDAY]),
+          escapeText(names[Calendar.SATURDAY]),
+          escapeText(names[Calendar.SUNDAY]));
    }
 
    /**
@@ -2480,7 +2451,8 @@ public class TeXOSQuery implements Serializable
     * <tt>\\patdtf{2}{d}-\\patdtf{3}{M}-\\patdtf{4}{y}</tt>). The 
     * query command \\TeXOSQuery in texosquery.tex will expand \\patdtf
     * to the longer \\texosquerydtf to avoid conflict. This can then be
-    * redefined as appropriate.
+    * redefined as appropriate. (See the "Pattern Formats" section
+    * of the TeX documented code for more detail.)
     * @param localeFormat The date/time pattern
     * @return TeX code
     * @since 1.2
@@ -2501,7 +2473,7 @@ public class TeXOSQuery implements Serializable
       catch (Exception e)
       {
          // this shouldn't happen
-         debug(String.format("invalid argument: %s", localeFormat), e);
+         debug(String.format("Invalid argument: %s", localeFormat), e);
          return "";
       }
 
@@ -2645,7 +2617,7 @@ public class TeXOSQuery implements Serializable
       catch (Exception e)
       {
          // this shouldn't happen
-         debug(String.format("invalid argument: %s", numFormat), e);
+         debug(String.format("Invalid argument: %s", numFormat), e);
          return "";
       }
 
@@ -3009,7 +2981,9 @@ public class TeXOSQuery implements Serializable
     * a command that effectively takes 10 arguments (with a bit of
     * trickery to get around the 9-arg maximum). Each digit can then
     * be rendered using either \\patdgt (always display the digit)
-    * or \\patdgtnz (only display the digit if it isn't zero).
+    * or \\patdgtnz (only display the digit if it isn't a
+    * non-significant zero).
+    *
     * These short commands will be converted to longer ones that are
     * less likely to cause conflict when \\TeXOSQuery is used.
     * (See the "Pattern Formats" section of the documented code for
@@ -3241,13 +3215,14 @@ public class TeXOSQuery implements Serializable
    }
 
    /**
-    * Gets all available for the given locale. If the
+    * Gets all available data for the given locale. If the
     * given locale tag is null, the default locale is used. The
     * information is returned with grouping to make it
-    * easier to parse in TeX. Since TeX has a nine-argument limit,
-    * each block is in a sub-group (although this still exceeds nine
-    * arguments). The standalone month names and day of week names are new
-    * to Java 8, so we can't use it for earlier versions.
+    * easier to parse in TeX. (Each block is grouped, with each
+    * element within the block also grouped.)
+    *
+    * The standalone month names and day of week names are new
+    * to Java 8, so we can't use them for earlier versions.
     * @param localeTag the language tag identifying the locale or null for
     * the default locale
     * @return locale data in grouped blocks:
@@ -3272,8 +3247,8 @@ public class TeXOSQuery implements Serializable
     * decimal separator, exponent separator, grouping flag, ISO 4217 currency
     * identifier (e.g. GBP), region currency identifier (usually the same as
     * the ISO 4217 code, but may be an unofficial currency code, such as IMP),
-    * currency symbol (e.g. &0x00A3;), TeX currency symbol, monetary decimal separator,
-    * percent symbol, per mill symbol.
+    * currency symbol (e.g. &0x00A3;), TeX currency symbol, monetary decimal 
+    * separator, percent symbol, per mille symbol.
     * <li> number format, integer format, currency format,
     * percent format.
     * </ol>
@@ -3335,7 +3310,7 @@ public class TeXOSQuery implements Serializable
        }
 
        String langRegionGroup = String.format("{%s}{%s}{%s}{%s}{%s}{%s}{%s}",
-             getLanguageTag(locale),
+             escapeFileName(getLanguageTag(locale)),
              escapeText(languageName),
              escapeText(localeLanguageName),
              escapeText(countryName),
@@ -3567,8 +3542,8 @@ public class TeXOSQuery implements Serializable
              escapeText(fmtSyms.getDecimalSeparator()),
              escapeText(fmtSyms.getExponentSeparator()), 
              numFormat.isGroupingUsed() ? 1 : 0,
-             escapeText(currencyCode),
-             escapeText(localeCurrencyCode),
+             currencyCode,
+             localeCurrencyCode,
              escapeText(currency),
              texCurrency,// already escaped
              escapeText(fmtSyms.getMonetaryDecimalSeparator()),
@@ -3706,7 +3681,7 @@ public class TeXOSQuery implements Serializable
 
     /**
      * Prints the information with optional grouping.
-     * @param numActions Add grouping if actions &gt; 1
+     * @param numActions Add grouping if number of actions &gt; 1
      * @param info Information to print
      * @since 1.2
      */ 
@@ -3853,7 +3828,7 @@ public class TeXOSQuery implements Serializable
             if (i == args.length-1)
             {
                System.err.println(String.format(
-                 "%s <level> expected", args[i]));
+                 "<level> expected after: %s", args[i]));
                System.exit(1);
             }
 
@@ -3903,7 +3878,12 @@ public class TeXOSQuery implements Serializable
          }
          catch (Throwable e)
          {
-            System.err.println(e.getMessage());
+            // Any errors should've been picked up by the action, 
+            // so this is most likely a runtime error that needs
+            // to be reported.
+
+            System.err.println("Fatal error: "+e.getMessage());
+            System.err.println("Use --debug 2 to obtain stack trace");
             debug(String.format("Action failed: %s", action.getInvocation()),
               e);
             System.exit(1);
@@ -3998,7 +3978,7 @@ public class TeXOSQuery implements Serializable
       {
          public String action()
          {
-            return getLanguageTag(null);
+            return escapeFileName(getLanguageTag(null));
          }
       },
       new QueryAction("numeric", "N", 1, 0, "[locale]",
@@ -4215,15 +4195,114 @@ public class TeXOSQuery implements Serializable
 
    private static final int MAX_DIGIT_FORMAT=10;
 
+   // Dollar symbol
+   private static final char DOLLAR_CHAR=0x0024;
+
+   // Cent symbol
+   private static final char CENT_CHAR=0x00A2;
+
    // Pound symbol
    private static final char POUND_CHAR=0x00A3;
 
-   // Pound symbols as a string
+   // Pound symbol as a string
    private static final String POUND_STRING=""+POUND_CHAR;
-
-   // Per mille symbol
-   private static final char PERMILLE_CHAR=0x2030;
 
    // Currency symbol
    private static final char CURRENCY_CHAR=0x00A4;
+
+   // Yen symbol
+   private static final char YEN_CHAR=0x00A5;
+
+   // ECU symbol
+   private static final char ECU_CHAR=0x20A0;
+
+   // Colon currency symbol
+   private static final char COLON_CURRENCY_CHAR=0x20A1;
+
+   // Cruzeiro symbol
+   private static final char CRUZEIRO_CHAR=0x20A2;
+
+   // Franc symbol
+   private static final char FRANC_CHAR=0x20A3;
+
+   // Lira symbol
+   private static final char LIRA_CHAR=0x20A4;
+
+   // Mill currency symbol
+   private static final char MILL_CURRENCY_CHAR=0x20A5;
+
+   // Naira symbol
+   private static final char NAIRA_CHAR=0x20A6;
+
+   // Peseta symbol
+   private static final char PESETA_CHAR=0x20A7;
+
+   // Legacy rupee symbol
+   private static final char LEGACY_RUPEE_CHAR=0x20A8;
+
+   // Won symbol
+   private static final char WON_CHAR=0x20A9;
+
+   // New sheqel symbol
+   private static final char NEW_SHEQEL_CHAR=0x20AA;
+
+   // Dong symbol
+   private static final char DONG_CHAR=0x20AB;
+
+   // Euro symbol
+   private static final char EURO_CHAR=0x20AC;
+
+   // Kip symbol
+   private static final char KIP_CHAR=0x20AD;
+
+   // Tugrik symbol
+   private static final char TUGRIK_CHAR=0x20AE;
+
+   // Drachma symbol
+   private static final char DRACHMA_CHAR=0x20AF;
+
+   // German penny symbol
+   private static final char GERMAN_PENNY_CHAR=0x20B0;
+
+   // Peso symbol
+   private static final char PESO_CHAR=0x20B1;
+
+   // Guarani symbol
+   private static final char GUARANI_CHAR=0x20B2;
+
+   // Austral symbol
+   private static final char AUSTRAL_CHAR=0x20B3;
+
+   // Hryvnia symbol
+   private static final char HRYVNIA_CHAR=0x20B4;
+
+   // Cedi symbol
+   private static final char CEDI_CHAR=0x20B5;
+
+   // Livre tournois symbol
+   private static final char LIVRE_TOURNOIS_CHAR=0x20B6;
+
+   // Spesmilo symbol
+   private static final char SPESMILO_CHAR=0x20B7;
+
+   // Tenge symbol
+   private static final char TENGE_CHAR=0x20B8;
+
+   // Official rupee symbol
+   private static final char RUPEE_CHAR=0x20B9;
+
+   // Turkish lira symbol
+   private static final char TURKISH_LIRA_CHAR=0x20BA;
+
+   // Nordic mark symbol
+   private static final char NORDIC_MARK_CHAR=0x20BB;
+
+   // Manat symbol
+   private static final char MANAT_CHAR=0x20BC;
+
+   // Ruble symbol
+   private static final char RUBLE_CHAR=0x20BD;
+
+   // Per mille symbol
+   private static final char PERMILLE_CHAR=0x2030;
 }

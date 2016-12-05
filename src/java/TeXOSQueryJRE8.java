@@ -184,7 +184,7 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
 
       for (int i = 0; i < names.length; i++)
       {
-         builder.append(String.format("{%s}", names[i]));
+         builder.append(String.format("{%s}", escapeText(names[i])));
       }
 
       return builder.toString();
@@ -235,7 +235,7 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
 
       for (int i = 0; i < names.length; i++)
       {
-         builder.append(String.format("{%s}", names[i]));
+         builder.append(String.format("{%s}", escapeText(names[i])));
       }
 
       return builder.toString();
@@ -285,7 +285,7 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
 
       for (int i = 0; i < names.length; i++)
       {
-         builder.append(String.format("{%s}", names[i]));
+         builder.append(String.format("{%s}", escapeText(names[i])));
       }
 
       return builder.toString();
