@@ -123,7 +123,7 @@ Organization for Standardization}
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2016-11-30 (v1.2)}
+%\date{2016-12-06 (v1.2)}
 %\maketitle
 %
 %\begin{abstract}
@@ -848,6 +848,13 @@ Organization for Standardization}
 %line using \meta{sep} as the separator between entries. Note that
 %the list doesn't include the full path, just the file names.
 %
+%\begin{important}
+%As from v1.2, \meta{dir} must have a parent. That is, \meta{dir}
+%can't be a root directory. This is a security feature to prevent
+%any malicious code that might try to recursively list the contents
+%of the entire filing system, which would hog resources.
+%\end{important}
+%
 %As from version 1.2, there is now an optional argument \meta{sort},
 %which indicates how the returned list should be sorted. If omitted
 %\texttt{default} is assumed. Available values of \meta{sort}:
@@ -940,7 +947,8 @@ Organization for Standardization}
 %
 %This action obeys the \texttt{openin\_any} setting, so if access to
 %a file in the directory is forbidden, the file will be omitted from the
-%list.
+%list. As with \longarg{list}, \meta{dir} can't be a root directory
+%for security reasons.
 %
 %\begin{important}
 %Unlike most of the return values the \meta{sep} part here isn't
@@ -2290,12 +2298,12 @@ Organization for Standardization}
 %    \end{macrocode}
 % Version info.
 %    \begin{macrocode}
-\expandafter\def\csname ver@texosquery.tex\endcsname{2016/11/30 v1.2
+\expandafter\def\csname ver@texosquery.tex\endcsname{2016/12/06 v1.2
 (NLCT)}
 %    \end{macrocode}
 %
 %\begin{macro}{\@texosquery@warn}
-%\changes{1.2}{2016-11-30}{added check for tracklang's warning command}
+%\changes{1.2}{2016-12-06}{added check for tracklang's warning command}
 %Generate warning message. Use \sty{tracklang}'s warning if
 %available (so that the warnings can be disabled for both packages
 %at the same time).
@@ -2323,7 +2331,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@err}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\PackageError\undefined
   \def\@texosquery@err#1#2{%
@@ -2396,7 +2404,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryAllowRestricted}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %The default behaviour only switches off the dry-run mode if the
 %shell escape is unrestricted. The configuration file may override
 %this with \cs{TeXOSQueryAllowRestricted}, which will allow
@@ -2409,7 +2417,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryDenyRestricted}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Switch it off. 
 %    \begin{macrocode}
 \def\TeXOSQueryDenyRestricted{%
@@ -2419,7 +2427,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@allowrestricted}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Initialise to prevent shell escape in restricted mode.
 %    \begin{macrocode}
 \def\@texosquery@allowrestricted#1#2{#2}%
@@ -2427,7 +2435,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %Load the configuration file if it exists.
-%\changes{1.2}{2016-11-30}{added texosquery.cfg}
+%\changes{1.2}{2016-12-06}{added texosquery.cfg}
 %    \begin{macrocode}
 \openin0=texosquery.cfg \ifeof0\relax \else
   \closein0\relax
@@ -2489,7 +2497,7 @@ Organization for Standardization}
 %results of the shell escape. This command may be defined before loading
 %\sty{texosquery}, otherwise it's set to \cs{protected@edef}, if
 %defined, or \cs{edef}.
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\@texosquery@edef\undefined
   \ifx\protected@edef\undefined
@@ -2504,13 +2512,13 @@ Organization for Standardization}
 %Provide some utility commands. (Can't use \cs{@gobble} etc, as we
 %may not be using \LaTeX.)
 %\begin{macro}{\@texosquery@gobble}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@gobble#1{}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\@texosquery@firstofone}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@firstofone#1{#1}
 %    \end{macrocode}
@@ -2565,7 +2573,7 @@ Organization for Standardization}
 %longer forms.
 %
 %\begin{macro}{\texosquerynonasciiwrap}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Allow a way to deal with non-ASCII characters returned by
 %\app{texosquery}. \cs{TeXOSQuery} locally defines \cs{twrp}
 %to this command. By default this just does its argument
@@ -2578,7 +2586,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerynonasciidetokwrap}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %We also need to allow for non-ASCII characters in file names. In
 %this case the argument needs detokenizing. With \eTeX, we can
 %simply use \cs{detokenize} but we need to allow for plain
@@ -2605,7 +2613,7 @@ Organization for Standardization}
 %This helps to protect against \sty{babel} shorthands etc.
 %
 %\begin{macro}{\texosquerybackslash}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal backslash.
 %    \begin{macrocode}
 \edef\texosquerybackslash{\expandafter\@texosquery@gobble\string\\}
@@ -2613,7 +2621,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextbackslash}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual backslash.
 %    \begin{macrocode}
 \ifx\textbackslash\undefined
@@ -2625,7 +2633,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryleftbrace}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal left brace.
 %    \begin{macrocode}
 \edef\texosqueryleftbrace{\expandafter\@texosquery@gobble\string\{}
@@ -2633,7 +2641,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextleftbrace}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual left brace.
 %    \begin{macrocode}
 \def\texosquerytextleftbrace{\{}
@@ -2641,7 +2649,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryrightbrace}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal right brace.
 %    \begin{macrocode}
 \edef\texosqueryrightbrace{\expandafter\@texosquery@gobble\string\}}
@@ -2649,7 +2657,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextrightbrace}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual right brace.
 %    \begin{macrocode}
 \def\texosquerytextrightbrace{\}}
@@ -2657,7 +2665,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryhash}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal hash.
 %    \begin{macrocode}
 \edef\texosqueryhash{\expandafter\@texosquery@gobble\string\#}
@@ -2665,7 +2673,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytexthash}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual hash.
 %    \begin{macrocode}
 \def\texosquerytexthash{\#}
@@ -2673,7 +2681,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryunderscore}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal underscore.
 %    \begin{macrocode}
 \edef\texosqueryunderscore{\expandafter\@texosquery@gobble\string\_}
@@ -2681,7 +2689,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextunderscore}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual underscore.
 %    \begin{macrocode}
 \def\texosquerytextunderscore{\_}
@@ -2689,7 +2697,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerybacktick}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal grave.
 %    \begin{macrocode}
 \edef\texosquerybacktick{\string`}
@@ -2697,7 +2705,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextbacktick}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual open quote.
 %    \begin{macrocode}
 \def\texosquerytextbacktick{`}
@@ -2705,7 +2713,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryclosequote}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal apostrophe.
 %    \begin{macrocode}
 \edef\texosqueryclosequote{\string'}
@@ -2713,7 +2721,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextclosequote}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual apostrophe / single closing quote.
 %    \begin{macrocode}
 \def\texosquerytextclosequote{'}
@@ -2721,7 +2729,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerydoublequote}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal double-quote.
 %    \begin{macrocode}
 \edef\texosquerydoublequote{\string"}
@@ -2729,7 +2737,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextdoublequote}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual double-quote.
 %    \begin{macrocode}
 \def\texosquerytextdoublequote{"}
@@ -2737,7 +2745,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycolon}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal colon.
 %    \begin{macrocode}
 \edef\texosquerycolon{\string:}
@@ -2745,7 +2753,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextcolon}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual colon.
 %    \begin{macrocode}
 \def\texosquerytextcolon{:}
@@ -2753,7 +2761,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerysemicolon}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal semi-colon.
 %    \begin{macrocode}
 \edef\texosquerysemicolon{\string;}
@@ -2761,7 +2769,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextsemicolon}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual semi-colon.
 %    \begin{macrocode}
 \def\texosquerytextsemicolon{;}
@@ -2769,7 +2777,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryequals}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal equals.
 %    \begin{macrocode}
 \edef\texosqueryequals{\string=}
@@ -2777,7 +2785,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextequals}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual equals.
 %    \begin{macrocode}
 \def\texosquerytextequals{=}
@@ -2785,7 +2793,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryslash}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal slash.
 %    \begin{macrocode}
 \edef\texosqueryslash{\string/}
@@ -2793,7 +2801,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextslash}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual slash.
 %    \begin{macrocode}
 \def\texosquerytextslash{/}
@@ -2801,7 +2809,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryhyphen}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal hyphen.
 %    \begin{macrocode}
 \edef\texosqueryhyphen{\string-}
@@ -2809,7 +2817,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytexthyphen}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual hyphen.
 %    \begin{macrocode}
 \def\texosquerytexthyphen{-}
@@ -2817,7 +2825,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryplus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal plus.
 %    \begin{macrocode}
 \edef\texosqueryplus{\string+}
@@ -2825,7 +2833,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextplus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual plus.
 %    \begin{macrocode}
 \def\texosquerytextplus{+}
@@ -2833,7 +2841,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryperiod}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal period.
 %    \begin{macrocode}
 \edef\texosqueryperiod{\string.}
@@ -2841,7 +2849,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextperiod}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual period.
 %    \begin{macrocode}
 \def\texosquerytextperiod{.}
@@ -2849,7 +2857,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycomma}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal comma.
 %    \begin{macrocode}
 \edef\texosquerycomma{\string,}
@@ -2857,7 +2865,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextcomma}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual comma.
 %    \begin{macrocode}
 \def\texosquerytextcomma{,}
@@ -2865,7 +2873,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryopenparen}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal open bracket.
 %    \begin{macrocode}
 \edef\texosqueryopenparen{\string(}
@@ -2873,7 +2881,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextopenparen}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual open bracket.
 %    \begin{macrocode}
 \def\texosquerytextopenparen{(}
@@ -2881,7 +2889,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycloseparen}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal close bracket.
 %    \begin{macrocode}
 \edef\texosquerycloseparen{\string)}
@@ -2889,7 +2897,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextcloseparen}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual close bracket.
 %    \begin{macrocode}
 \def\texosquerytextcloseparen{)}
@@ -2897,7 +2905,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryopensq}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal open square bracket.
 %    \begin{macrocode}
 \edef\texosqueryopensq{\string[}
@@ -2905,7 +2913,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextopensq}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual open square bracket.
 %    \begin{macrocode}
 \def\texosquerytextopensq{[}
@@ -2913,7 +2921,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryclosesq}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal close square bracket.
 %    \begin{macrocode}
 \edef\texosqueryclosesq{\string]}
@@ -2921,7 +2929,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextclosesq}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual close square bracket.
 %    \begin{macrocode}
 \def\texosquerytextclosesq{]}
@@ -2929,7 +2937,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryasterisk}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal asterisk.
 %    \begin{macrocode}
 \edef\texosqueryasterisk{\string*}
@@ -2937,7 +2945,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextasterisk}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual asterisk.
 %    \begin{macrocode}
 \def\texosquerytextasterisk{*}
@@ -2945,7 +2953,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryatchar}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal at character.
 %    \begin{macrocode}
 \edef\texosqueryatchar{\string @}
@@ -2953,7 +2961,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextatchar}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual at character.
 %    \begin{macrocode}
 \def\texosquerytextatchar{@}
@@ -2961,7 +2969,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerybar}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal bar.
 %    \begin{macrocode}
 \edef\texosquerybar{\string|}
@@ -2969,7 +2977,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextbar}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual bar.
 %    \begin{macrocode}
 \ifx\undefined\textbar
@@ -2981,7 +2989,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerylessthan}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal less than.
 %    \begin{macrocode}
 \edef\texosquerylessthan{\string<}
@@ -2989,7 +2997,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextlessthan}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual less than.
 %    \begin{macrocode}
 \ifx\undefined\textless
@@ -3001,7 +3009,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerygreaterthan}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal greater than.
 %    \begin{macrocode}
 \edef\texosquerygreaterthan{\string>}
@@ -3009,7 +3017,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextgreaterthan}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual greater than.
 %    \begin{macrocode}
 \ifx\undefined\textgreater
@@ -3021,7 +3029,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytilde}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal tilde.
 %    \begin{macrocode}
 \edef\texosquerytilde{\string~}
@@ -3029,7 +3037,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytexttilde}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual tilde.
 %    \begin{macrocode}
 \ifx\textasciitilde\undefined
@@ -3041,7 +3049,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycircum}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal circumflex.
 %    \begin{macrocode}
 \edef\texosquerycircum{\string^}
@@ -3049,7 +3057,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextcircum}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual circumflex.
 %    \begin{macrocode}
 \ifx\textasciicircum\undefined
@@ -3061,7 +3069,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryampersand}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal ampersand.
 %    \begin{macrocode}
 \edef\texosqueryampersand{\string&}
@@ -3069,7 +3077,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextampersand}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual ampersand.
 %    \begin{macrocode}
 \def\texosquerytextampersand{\&}
@@ -3077,7 +3085,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerydollar}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal dollar. (This could just be defined as \verb|\string$|, but
 %that plays havoc with the syntax highlighting!)
 %    \begin{macrocode}
@@ -3086,7 +3094,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextdollar}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual dollar.
 %    \begin{macrocode}
 \def\texosquerytextdollar{\$}
@@ -3094,7 +3102,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypercent}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal percent.
 %    \begin{macrocode}
 \edef\texosquerypercent{\expandafter\@texosquery@gobble\string\%}
@@ -3102,7 +3110,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextpercent}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual percent.
 %    \begin{macrocode}
 \def\texosquerytextpercent{\%}
@@ -3110,7 +3118,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryexclam}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal exclamation.
 %    \begin{macrocode}
 \edef\texosqueryexclam{\string!}
@@ -3118,7 +3126,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextexclam}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual exclamation.
 %    \begin{macrocode}
 \def\texosquerytextexclam{!}
@@ -3126,7 +3134,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryquestion}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal question mark.
 %    \begin{macrocode}
 \edef\texosqueryquestion{\string?}
@@ -3134,7 +3142,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextquestion}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual question mark.
 %    \begin{macrocode}
 \def\texosquerytextquestion{?}
@@ -3143,7 +3151,7 @@ Organization for Standardization}
 %
 %
 %\begin{macro}{\texosqueryliteralspace}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal space.
 %    \begin{macrocode}
 \edef\texosqueryliteralspace{\expandafter\string\space}
@@ -3151,7 +3159,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytextspace}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Textual space. (Don't allow it to expand while it's being fetched
 %from \cs{texosquery} just in case it disappears.)
 %    \begin{macrocode}
@@ -3160,7 +3168,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@D}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %The \verb|D| identifier in PDF date-time formats need to have
 %category code 12. This is only used by methods that return results
 %in the form:
@@ -3172,7 +3180,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@enableshortcs}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %\hypertarget{enableshortcs}{Enable shortcut commands.}
 %    \begin{macrocode}
 \def\@texosquery@enableshortcs{%
@@ -3333,7 +3341,7 @@ Organization for Standardization}
 %\end{definition}
 %which simply expands to the appropriate command.
 %\begin{macro}{\texosquerycurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrency#1{%
  \expandafter\noexpand\csname texosquerycurrency#1\endcsname
@@ -3348,7 +3356,7 @@ Organization for Standardization}
 %The \sty{fontawesome} package has the most support for currency
 %symbols, so these are checked first.
 %\begin{macro}{\texosquerycurrencydollar}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faDollar\undefined
   \def\texosquerycurrencydollar{\$}
@@ -3359,7 +3367,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencycent}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\textcent\undefined
   \def\texosquerycurrencycent{cent}
@@ -3370,7 +3378,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencypound}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faGbp\undefined
   \ifx\pounds\undefined
@@ -3385,7 +3393,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencysign}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\textcurrency\undefined
   \def\texosquerycurrencysign{currency-sign}
@@ -3396,7 +3404,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyyen}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faYen\undefined
   \ifx\textyen\undefined
@@ -3411,35 +3419,35 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyecu}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencyecu{ecu}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencycolon}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencycolon{colon}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencycruzeiro}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencycruzeiro{cruzeiro}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyfranc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencyfranc{franc}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencylira}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\textlira\undefined
   \def\texosquerycurrencylira{lira}
@@ -3450,14 +3458,14 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencymill}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencymill{mill}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencynaira}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\textnaira\undefined
   \def\texosquerycurrencynaira{naira}
@@ -3468,14 +3476,14 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencypeseta}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencypeseta{peseta}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyrupee}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faRupee\undefined
   \def\texosquerycurrencyrupee{rupee}
@@ -3486,7 +3494,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencywon}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faWon\undefined
   \ifx\textwon\undefined
@@ -3501,7 +3509,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencynewsheqel}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faSheqel\undefined
   \def\texosquerycurrencynewsheqel{newsheqel}
@@ -3512,7 +3520,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencydong}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\textdong\undefined
   \def\texosquerycurrencydong{dong}
@@ -3523,7 +3531,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyeuro}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faEuro\undefined
   \ifx\texteuro\undefined
@@ -3542,35 +3550,35 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencykip}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencykip{kip}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencytugrik}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencytugrik{tugrik}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencydrachma}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencydrachma{drachma}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencygermanpenny}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencygermanpenny{german-penny}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencypeso}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\textpeso\undefined
   \def\texosquerycurrencypeso{peso}
@@ -3581,7 +3589,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyguarani}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\textguarani\undefined
   \def\texosquerycurrencyguarani{guarani}
@@ -3592,21 +3600,21 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyaustral}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencyaustral{austral}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyhryvnia}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencyhryvnia{hryvnia}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencycedi}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\textcolonmonetary\undefined
   \def\texosquerycurrencycedi{cedi}
@@ -3617,35 +3625,35 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencylivretournois}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencylivretournois{livre-tournois}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyspesmilo}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencyspesmilo{spesmilo}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencytenge}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencytenge{tenge}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyrupee}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencyrupee{rupee}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyturkishlira}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faTurkishLira\undefined
   \def\texosquerycurrencyturkishlira{turkish-lira}
@@ -3656,21 +3664,21 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencynordicmark}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencynordicmark{nordic-mark}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencymanat}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerycurrencymanat{manat}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosquerycurrencyruble}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \ifx\faRuble\undefined
   \def\texosquerycurrencyruble{ruble}
@@ -3695,7 +3703,7 @@ Organization for Standardization}
 %\begin{macro}{\TeXOSQueryLangTag}
 %Query the language tag and store the result in the control sequence
 %provided in the argument.
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\TeXOSQueryLangTag#1{\TeXOSQuery{#1}{\string-b}}
 %    \end{macrocode}
@@ -3706,7 +3714,7 @@ Organization for Standardization}
 %argument and store the result in the control sequence
 %provided in the argument. Leave the second argument empty for the
 %default locale.
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\TeXOSQueryNumeric#1#2{\TeXOSQuery{#1}{\string-N #2}}
 %    \end{macrocode}
@@ -3717,7 +3725,7 @@ Organization for Standardization}
 %argument and store the result in the control sequence
 %provided in the argument. Leave the second argument empty for the
 %default locale.
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\TeXOSQueryLocaleData#1#2{\TeXOSQuery{#1}{\string-D #2}}
 %    \end{macrocode}
@@ -3766,7 +3774,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryDateTime}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Query the current date and time.
 %    \begin{macrocode}
 \def\TeXOSQueryDateTime#1{%
@@ -3776,7 +3784,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryTimeZones}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Query the current time zone mappings. Leave the second argument
 %empty for the default locale.
 %    \begin{macrocode}
@@ -3850,7 +3858,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@filelist}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@filelist#1#2#3#4#5{\TeXOSQuery{#1}{%
  \string#2 \string'#3\string' 
@@ -3869,7 +3877,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListDateAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by date.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListDateAsc#1#2#3{%
@@ -3879,7 +3887,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListDateDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by date in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListDateDes#1#2#3{%
@@ -3889,7 +3897,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListSizeAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by size.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListSizeAsc#1#2#3{%
@@ -3899,7 +3907,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListSizeDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by size in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListSizeDes#1#2#3{%
@@ -3909,7 +3917,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListNameAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by name.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListNameAsc#1#2#3{%
@@ -3919,7 +3927,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListNameDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListNameDes#1#2#3{%
@@ -3929,7 +3937,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListNameIgnoreCaseAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by case-insensitive name.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListNameIgnoreCaseAsc#1#2#3{%
@@ -3939,7 +3947,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListNameIgnoreCaseDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by case-insensitive name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListNameIgnoreCaseDes#1#2#3{%
@@ -3949,7 +3957,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListExtAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by extension.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListExtAsc#1#2#3{%
@@ -3959,7 +3967,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileListExtDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by extension in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFileListExtDes#1#2#3{%
@@ -3987,7 +3995,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListDateAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by date.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListDateAsc#1#2#3{%
@@ -3997,7 +4005,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListDateAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by date.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListDateAsc#1#2#3{%
@@ -4007,7 +4015,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListDateDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by date in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListDateDes#1#2#3{%
@@ -4017,7 +4025,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListDateDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by date in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListDateDes#1#2#3{%
@@ -4027,7 +4035,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListSizeAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by size.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListSizeAsc#1#2#3{%
@@ -4037,7 +4045,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListSizeAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by size.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListSizeAsc#1#2#3{%
@@ -4047,7 +4055,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListSizeDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by size in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListSizeDes#1#2#3{%
@@ -4057,7 +4065,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListSizeDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by size in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListSizeDes#1#2#3{%
@@ -4067,7 +4075,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListNameAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by file name.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListNameAsc#1#2#3{%
@@ -4077,7 +4085,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListNameAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by file name.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListNameAsc#1#2#3{%
@@ -4087,7 +4095,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListNameDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by file name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListNameDes#1#2#3{%
@@ -4097,7 +4105,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListNameDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListNameDes#1#2#3{%
@@ -4107,7 +4115,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListNameIgnoreCaseAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by file case-insensitive name.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListNameIgnoreCaseAsc#1#2#3{%
@@ -4117,7 +4125,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListNameIgnoreCaseAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by file case-insensitive name.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListNameIgnoreCaseAsc#1#2#3{%
@@ -4127,7 +4135,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListNameIgnoreCaseDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by file case-insensitive name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListNameIgnoreCaseDes#1#2#3{%
@@ -4137,7 +4145,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListNameIgnoreCaseDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by case-insensitive name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListNameIgnoreCaseDes#1#2#3{%
@@ -4147,7 +4155,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListExtAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by file extension.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListExtAsc#1#2#3{%
@@ -4157,7 +4165,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListExtAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by file extension.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListExtAsc#1#2#3{%
@@ -4167,7 +4175,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryRegularFileListExtDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all regular files sorted by file extension in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryRegularFileListExtDes#1#2#3{%
@@ -4177,7 +4185,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQuerySubDirListExtDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %List all sub-directories sorted by extension in descending order.
 %    \begin{macrocode}
 \def\TeXOSQuerySubDirListExtDes#1#2#3{%
@@ -4188,7 +4196,7 @@ Organization for Standardization}
 %
 %
 %\begin{macro}{\@texosquery@filterfilelist}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@filterfilelist#1#2#3#4#5#6{%
  \TeXOSQuery{#1}%
@@ -4213,7 +4221,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListDateAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by date.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListDateAsc#1#2#3#4{%
@@ -4223,7 +4231,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListDateDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by date in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListDateDes#1#2#3#4{%
@@ -4233,7 +4241,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListSizeAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by size.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListSizeAsc#1#2#3#4{%
@@ -4243,7 +4251,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListSizeDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by size in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListSizeDes#1#2#3#4{%
@@ -4253,7 +4261,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListNameAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by file name.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListNameAsc#1#2#3#4{%
@@ -4263,7 +4271,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListNameDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListNameDes#1#2#3#4{%
@@ -4273,7 +4281,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListNameIgnoreCaseAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by file name (case-insensitive).
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListNameIgnoreCaseAsc#1#2#3#4{%
@@ -4283,7 +4291,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListNameIgnoreCaseDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by name in descending order (case-insensitive).
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListNameIgnoreCaseDes#1#2#3#4{%
@@ -4293,7 +4301,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListExtAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by file extension.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListExtAsc#1#2#3#4{%
@@ -4303,7 +4311,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterFileListExtDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above, but sort by extension in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterFileListExtDes#1#2#3#4{%
@@ -4332,7 +4340,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListDateAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by file date.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListDateAsc#1#2#3#4{%
@@ -4342,7 +4350,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListDateAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by file date.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListDateAsc#1#2#3#4{%
@@ -4352,7 +4360,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListDateDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by file date in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListDateDes#1#2#3#4{%
@@ -4362,7 +4370,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListDateDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by file date in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListDateDes#1#2#3#4{%
@@ -4373,7 +4381,7 @@ Organization for Standardization}
 %
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListSizeAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by file size.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListSizeAsc#1#2#3#4{%
@@ -4383,7 +4391,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListSizeAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by file size.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListSizeAsc#1#2#3#4{%
@@ -4393,7 +4401,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListSizeDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by file size in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListSizeDes#1#2#3#4{%
@@ -4403,7 +4411,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListSizeDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by file size in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListSizeDes#1#2#3#4{%
@@ -4414,7 +4422,7 @@ Organization for Standardization}
 %
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListNameAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by file name.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListNameAsc#1#2#3#4{%
@@ -4424,7 +4432,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListNameAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by file name.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListNameAsc#1#2#3#4{%
@@ -4434,7 +4442,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListNameDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by file name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListNameDes#1#2#3#4{%
@@ -4444,7 +4452,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListNameDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by file name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListNameDes#1#2#3#4{%
@@ -4455,7 +4463,7 @@ Organization for Standardization}
 %
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListNameIgnoreCaseAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by case-insensitive file name.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListNameIgnoreCaseAsc#1#2#3#4{%
@@ -4465,7 +4473,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListNameIgnoreCaseAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by case-insensitive file name.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListNameIgnoreCaseAsc#1#2#3#4{%
@@ -4475,7 +4483,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListNameIgnoreCaseDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by case-insensitive file name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListNameIgnoreCaseDes#1#2#3#4{%
@@ -4485,7 +4493,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListNameIgnoreCaseDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by case-insensitive file name in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListNameIgnoreCaseDes#1#2#3#4{%
@@ -4495,7 +4503,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListExtAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by file extension. (Added for
 %completeness as directories don't tend to have extensions.)
 %    \begin{macrocode}
@@ -4506,7 +4514,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListExtAsc}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by file extension.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListExtAsc#1#2#3#4{%
@@ -4516,7 +4524,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterSubDirListExtDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of sub-directories by file extension in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterSubDirListExtDes#1#2#3#4{%
@@ -4526,7 +4534,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFilterRegularFileListExtDes}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Filtered sort of regular files by file extension in descending order.
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListExtDes#1#2#3#4{%
@@ -4811,7 +4819,7 @@ Organization for Standardization}
 %\cs{texosqueryfmtnumber}.
 %
 %\begin{macro}{\texosquerydtf}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Date/time format placeholder. The second argument is the
 %placeholder character and the first argument is the number of
 %occurrences of that character in the placeholder. The default
@@ -4843,14 +4851,14 @@ Organization for Standardization}
 %displayed.
 %
 %\begin{macro}{\texosquerypatstr}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Quoted string contained in number format.
 %    \begin{macrocode}
 \def\texosquerypatstr#1{'#1'}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatquote}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Literal quote contained in number format.
 %    \begin{macrocode}
 \def\texosquerypatquote{''}
@@ -4858,31 +4866,31 @@ Organization for Standardization}
 %\end{macro}
 %Number format place holders.
 %\begin{macro}{\texosquerypatplusminus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatplusminus#1#2{#1;#2}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatnum}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatnum#1{#1}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatsinum}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatsinum#1#2{#1E#2}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatdec}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatdec#1#2{#1.#2}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatprefixcurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First argument is a number, the second is optional text before the
 %currency symbol. This will require UTF-8 support otherwise it will
 %need redefining as appropriate. (Similarly for the other currency
@@ -4892,14 +4900,14 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatprefixicurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above but use international currency symbol.
 %    \begin{macrocode}
 \def\texosquerypatprefixicurrency#1#2{#2¤¤#1}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatsuffixcurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First argument is a number, the second is optional text after the
 %currency symbol.
 %    \begin{macrocode}
@@ -4907,38 +4915,38 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatsuffixicurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %As above but use international currency symbol.
 %    \begin{macrocode}
 \def\texosquerypatsuffixicurrency#1#2{#1¤¤#2}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatdigit}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatdigit{0}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatdigitnozero}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatdigitnozero{\#}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatminus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatminus{-}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatgroupsep}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatgroupsep{,}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatprefixpercent}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %The first argument is the value, the second argument is optional
 %text before the percent symbol.
 %    \begin{macrocode}
@@ -4946,7 +4954,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatsuffixpercent}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %The first argument is the value, the second argument is optional
 %text after the percent symbol.
 %    \begin{macrocode}
@@ -4954,7 +4962,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatprefixpermill}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %The first argument is the value, the second argument is optional
 %text before the per-mill symbol.
 %    \begin{macrocode}
@@ -4962,7 +4970,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatsuffixpermill}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %The first argument is the value, the second argument is optional
 %text after the per-mill symbol.
 %    \begin{macrocode}
@@ -4973,7 +4981,7 @@ Organization for Standardization}
 %\begin{macro}{\@texosquery@pattern@shortcuts}
 %Provide much shorter cuts for the convenience of directly defining
 %patterns with \cs{texosquerydefpattern}.
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@pattern@shortcuts{%
    \def\%{\noexpand\texosquerydtf}%
@@ -5002,7 +5010,7 @@ Organization for Standardization}
 %is the name of the control sequence in which to store the pattern
 %provided in the second argument. Be careful of any fragile commands
 %within the second argument. They will need protecting!
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerydefpattern#1#2{%
  \begingroup
@@ -5080,7 +5088,7 @@ Organization for Standardization}
 %maximum limit.
 %
 %\begin{macro}{\texosqueryfmtdatetime}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %The general utility command to format a pattern. The first argument
 %is the pattern. After that are the date-time data arguments.
 %    \begin{macrocode}
@@ -5095,7 +5103,7 @@ Organization for Standardization}
 %integers. These are padded using \cs{@texosquery@paddigits}.
 %
 %\begin{macro}{\@texosquery@fmt@getera}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getera#1{%
   \edef\@texosquery@fmt@G{\@texosquery@paddigits{#1}}%
@@ -5105,7 +5113,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getyear}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getyear#1{%
   \edef\@texosquery@fmt@y{\@texosquery@paddigits{#1}}%
@@ -5115,7 +5123,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getweekyear}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getweekyear#1{%
   \edef\@texosquery@fmt@Y{\@texosquery@paddigits{#1}}%
@@ -5125,7 +5133,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getmonth}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getmonth#1{%
   \edef\@texosquery@fmt@M{\@texosquery@paddigits{#1}}%
@@ -5136,7 +5144,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getweekinyear}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getweekinyear#1{%
   \edef\@texosquery@fmt@w{\@texosquery@paddigits{#1}}%
@@ -5146,7 +5154,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getweekinmonth}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getweekinmonth#1{%
   \edef\@texosquery@fmt@W{\@texosquery@paddigits{#1}}%
@@ -5156,7 +5164,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getdayinyear}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getdayinyear#1{%
   \edef\@texosquery@fmt@D{\@texosquery@paddigits{#1}}%
@@ -5166,7 +5174,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getdayinmonth}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getdayinmonth#1{%
   \edef\@texosquery@fmt@d{\@texosquery@paddigits{#1}}%
@@ -5176,7 +5184,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getdayofweekinmonth}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getdayofweekinmonth#1{%
   \edef\@texosquery@fmt@F{\@texosquery@paddigits{#1}}%
@@ -5186,7 +5194,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getdaynumberofweek}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getdaynumberofweek#1{%
   \edef\@texosquery@fmt@u{\@texosquery@paddigits{#1}}%
@@ -5197,7 +5205,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getampm}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getampm#1{%
   \edef\@texosquery@fmt@a{\@texosquery@paddigits{#1}}%
@@ -5207,7 +5215,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@gethourindayH}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@gethourindayH#1{%
   \edef\@texosquery@fmt@H{\@texosquery@paddigits{#1}}%
@@ -5217,7 +5225,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@gethourindayk}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@gethourindayk#1{%
   \edef\@texosquery@fmt@k{\@texosquery@paddigits{#1}}%
@@ -5227,7 +5235,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@gethourinampmK}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@gethourinampmK#1{%
   \edef\@texosquery@fmt@K{\@texosquery@paddigits{#1}}%
@@ -5237,7 +5245,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@gethourinampmh}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@gethourinampmh#1{%
   \edef\@texosquery@fmt@h{\@texosquery@paddigits{#1}}%
@@ -5247,7 +5255,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getminute}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getminute#1{%
   \edef\@texosquery@fmt@m{\@texosquery@paddigits{#1}}%
@@ -5257,7 +5265,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getsecond}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getsecond#1{%
   \edef\@texosquery@fmt@s{\@texosquery@paddigits{#1}}%
@@ -5267,7 +5275,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@getmillisecond}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@getmillisecond#1{%
   \edef\@texosquery@fmt@S{\@texosquery@paddigits{#1}}%
@@ -5277,7 +5285,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@gettimezone}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@gettimezone#1{%
   \def\@texosquery@fmt@Z{#1}%
@@ -5296,7 +5304,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@setup@dtpattern}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@setup@dtpattern{%
   \let\texosquerydtf\@texosquery@fmt@dtf
@@ -5307,7 +5315,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@paddigits@pos}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Pad positive number to 10 digits. \TeX\ can't reach 11 digits, so this is
 %the maximum representation.
 %    \begin{macrocode}
@@ -5354,7 +5362,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@paddigits}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %This will expand to 11 characters (sign followed by 10 digits).
 %    \begin{macrocode}
 \def\@texosquery@paddigits#1{%
@@ -5372,7 +5380,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@paddigits@trailing}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Pad trailing zeros.
 %    \begin{macrocode}
 \def\@texosquery@paddigits@trailing#1{%
@@ -5383,7 +5391,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@tenoften@then@gobble}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@tenoften@then@gobble#1#2#3#4#5#6#7#8#9{%
   #1#2#3#4#5#6#7#8#9%
@@ -5393,7 +5401,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@lastoften@gobble}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@lastoften@gobble#1#2\@texosquery@end@tenoften{#1}
 %    \end{macrocode}
@@ -5402,7 +5410,7 @@ Organization for Standardization}
 %Provide commands to select certain digits. (Sign not included.)
 %
 %\begin{macro}{\@texosquery@firstoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First of ten.
 %    \begin{macrocode}
 \def\@texosquery@firstoften#1#2#3#4#5#6#7#8#9{%
@@ -5416,7 +5424,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@secondoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Second of ten.
 %    \begin{macrocode}
 \def\@texosquery@secondoften#1#2#3#4#5#6#7#8#9{%
@@ -5430,7 +5438,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@thirdoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Third of ten.
 %    \begin{macrocode}
 \def\@texosquery@thirdoften#1#2#3#4#5#6#7#8#9{%
@@ -5444,7 +5452,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fourthoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Fourth of ten.
 %    \begin{macrocode}
 \def\@texosquery@fourthoften#1#2#3#4#5#6#7#8#9{%
@@ -5458,7 +5466,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fifthoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Fifth of ten.
 %    \begin{macrocode}
 \def\@texosquery@fifthoften#1#2#3#4#5#6#7#8#9{%
@@ -5472,7 +5480,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@sixthoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Sixth of ten.
 %    \begin{macrocode}
 \def\@texosquery@sixthoften#1#2#3#4#5#6#7#8#9{%
@@ -5486,7 +5494,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@seventhoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Seventh of ten.
 %    \begin{macrocode}
 \def\@texosquery@seventhoften#1#2#3#4#5#6#7#8#9{%
@@ -5500,7 +5508,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@eighthoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Eighth of ten.
 %    \begin{macrocode}
 \def\@texosquery@eighthoften#1#2#3#4#5#6#7#8#9{%
@@ -5514,7 +5522,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@ninthoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Ninth of ten.
 %    \begin{macrocode}
 \def\@texosquery@ninthoften#1#2#3#4#5#6#7#8#9{%
@@ -5528,7 +5536,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@tenthoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Tenth of ten.
 %    \begin{macrocode}
 \def\@texosquery@tenthoften#1#2#3#4#5#6#7#8#9{%
@@ -5540,7 +5548,7 @@ Organization for Standardization}
 %Now macros to select first $n$ of ten.
 %
 %\begin{macro}{@texosquery@firsttwooften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First two of ten.
 %    \begin{macrocode}
 \def\@texosquery@firsttwooften#1#2#3#4#5#6#7#8#9{%
@@ -5554,7 +5562,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@firstthreeoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First three of ten.
 %    \begin{macrocode}
 \def\@texosquery@firstthreeoften#1#2#3#4#5#6#7#8#9{%
@@ -5568,7 +5576,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@firstfouroften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First four of ten.
 %    \begin{macrocode}
 \def\@texosquery@firstfouroften#1#2#3#4#5#6#7#8#9{%
@@ -5582,7 +5590,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@firstfiveoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First five of ten.
 %    \begin{macrocode}
 \def\@texosquery@firstfiveoften#1#2#3#4#5#6#7#8#9{%
@@ -5596,7 +5604,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@firstsixoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First six of ten.
 %    \begin{macrocode}
 \def\@texosquery@firstsixoften#1#2#3#4#5#6#7#8#9{%
@@ -5610,7 +5618,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@firstsevenoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First seven of ten.
 %    \begin{macrocode}
 \def\@texosquery@firstsevenoften#1#2#3#4#5#6#7#8#9{%
@@ -5624,7 +5632,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@firsteightoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First eight of ten.
 %    \begin{macrocode}
 \def\@texosquery@firsteightoften#1#2#3#4#5#6#7#8#9{%
@@ -5638,7 +5646,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@firstnineoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %First nine of ten.
 %    \begin{macrocode}
 \def\@texosquery@firstnineoften#1#2#3#4#5#6#7#8#9{%
@@ -5652,7 +5660,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@alltenoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %All ten.
 %    \begin{macrocode}
 \def\@texosquery@alltenoften#1#2#3#4#5#6#7#8#9{%
@@ -5665,7 +5673,7 @@ Organization for Standardization}
 %Select last $n$ of ten.
 %
 %\begin{macro}{@texosquery@lasttwooften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Last two of ten.
 %    \begin{macrocode}
 \def\@texosquery@lasttwooften#1#2#3#4#5#6#7#8#9{%
@@ -5676,7 +5684,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@lastthreeoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Last three of ten.
 %    \begin{macrocode}
 \def\@texosquery@lastthreeoften#1#2#3#4#5#6#7#8#9{%
@@ -5687,7 +5695,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@lastfouroften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Last four of ten.
 %    \begin{macrocode}
 \def\@texosquery@lastfouroften#1#2#3#4#5#6#7#8#9{%
@@ -5698,7 +5706,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@lastfiveoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Last five of ten.
 %    \begin{macrocode}
 \def\@texosquery@lastfiveoften#1#2#3#4#5#6#7#8#9{%
@@ -5709,7 +5717,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@lastsixoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Last six of ten.
 %    \begin{macrocode}
 \def\@texosquery@lastsixoften#1#2#3#4#5#6#7#8#9{%
@@ -5720,7 +5728,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@lastsevenoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Last seven of ten.
 %    \begin{macrocode}
 \def\@texosquery@lastsevenoften#1#2#3#4#5#6#7#8#9{%
@@ -5731,7 +5739,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@lasteightoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Last eight of ten.
 %    \begin{macrocode}
 \def\@texosquery@lasteightoften#1#2#3#4#5#6#7#8#9{%
@@ -5742,7 +5750,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{@texosquery@lastnineoften}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Last nine of ten.
 %    \begin{macrocode}
 \def\@texosquery@lastnineoften#1#2#3#4#5#6#7#8#9{%
@@ -5753,7 +5761,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmtminus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Minus symbol for use in date-time patterns.
 %    \begin{macrocode}
 \def\@texosquery@fmtminus{\texosquerypatfmtminus}
@@ -5761,7 +5769,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmtplus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Plus symbol for use in date-time patterns. Omit by default.
 %    \begin{macrocode}
 \def\@texosquery@fmtplus{}
@@ -5769,7 +5777,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmtsign}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Plus or minus sign for use in date-time patterns.
 %    \begin{macrocode}
 \def\@texosquery@fmtsign#1{%
@@ -5779,7 +5787,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@atleastonedigit}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %At least one digit with leading zeros removed.
 %    \begin{macrocode}
 \def\@texosquery@atleastonedigit#1{%
@@ -5793,7 +5801,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@atleastfourdigits}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %At least four digits, possible padded with zeros to make up four. The first
 %argument is the sign, then follow the ten digits.
 %    \begin{macrocode}
@@ -5804,7 +5812,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@at@leastfourdigits}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %At least four digits, possible padded with zeros to make up four. The first
 %argument is the sign, then follow the ten digits.
 %    \begin{macrocode}
@@ -5820,7 +5828,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@threedigitsexactly}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Exactly three digits.
 %    \begin{macrocode}
 \def\@texosquery@threedigitsexactly#1{%
@@ -5830,7 +5838,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@threedigits@exactly}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Exactly three digits.
 %    \begin{macrocode}
 \def\@texosquery@threedigits@exactly#1#2\@texosquery@threedigits@exactly{%
@@ -5841,7 +5849,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@twodigitsexactly}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Exactly two digits.
 %    \begin{macrocode}
 \def\@texosquery@twodigitsexactly#1{%
@@ -5851,7 +5859,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@twodigits@exactly}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Exactly two digits.
 %    \begin{macrocode}
 \def\@texosquery@twodigits@exactly#1#2\@texosquery@twodigits@exactly{%
@@ -5862,7 +5870,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fmt@dtf}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %\begin{definition}
 %\cs{@texosquery@fmt@dtf}\marg{n}\marg{designator}
 %\end{definition}
@@ -5876,7 +5884,7 @@ Organization for Standardization}
 %of the numeric commands defined above. The \sty{locale} package
 %defines \cs{texosqueryfmtpatMMM} and so on to use the locale's month names
 %etc.
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fmt@dtf#1#2{%
   \@texosquery@ifundef{@texosquery@fmt@#2}%
@@ -5945,7 +5953,7 @@ Organization for Standardization}
 %time zone isn't supplied as a single integer.
 %
 %\begin{macro}{\texosqueryfmttimezonehr}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Allow for \verb|-0| so append 1 to hour in test.
 %    \begin{macrocode}
 \def\texosqueryfmttimezonehr#1{%
@@ -5959,7 +5967,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmttimezonenumhr}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Like the above, but don't zero-pad or prefix with plus sign.
 %    \begin{macrocode}
 \def\texosqueryfmttimezonenumhr#1{%
@@ -5973,7 +5981,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmttimezonemin}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosqueryfmttimezonemin#1{%
   \ifnum#1<10 0\fi\number#1
@@ -5982,35 +5990,35 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@firstoffour}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@firstoffour#1#2#3#4{#1}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@secondoffour}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@secondoffour#1#2#3#4{#2}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@thirdoffour}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@thirdoffour#1#2#3#4{#3}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@fourthoffour}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@fourthoffour#1#2#3#4{#4}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryshorttimezone}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Maps id to short time zone display name. This will need redefining
 %as appropriate. The default simply expands to the ID.
 %Mappings can be obtained for a particular locale using the
@@ -6021,7 +6029,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryshortdstzone}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Maps id to short daylight saving time zone display name. This will need redefining
 %as appropriate. The default simply expands to the ID followed by
 %(DST).
@@ -6031,7 +6039,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerylongtimezone}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Maps id to long time zone display name. This will need redefining
 %as appropriate. The default simply expands to the ID.
 %    \begin{macrocode}
@@ -6040,7 +6048,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerylongdstzone}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Maps id to long daylight saving time zone display name. This will need redefining
 %as appropriate. The default simply expands to the ID followed by
 %(DST).
@@ -6050,14 +6058,14 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerytimesep}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerytimesep{:}
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatz}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{z} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatz#1{%
@@ -6071,7 +6079,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatzz}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{zz} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatzz#1{%
@@ -6085,7 +6093,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatzzz}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{zzz} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatzzz#1{%
@@ -6099,7 +6107,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatzzzz}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{zzzz} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatzzzz#1{%
@@ -6113,7 +6121,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatZ}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{Z} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatZ#1{%
@@ -6126,7 +6134,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatZZ}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{ZZ} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatZZ#1{%
@@ -6139,7 +6147,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatZZZ}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{ZZZ} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatZZZ#1{%
@@ -6152,7 +6160,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatZZZZ}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{ZZZZ} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatZZZZ#1{%
@@ -6165,7 +6173,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatX}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{X} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatX#1{%
@@ -6179,7 +6187,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatXX}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{XX} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatXX#1{%
@@ -6193,7 +6201,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatXXX}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{XXX} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatXXX#1{%
@@ -6207,7 +6215,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatXXXX}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default time zone format for \texttt{XXXX} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatXXXX#1{%
@@ -6221,7 +6229,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpata}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default am/pm designator for the \texttt{a} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpata#1{%
@@ -6231,7 +6239,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpataa}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default am/pm for the \texttt{aa} designator. Just make it the same
 %as the \texttt{a} designator.
 %    \begin{macrocode}
@@ -6240,7 +6248,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpataaa}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default am/pm for the \texttt{aaa} designator. Just make it the same
 %as the \texttt{a} designator.
 %    \begin{macrocode}
@@ -6249,7 +6257,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpataaaa}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default am/pm for the \texttt{aaaa} designator. Just make it the same
 %as the \texttt{a} designator.
 %    \begin{macrocode}
@@ -6258,7 +6266,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatG}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default era designator for the \texttt{G} designator.
 %    \begin{macrocode}
 \def\texosqueryfmtpatG#1{%
@@ -6268,7 +6276,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatGG}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default era for the \texttt{GG} designator. Just make it the same
 %as the \texttt{G} designator.
 %    \begin{macrocode}
@@ -6277,7 +6285,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatGGG}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default era for the \texttt{GGG} designator. Just make it the same
 %as the \texttt{G} designator.
 %    \begin{macrocode}
@@ -6286,7 +6294,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosqueryfmtpatGGGG}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Default era for the \texttt{GGGG} designator. Just make it the same
 %as the \texttt{G} designator.
 %    \begin{macrocode}
@@ -6299,7 +6307,7 @@ Organization for Standardization}
 %\label{sec:applynumpatterns}
 %
 %\begin{macro}{\texosqueryfmtnumber}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %\begin{definition}
 %\cs{texosqueryfmtnumber}\marg{pattern}\marg{int}\marg{frac}\marg{mantissa}
 %\end{definition}
@@ -6408,21 +6416,21 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@digitindex}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \newcount\@texosquery@digitindex
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\if@texosquery@digitfound}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \newif\if@texosquery@digitfound
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@pos@shift}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@pos@shift#1{%
   \ifcase#1
@@ -6502,7 +6510,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@neg@shift}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@neg@shift#1{%
   \ifcase#1
@@ -6591,7 +6599,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquerypat@numfmt@sign}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquerypat@numfmt@sign{%
   \@texosquery@currentsign
@@ -6602,19 +6610,19 @@ Organization for Standardization}
 %
 %
 %\begin{macro}{\texosquerypatfmtstr}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmtstr#1{#1}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmtquote}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmtquote{'}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmt@plusminus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmt@plusminus#1#2{%
  \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
@@ -6637,13 +6645,13 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmt@num}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmt@num#1{#1}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmtexp}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Exponent symbol. Change as appropriate.
 %    \begin{macrocode}
 \def\texosquerypatfmtexp{E}
@@ -6651,7 +6659,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypatfmt@sinum}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmt@sinum#1#2{%
  \let\@texosquery@int\@texosquery@si@int
@@ -6672,7 +6680,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmtdecsep}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Decimal separator. Change as appropriate.
 %    \begin{macrocode}
 \def\texosquerypatfmtdecsep{.}
@@ -6680,7 +6688,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypatfmtcurdecsep}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Currency decimal separator. Change as appropriate.
 %    \begin{macrocode}
 \def\texosquerypatfmtcurdecsep{.}
@@ -6688,7 +6696,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypatfmt@dec}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmt@dec#1#2{%
  \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
@@ -6715,7 +6723,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmtint}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmtint#1{%
  \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
@@ -6732,7 +6740,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@setpatdisplay}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@setpatdisplay{%
    \def\texosquerypatstr##1{'##1'}%
@@ -6759,7 +6767,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@invalidpattern}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@invalidpattern#1{%
   \begingroup
@@ -6774,7 +6782,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypatfmtcurrencysign}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Currency symbol. Redefine as appropriate.
 %    \begin{macrocode}
 \def\texosquerypatfmtcurrencysign{\$}
@@ -6782,7 +6790,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypatfmticurrencysign}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %International currency symbol. There's no generic fallback that's
 %independent of the input encoding, so this uses a UTF-8 character
 %on the assumption that if \cs{textcurrency} isn't available (for
@@ -6799,7 +6807,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquery@patfmt@prefixcurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquery@patfmt@prefixcurrency#1#2{%
  \let\texosquerypatfmt@decsep\texosquerypatfmtcurdecsep
@@ -6808,7 +6816,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@prefixicurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquery@patfmt@prefixicurrency#1#2{%
  \let\texosquerypatfmt@decsep\texosquerypatfmtcurdecsep
@@ -6817,7 +6825,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@suffixcurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquery@patfmt@suffixcurrency#1#2{%
  \let\texosquerypatfmt@decsep\texosquerypatfmtcurdecsep
@@ -6826,7 +6834,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@suffixicurrency}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquery@patfmt@suffixicurrency#1#2{%
  \let\texosquerypatfmt@decsep\texosquerypatfmtcurdecsep
@@ -6835,7 +6843,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmt@digit}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmt@digit{%
  \advance\@texosquery@digitindex by 1\relax
@@ -6873,7 +6881,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmt@digitnozero}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmt@digitnozero{%
  \advance\@texosquery@digitindex by 1\relax
@@ -6922,7 +6930,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@zerodigit@leading}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@zerodigit@leading{%
  \edef\@texosquery@digit{%
@@ -6967,7 +6975,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@zerodigit@trailing}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@zerodigit@trailing{%
  \edef\@texosquery@digit{%
@@ -7012,27 +7020,27 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypatfmtminus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Formatted minus sign. Redefined as appropriate.
 %    \begin{macrocode}
 \def\texosquerypatfmtminus{\ifmmode-\else$-$\fi}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmtplus}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Formatted plus sign. Redefined as appropriate.
 %    \begin{macrocode}
 \def\texosquerypatfmtplus{\ifmmode+\else$+$\fi}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmtgroupsep}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmtgroupsep{,}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquerypatfmt@groupsep}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquerypatfmt@groupsep{%
   \if@texosquery@digitfound\texosquerypatfmtgroupsep\fi}
@@ -7040,7 +7048,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypatfmtpercentsign}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Percent sign used in number format.
 %    \begin{macrocode}
 \def\texosquerypatfmtpercentsign{\%}
@@ -7048,7 +7056,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquerypatfmtpermillsign}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %Per-mill sign used in number format. Redefine as appropriate.
 %    \begin{macrocode}
 \def\texosquerypatfmtpermillsign{‰}
@@ -7056,7 +7064,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\@texosquery@adjust@per}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\@texosquery@adjust@per#1{%
  \@texosquery@pos@shift{#1}%
@@ -7069,7 +7077,7 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\texosquery@patfmt@prefixpercent}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquery@patfmt@prefixpercent#1#2{%
  \@texosquery@adjust@per{2}%
@@ -7078,7 +7086,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@suffixpercent}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquery@patfmt@suffixpercent#1#2{%
  \@texosquery@adjust@per{2}%
@@ -7087,7 +7095,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@prefixpermill}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquery@patfmt@prefixpermill#1#2{%
  \@texosquery@adjust@per{3}%
@@ -7096,7 +7104,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\texosquery@patfmt@suffixpermill}
-%\changes{1.2}{2016-11-30}{new}
+%\changes{1.2}{2016-12-06}{new}
 %    \begin{macrocode}
 \def\texosquery@patfmt@suffixpermill#1#2{%
  \@texosquery@adjust@per{3}%
@@ -7128,7 +7136,7 @@ Organization for Standardization}
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2016/11/30 v1.2 (NLCT)]
+\ProvidesPackage{texosquery}[2016/12/06 v1.2 (NLCT)]
 %    \end{macrocode}
 %Load \file{texosquery.tex}:
 %    \begin{macrocode}

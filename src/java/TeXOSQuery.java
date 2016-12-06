@@ -1299,7 +1299,7 @@ public class TeXOSQuery implements Serializable
      * The user will need to take the appropriate precautions
      * to protect it from expansion during the shell escape.
      * @param separator Separator.
-     * @param directory Directory.
+     * @param directory Directory (root not permitted).
      * @param sortType How to sort the file list
      * @param listType The type of files to include in the list
      * @return List as a string.
@@ -1315,6 +1315,12 @@ public class TeXOSQuery implements Serializable
      * Files with read access prohibited by openin_any or the OS are
      * omitted from the list. The regular expression is anchored,
      * so ".*foo" will only match file names that end with "foo".
+     *
+     * For security reasons, as from v1.2, the directory must have a
+     * parent (otherwise malicious code could try to perform a
+     * recursive search across the filing system, which would hog
+     * resources).
+     *
      * @param separator Separator.
      * @param regex Regular expression.
      * @param directory Directory.
@@ -1331,6 +1337,17 @@ public class TeXOSQuery implements Serializable
          // shouldn't happen, but just in case...
 
          debug("Unable to list contents (null directory)");
+         return "";
+      }
+
+      try
+      {
+         directory = directory.getCanonicalFile();
+      }
+      catch (Exception e)
+      {
+         debug(String.format("Unable to obtain canonical path from: %s",
+                directory.toString()), e);
          return "";
       }
 
@@ -1355,7 +1372,13 @@ public class TeXOSQuery implements Serializable
          debug(String.format("No read access for directory: %s", directory));
          return "";
       }
-        
+
+      if (directory.getParentFile() == null)
+      {
+         debug(String.format("Root directory not permitted: %s", directory));
+         return "";
+      }
+
       if ((regex == null) || ("".equals(regex)))
       {
          // null or empty regular expression forbidden
@@ -4154,7 +4177,7 @@ public class TeXOSQuery implements Serializable
    public static final int DEFAULT_COMPATIBLE=2;
 
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2016-11-30";
+   private static final String VERSION_DATE = "2016-12-06";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
