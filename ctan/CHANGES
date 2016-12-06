@@ -1,4 +1,4 @@
-1.2 (2016/11/29):
+1.2 (2016/12/06):
 
  * Now has three .jar files depending on the Java installation:
 
@@ -70,6 +70,7 @@
   --list-regular / -lr
   --filterlist-dir / -fd
   --filterlist-regular / -fr
+  --walk / -w
 
   Options:
 

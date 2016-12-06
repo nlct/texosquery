@@ -245,6 +245,7 @@ java/QueryActionType.java
 java/FileSortType.java
 java/FileSortComparator.java
 java/FileListType.java
+java/FileWalkVisitor.java
 java/Manifest-jre5.txt
 java/Manifest-jre7.txt
 java/Manifest-jre8.txt
@@ -253,7 +254,7 @@ classes/com/dickimawbooks/texosquery/
 Then to create `texosquery-jre8.jar`, do (for JDK version 1.8):
 ```bash
 cd java 
-javac -d ../classes TeXOSQuery.java QueryAction.java QueryActionType.java TeXOSQueryJRE8.java FileSortType.java FileSortComparator.java FileListType.java
+javac -d ../classes TeXOSQuery.java QueryAction.java QueryActionType.java TeXOSQueryJRE8.java FileSortType.java FileSortComparator.java FileListType.java FileWalkVisitor.java
 cd ../classes
 jar cmf ../java/Manifest-jre8.txt ../texosquery-jre8.jar com/dickimawbooks/texosquery/*.class
 ```

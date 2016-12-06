@@ -18,6 +18,10 @@
 */
 package com.dickimawbooks.texosquery;
 
+/**
+ * Indicates the type of file to be included in listings.
+ * @since 1.2
+ */
 public enum FileListType
 {
    FILE_LIST_ANY, FILE_LIST_DIRECTORIES_ONLY,

@@ -19,35 +19,37 @@
 package com.dickimawbooks.texosquery;
 
 import java.util.Comparator;
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileTime;
 
 /**
- * Used to compare two file names according to the given sort type.
+ * Used to compare two paths according to the given sort type.
+ * This uses the java.nio.file library, which was introduced in Java 7,
+ * so this isn't available for the JRE5 version.
  * @since 1.2
  */
-public class FileSortComparator implements Comparator<String>
+public class FilePathSortComparator implements Comparator<Path>
 {
    /**
-    * Creates a new comparator for ordering file listings.
-    * @param baseDir the directory containing the listed files
+    * Creates a new comparator for ordering path listings.
     * @param sortType the way in which the files should be ordered
     */ 
-   public FileSortComparator(File baseDir, FileSortType sortType)
+   public FilePathSortComparator(FileSortType sortType)
    {
-      this.baseDir = baseDir;
       this.sortType = sortType;
    }
 
    /**
-    * Compares two files according to this object's sort type. 
-    * @param name1 the name of the first file
-    * @param name2 the name of the second file
-    * @return -1 if name1 is considered less than name2, 0 if both are the same
-    * or +1 if name2 is greater than name1, according to the sort
+    * Compares two paths according to this object's sort type. 
+    * @param path1 the first path
+    * @param path2 the second path
+    * @return -1 if path1 is considered less than path2, 0 if both are the same
+    * or +1 if path2 is greater than path1, according to the sort
     * criteria
     */ 
    @Override
-   public int compare(String name1, String name2)
+   public int compare(Path path1, Path path2)
    {
       int idx=-1;
       int result=0;
@@ -57,8 +59,14 @@ public class FileSortComparator implements Comparator<String>
       long size2=0L;
       String ext1="";
       String ext2="";
-      File file1;
-      File file2;
+      FileTime time1=null;
+      FileTime time2=null;
+
+      String name1 = path1.toString();
+      String name2 = path2.toString();
+
+      String basename1 = path1.getName(path1.getNameCount()-1).toString();
+      String basename2 = path2.getName(path2.getNameCount()-1).toString();
 
       switch (sortType)
       {
@@ -72,27 +80,29 @@ public class FileSortComparator implements Comparator<String>
            return name2.compareToIgnoreCase(name1);
          case FILE_SORT_EXT_ASCENDING:
 
-           idx = name1.lastIndexOf(".");
+           idx = basename1.lastIndexOf(".");
 
-           ext1 = idx > -1 ? name1.substring(idx+1) : "";
+           ext1 = idx > -1 ? basename1.substring(idx+1) : "";
 
-           idx = name2.lastIndexOf(".");
+           idx = basename2.lastIndexOf(".");
 
-           ext2 = idx > -1 ? name2.substring(idx+1) : "";
+           ext2 = idx > -1 ? basename2.substring(idx+1) : "";
 
            result = ext1.compareTo(ext2);
+
+            // If the extensions are the same, compare paths instead
 
            return result == 0 ? name1.compareTo(name2) : result;
 
          case FILE_SORT_EXT_DESCENDING:
 
-           idx = name1.lastIndexOf(".");
+           idx = basename1.lastIndexOf(".");
 
-           ext1 = idx > -1 ? name1.substring(idx+1) : "";
+           ext1 = idx > -1 ? basename1.substring(idx+1) : "";
 
-           idx = name2.lastIndexOf(".");
+           idx = basename2.lastIndexOf(".");
 
-           ext2 = idx > -1 ? name2.substring(idx+1) : "";
+           ext2 = idx > -1 ? basename2.substring(idx+1) : "";
 
            result =  ext2.compareTo(ext1);
 
@@ -100,47 +110,58 @@ public class FileSortComparator implements Comparator<String>
 
          case FILE_SORT_DATE_ASCENDING:
 
-           file1 = new File(baseDir, name1);
-           file2 = new File(baseDir, name2);
+           try
+           {
+              time1 = Files.getLastModifiedTime(path1);
+           }
+           catch (Exception e)
+           {
+              // IO error or security manager has prohibited access
+              return 1;
+           }
 
            try
            {
-              date1 = file1.lastModified();
-              date2 = file2.lastModified();
+              time2 = Files.getLastModifiedTime(path2);
            }
            catch (Exception e)
-           {// file missing or no read access or for some other
-            // reason the last modified date can't be obtained.
+           {
+              // IO error or security manager has prohibited access
+              return -1;
            }
 
-           return date1 == date2 ? 0 : (date1 < date2 ? -1 : 0);
+           return time1.compareTo(time2);
 
          case FILE_SORT_DATE_DESCENDING:
 
-           file1 = new File(baseDir, name1);
-           file2 = new File(baseDir, name2);
+           try
+           {
+              time1 = Files.getLastModifiedTime(path1);
+           }
+           catch (Exception e)
+           {
+              // IO error or security manager has prohibited access
+              return -1;
+           }
 
            try
            {
-              date1 = file1.lastModified();
-              date2 = file2.lastModified();
+              time2 = Files.getLastModifiedTime(path2);
            }
            catch (Exception e)
-           {// file missing or no read access or for some other
-            // reason the last modified date can't be obtained.
+           {
+              // IO error or security manager has prohibited access
+              return 1;
            }
 
-           return date1 == date2 ? 0 : (date1 > date2 ? -1 : 0);
+           return time2.compareTo(time1);
 
          case FILE_SORT_SIZE_ASCENDING:
 
-           file1 = new File(baseDir, name1);
-           file2 = new File(baseDir, name2);
-
            try
            {
-              size1 = file1.length();
-              size2 = file2.length();
+              size1 = Files.size(path1);
+              size2 = Files.size(path2);
            }
            catch (Exception e)
            {// file missing or no read access or for some other
@@ -151,13 +172,10 @@ public class FileSortComparator implements Comparator<String>
 
          case FILE_SORT_SIZE_DESCENDING:
 
-           file1 = new File(baseDir, name1);
-           file2 = new File(baseDir, name2);
-
            try
            {
-              size1 = file1.length();
-              size2 = file2.length();
+              size1 = Files.size(path1);
+              size2 = Files.size(path2);
            }
            catch (Exception e)
            {// file missing or no read access or for some other
@@ -170,7 +188,5 @@ public class FileSortComparator implements Comparator<String>
       return 0;
    }
 
-
-   private File baseDir;
    private FileSortType sortType;
 }

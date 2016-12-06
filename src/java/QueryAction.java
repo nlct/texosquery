@@ -213,6 +213,63 @@ public abstract class QueryAction implements Serializable
         name, syntax == null || "".equals(syntax) ? "" : " "+syntax);
    }
 
+   /**
+    * Formats the description to fit maximum of 80 character line
+    * width.
+    */ 
+   private String formatDescription()
+   {
+      int n = description.length();
+      int max = MAX_CHARS_PER_LINE-8;
+
+      if (n < max)
+      {
+         return description;
+      }
+
+      StringBuilder builder = new StringBuilder();
+      StringBuilder line = new StringBuilder();
+      StringBuilder word = new StringBuilder();
+
+      for (int i = 0, offset=1; i < n; i += offset)
+      {
+         int codepoint = description.codePointAt(i);
+         offset = Character.charCount(codepoint);
+
+         if (codepoint == ' ')
+         {
+            if (line.length()+word.length()+1 >= max)
+            {
+               builder.append(line);
+               builder.append(String.format("%n"));
+               line = new StringBuilder();
+               line.append('\t');
+            }
+
+            line.append(word);
+            line.append(' ');
+            word = new StringBuilder();
+         }
+         else
+         {
+            word.appendCodePoint(codepoint);
+         }
+      }
+
+      if (line.length()+word.length()+1 >= max)
+      {
+         builder.append(line);
+         builder.append(String.format("%n"));
+         line = new StringBuilder();
+         line.append('\t');
+      }
+
+      line.append(word);
+      builder.append(line);
+
+      return builder.toString();
+   }
+
    public String help()
    {
       String usage;
@@ -229,9 +286,7 @@ public abstract class QueryAction implements Serializable
 
       int n = usage.length();
 
-      // This could do with a bit of neatening. Some of the
-      // descriptions need line wrapping.
-      return String.format("%s%n\t%s.%n", usage, description);
+      return String.format("%s%n\t%s.%n", usage, formatDescription());
    }
 
    public String doAction(int compatible) throws IllegalArgumentException
@@ -317,4 +372,6 @@ public abstract class QueryAction implements Serializable
    private QueryActionType type;
    private String description;
    private int minCompatibility=0;
+
+   private static final int MAX_CHARS_PER_LINE=80;
 }

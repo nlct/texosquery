@@ -53,7 +53,7 @@
 \renewcommand{\meta@font@select}{\rmfamily\itshape}
 \makeatother
 
-\CheckSum{3214}
+\CheckSum{3263}
 
 \RecordChanges
 \PageIndex
@@ -971,7 +971,26 @@ Organization for Standardization}
 %
 %This action is like \longarg{filterlist} but only includes
 %regular files. 
-
+%
+%\subsubsection{Action \shortarg{w} \meta{sep} \meta{regex} \meta{dir}
+%\oarg{sort} or \longarg{walk}
+%\meta{sep} \meta{regex} \meta{dir} \oarg{sort}}
+%(New to version 1.2)
+%This actions starts from the directory \meta{dir} \emph{which must
+%be on the current working directory's path} and returns a list
+%separated by \meta{sep} of all the regular files whose basename matches
+%the regular expression \meta{regex} (as for the filtered file
+%listings described above), recursively descending
+%non-hidden sub-directories. Any files that are hidden, unreadable
+%or symbolic links are skipped. The list is sorted
+%according to \meta{sort}, which is as for the file listing actions
+%described above.
+%
+%\begin{important}
+%This action requires at least Java 7 so it's not available with
+%\file{texosquery-jre5.jar}.
+%\end{important}
+%
 %\subsubsection{Action \shortarg{u} \meta{file} or \longarg{uri}
 %\meta{file}}
 %
@@ -2260,6 +2279,70 @@ Organization for Standardization}
 %\DescribeMacro\TeXOSQueryFilterSubDirListExtDes
 %\begin{definition}
 %\cs{TeXOSQueryFilterSubDirListExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%
+%A recursive filtered list of regular files starting from a given directory
+%on the current working path
+%(\shortarg{w} or \longarg{alk}) can be obtained using:
+%\DescribeMacro\TeXOSQueryWalk
+%\begin{definition}
+%\cs{TeXOSQueryWalk}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%where \meta{regex} is as for the filtered listings described above.
+%
+%To sort according to last modified date:
+%\DescribeMacro\TeXOSQueryWalkDateAsc
+%\begin{definition}
+%\cs{TeXOSQueryWalkDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%or in reverse order:
+%\DescribeMacro\TeXOSQueryWalkDateDes
+%\begin{definition}
+%\cs{TeXOSQueryWalkDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%
+%To sort according to file size:
+%\DescribeMacro\TeXOSQueryWalkSizeAsc
+%\begin{definition}
+%\cs{TeXOSQueryWalkSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%or in reverse order:
+%\DescribeMacro\TeXOSQueryWalkSizeDes
+%\begin{definition}
+%\cs{TeXOSQueryWalkSizeDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%
+%To sort according to path name (case-sensitive):
+%\DescribeMacro\TeXOSQueryWalkNameAsc
+%\begin{definition}
+%\cs{TeXOSQueryWalkNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%or in reverse order:
+%\DescribeMacro\TeXOSQueryWalkNameDes
+%\begin{definition}
+%\cs{TeXOSQueryWalkNameDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%
+%To sort according to path name (case-insensitive):
+%\DescribeMacro\TeXOSQueryWalkNameIgnoreCaseAsc
+%\begin{definition}
+%\cs{TeXOSQueryWalkNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%or in reverse order:
+%\DescribeMacro\TeXOSQueryWalkNameIgnoreCaseDes
+%\begin{definition}
+%\cs{TeXOSQueryWalkNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%
+%To sort according to file extension:
+%\DescribeMacro\TeXOSQueryWalkExtAsc
+%\begin{definition}
+%\cs{TeXOSQueryWalkExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\end{definition}
+%or in reverse order:
+%\DescribeMacro\TeXOSQueryWalkExtDes
+%\begin{definition}
+%\cs{TeXOSQueryWalkExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %\setcounter{secnumdepth}{3}
@@ -4539,6 +4622,129 @@ Organization for Standardization}
 %    \begin{macrocode}
 \def\TeXOSQueryFilterRegularFileListExtDes#1#2#3#4{%
  \@texosquery@filterfilelist{#1}{-fr}{#2}{#3}{#4}{ext\string-des}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@walk}
+%\changes{1.2}{2016-12-06}{new}
+%    \begin{macrocode}
+\def\@texosquery@walk#1#2#3#4#5{%
+ \TeXOSQuery{#1}%
+ {%
+   \string-w \string'#2\string' \string'#3\string'
+   \string'\texosquerystripquotes{#4}\string' #5%
+ }%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalk}
+%\changes{1.2}{2016-12-06}{new}
+%Recursive filtered listing of regular files.
+%    \begin{macrocode}
+\def\TeXOSQueryWalk#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkDateAsc}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by date.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkDateAsc#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{date}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkDateDes}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by date in descending order.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkDateDes#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{date\string-des}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkSizeAsc}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by file size.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkSizeAsc#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{size}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkSizeDes}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by file size in descending order.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkSizeDes#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{size\string-des}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkNameAsc}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by file name.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkNameAsc#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{name}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkNameDes}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by file name in descending order.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkNameDes#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{name\string-des}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkNameIgnoreCaseAsc}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by file name (case-insensitive).
+%    \begin{macrocode}
+\def\TeXOSQueryWalkNameIgnoreCaseAsc#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{iname}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkNameIgnoreCaseDes}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by file name (case-insensitive) in descending order.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkNameIgnoreCaseDes#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{iname\string-des}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkExtAsc}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by file extension.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkExtAsc#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{ext}%
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryWalkExtDes}
+%\changes{1.2}{2016-12-06}{new}
+%As above, but sort by file extension in descending order.
+%    \begin{macrocode}
+\def\TeXOSQueryWalkExtDes#1#2#3#4{%
+ \@texosquery@walk{#1}{#2}{#3}{#4}{ext\string-des}%
 }
 %    \end{macrocode}
 %\end{macro}

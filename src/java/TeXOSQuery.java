@@ -44,7 +44,13 @@ import java.io.Serializable;
 /**
  * Application functions. These methods need to be Java version 1.5
  * compatible. The 1.7 methods need to be in the TeXOSQueryJRE7 class
- * and the 1.8 methods in TeXOSQueryJRE8.
+ * (which provides the main part of texosquery.jar) and the 1.8 methods in 
+ * TeXOSQueryJRE8 (which provides the main part of texosquery-jre8.jar).
+ *
+ * The texosquery-jre5.jar version should not be considered secure
+ * and is only provided for antiquated systems.
+ * Java 5 and 6 are both deprecated and are now considered security
+ * risks.
  *
  * Since this application is designed to be run from TeX, the output
  * needs to be easy to parse using TeX commands. For this reason,
@@ -65,6 +71,16 @@ public class TeXOSQuery implements Serializable
    public TeXOSQuery(String name)
    {
       this.name = name;
+   }
+
+   /**
+    * Gets the application name. 
+    * @return the application name
+    * @since 1.2
+    */ 
+   public String getName()
+   {
+      return name;
    }
 
    /**
@@ -250,11 +266,11 @@ public class TeXOSQuery implements Serializable
     * @return True if the file is considered hidden. 
      * @since 1.2
     */ 
-   private boolean isHidden(File file)
+   public boolean isHidden(File file)
    {
       try
       {
-         return (new File(file.getCanonicalPath())).isHidden();
+         return file.getCanonicalFile().isHidden();
       }
       catch (IOException e)
       {
@@ -1291,6 +1307,16 @@ public class TeXOSQuery implements Serializable
     }
 
     /**
+     * Checks the directory used for file listings. The JRE5 version
+     * just returns the argument. The other versions convert the
+     * directory to a canonical path and check it has a parent.
+     */ 
+    protected File checkDirectoryListing(File dir) throws IOException
+    {
+       return dir;
+    }
+
+    /**
      * Gets the list of files from a directory. This uses
      * getFilterFileList to filter out files prohibited by the
      * openin_any setting. Note that the separator isn't escaped as
@@ -1319,7 +1345,8 @@ public class TeXOSQuery implements Serializable
      * For security reasons, as from v1.2, the directory must have a
      * parent (otherwise malicious code could try to perform a
      * recursive search across the filing system, which would hog
-     * resources).
+     * resources). To allow for backward compatibility, the insecure
+     * JRE5 version doesn't have this new restriction.
      *
      * @param separator Separator.
      * @param regex Regular expression.
@@ -1342,11 +1369,11 @@ public class TeXOSQuery implements Serializable
 
       try
       {
-         directory = directory.getCanonicalFile();
+         directory = checkDirectoryListing(directory);
       }
       catch (Exception e)
       {
-         debug(String.format("Unable to obtain canonical path from: %s",
+         debug(String.format("Unable to list contents of: %s",
                 directory.toString()), e);
          return "";
       }
@@ -1370,12 +1397,6 @@ public class TeXOSQuery implements Serializable
       if (!isReadPermitted(directory))
       {
          debug(String.format("No read access for directory: %s", directory));
-         return "";
-      }
-
-      if (directory.getParentFile() == null)
-      {
-         debug(String.format("Root directory not permitted: %s", directory));
          return "";
       }
 
@@ -1459,6 +1480,32 @@ public class TeXOSQuery implements Serializable
       }
 
       // Unsuccessful
+      return "";
+   }
+
+   /**
+    * Recursive file listing. This method must have the CWD or a
+    * descendent as the starting directory. It will return list of
+    * files relative to the starting directory where the basename
+    * matches the supplied regular expression. Hidden files/directories 
+    * and symbolic links are skipped regardless of the openin_any setting.
+    * Files without read access are also omitted from the list.
+    *
+    * This method requires the java.nio.file library, which was
+    * introduced in Java 7, so this isn't available for the JRE5
+    * version.
+    *
+    * @param separator separator to use in returned list
+    * @param regex regular expression used to match file basenames
+    * @param directory starting directory (must be cwd or a
+    * descendent of cwd)
+    * @return list of relative paths
+    */ 
+   public String walk(String separator,
+            String regex, File directory, 
+            FileSortType sortType)
+   {
+      debug("walk requires at least JRE 7 version");
       return "";
    }
 
@@ -4060,21 +4107,21 @@ public class TeXOSQuery implements Serializable
       },
       new QueryAction("list", "i", 1, 2, "<sep> <dir> [<sort>]",
          QueryActionType.FILE_ACTION,
-         String.format("Display list of all files in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
-           (Object[])FileSortComparator.getFileSortOptions()))
+         String.format("Display list of all files in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s",
+           FileSortType.getFileSortOptions()))
       {
          public String action()
          {
             return getFileList(getRequiredArgument(0),
               new File(fromTeXPath(getRequiredArgument(1))),
-                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileSortType.getFileSortType(getOptionalArgument(0)),
                   FileListType.FILE_LIST_ANY);
          }
       },
       new QueryAction("filterlist", "f", 1, 3, "<sep> <regex> <dir> [<sort>]",
          QueryActionType.FILE_ACTION, 
-         String.format("Display list of files in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s", 
-           (Object[])FileSortComparator.getFileSortOptions()))
+         String.format("Display list of files in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s", 
+           FileSortType.getFileSortOptions()))
       {
          public String action()
          {
@@ -4082,27 +4129,27 @@ public class TeXOSQuery implements Serializable
                   getRequiredArgument(0), 
                   getRequiredArgument(1), 
                   new File(fromTeXPath(getRequiredArgument(2))),
-                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileSortType.getFileSortType(getOptionalArgument(0)),
                   FileListType.FILE_LIST_ANY);
          }
       },
       new QueryAction("list-dir", "id", 1, 2, "<sep> <dir> [<sort>]",
          QueryActionType.FILE_ACTION,
-         String.format("Display list of all sub-directories in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
-           (Object[])FileSortComparator.getFileSortOptions()))
+         String.format("Display list of all sub-directories in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s",
+           FileSortType.getFileSortOptions()))
       {
          public String action()
          {
             return getFileList(getRequiredArgument(0),
               new File(fromTeXPath(getRequiredArgument(1))),
-                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileSortType.getFileSortType(getOptionalArgument(0)),
                   FileListType.FILE_LIST_DIRECTORIES_ONLY);
          }
       },
       new QueryAction("filterlist-dir", "fd", 1, 3, "<sep> <regex> <dir> [<sort>]",
          QueryActionType.FILE_ACTION, 
-         String.format("Display list of sub-directories in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s", 
-           (Object[])FileSortComparator.getFileSortOptions()))
+         String.format("Display list of sub-directories in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s", 
+           FileSortType.getFileSortOptions()))
       {
          public String action()
          {
@@ -4110,27 +4157,27 @@ public class TeXOSQuery implements Serializable
                   getRequiredArgument(0), 
                   getRequiredArgument(1), 
                   new File(fromTeXPath(getRequiredArgument(2))),
-                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileSortType.getFileSortType(getOptionalArgument(0)),
                   FileListType.FILE_LIST_DIRECTORIES_ONLY);
          }
       },
       new QueryAction("list-regular", "ir", 1, 2, "<sep> <dir> [<sort>]",
          QueryActionType.FILE_ACTION,
-         String.format("Display list of all regular files in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
-           (Object[])FileSortComparator.getFileSortOptions()))
+         String.format("Display list of all regular files in <dir> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s",
+           FileSortType.getFileSortOptions()))
       {
          public String action()
          {
             return getFileList(getRequiredArgument(0),
               new File(fromTeXPath(getRequiredArgument(1))),
-                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileSortType.getFileSortType(getOptionalArgument(0)),
                   FileListType.FILE_LIST_REGULAR_FILES_ONLY);
          }
       },
       new QueryAction("filterlist-regular", "fr", 1, 3, "<sep> <regex> <dir> [<sort>]",
          QueryActionType.FILE_ACTION, 
-         String.format("Display list of regular files in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s", 
-           (Object[])FileSortComparator.getFileSortOptions()))
+         String.format("Display list of regular files in <dir> that fully match <regex> separated by <sep>. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s", 
+           FileSortType.getFileSortOptions()))
       {
          public String action()
          {
@@ -4138,8 +4185,22 @@ public class TeXOSQuery implements Serializable
                   getRequiredArgument(0), 
                   getRequiredArgument(1), 
                   new File(fromTeXPath(getRequiredArgument(2))),
-                  FileSortComparator.getFileSortType(getOptionalArgument(0)),
+                  FileSortType.getFileSortType(getOptionalArgument(0)),
                   FileListType.FILE_LIST_REGULAR_FILES_ONLY);
+         }
+      },
+      new QueryAction("walk", "w", 1, 3, "<sep> <regex> <dir> [<sort>]",
+         QueryActionType.FILE_ACTION, 
+          String.format("Display list of regular non-hidden files in <dir> (descending sub-directories) that fully match <regex> separated by <sep>. The starting directory <dir> may not be outside the current working directory. This action is not available for texosquery-jre5. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s", 
+           FileSortType.getFileSortOptions()))
+      {
+         public String action()
+         {
+            return walk(
+                  getRequiredArgument(0), 
+                  getRequiredArgument(1), 
+                  new File(fromTeXPath(getRequiredArgument(2))),
+                  FileSortType.getFileSortType(getOptionalArgument(0)));
          }
       },
       new QueryAction("uri", "u", 0, 1, "<file>",

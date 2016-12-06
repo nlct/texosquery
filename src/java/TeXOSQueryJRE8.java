@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.Arrays;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Main class. Supports Java 8 onwards.
@@ -37,6 +38,63 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
    {
       super("texosquery-jre8");
    }
+
+   /**
+    * Converts the given directory to a canonical path
+    * and checks to make sure it has a parent directory.
+    * @param dir the directory to check
+    * @return the canonical path
+    * @throws IOException if directory can't be converted to a
+    * canonical path or if the canonical path doesn't have a parent
+    * directory
+    */ 
+   @Override
+   protected File checkDirectoryListing(File dir) throws IOException
+   {
+      dir = dir.getCanonicalFile();
+
+      if (dir.getParentFile() == null)
+      {
+         throw new IOException(String.format(
+           "Listing on root directory not permitted: ", dir));
+      }
+
+      return dir;
+   }
+
+   /**
+    * Recursive file listing. This method must have the CWD or a
+    * descendent as the starting directory. It will return list of
+    * files relative to the starting directory where the basename
+    * matches the supplied regular expression. Hidden files/directories 
+    * and symbolic links are skipped regardless of the openin_any setting.
+    * Files without read access are also omitted from the list.
+    *
+    * @param separator separator to use in returned list
+    * @param regex regular expression used to match file basenames
+    * @param directory starting directory (must be cwd or a
+    * descendent of cwd)
+    * @return list of relative paths
+    */
+   @Override
+   public String walk(String separator,
+            String regex, File directory, 
+            FileSortType sortType)
+   {
+      try
+      {
+         return FileWalkVisitor.walk(this, separator,
+           regex, directory, sortType);
+      }
+      catch (Exception e)
+      {
+         debug(String.format("Can't walk directory: %s",
+           directory.toString()), e);
+      }
+
+      return "";
+   }
+
 
     /**
      * Gets the script for the given locale.
