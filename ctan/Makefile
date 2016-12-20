@@ -8,7 +8,7 @@ dist	:
 	cp ../src/tex/texosquery.dtx texosquery
 	cp ../src/tex/texosquery.ins texosquery
 	cp ../src/tex/texosquery.pdf texosquery
-	cp ../src/java/TeXOSQuery*.java texosquery/java
+	cp ../src/java/*.java texosquery/java
 	cp ../src/java/Manifest*.txt texosquery/java
 	cp ../README.md texosquery
 	cp CHANGES texosquery
