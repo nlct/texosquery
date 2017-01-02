@@ -4,6 +4,6 @@
 # texosquery-jre5.jar file. When installing the working application,
 # please use the texosquery-jre5.sh script bundled in texosquery.dtx
 
-bindir=`dirname $0`
+bindir=`dirname "$0"`
 java -jar "$bindir/texosquery-jre5.jar" "$@"
 

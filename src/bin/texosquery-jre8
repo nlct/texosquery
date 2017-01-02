@@ -4,6 +4,6 @@
 # texosquery-jre8.jar file. When installing the working application,
 # please use the texosquery-jre8.sh script bundled in texosquery.dtx
 
-bindir=`dirname $0`
+bindir=`dirname "$0"`
 java -Djava.locale.providers=CLDR,JRE -jar "$bindir/texosquery-jre8.jar" "$@"
 
