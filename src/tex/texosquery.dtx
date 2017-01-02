@@ -280,35 +280,107 @@ Organization for Standardization}
 %\section{texosquery.jar: the Java application}
 %The \app{texosquery} Java command line application looks up
 %certain system information that may be of use in \TeX\ 
-%documents. All this information can easily be obtained using 
+%documents. This information can be obtained using 
 %native commands, but the Java application allows an 
 %\gls{OS}-independent approach with results that can easily be
 %captured by \TeX's shell-escape without having to strip 
-%formatting information.
+%formatting information. It also uses control sequence markup to indicate 
+%whether characters should be interpreted literally (such as in file names) or 
+%if they should obey their current category code (such as
+%punctuation occurring in textual information) or if they should be
+%interpreted in some other way (such as pattern markup). This markup
+%is expanded by \cs{TeXOSQuery} when it performs the piped shell
+%escape.
 %
 %\begin{important}
 %\app{texosquery} provides read-only actions, and I don't 
 %intend adding any actions that modify system settings or files.
 %\end{important}
 %
-%Since the application is designed to work with \TeX, each
-%function will display the result on a single line without
-%formatting. (For multiple results, each line is grouped as
-%from v1.1.) A blank line (or empty group) will be displayed
-%if the information isn't available or is prohibited. A forward slash is always 
-%used as a directory divider, regardless of the operating 
-%system, so the result can be used, for example, in \cs{input} or
-%\cs{includegraphics}.
+%Since the application is designed to work with \TeX\ (through
+%\cs{TeXOSQuery} defined in \file{texosquery.tex}) each action (indicated 
+%by a command line switch) will display the result on a single line. 
+%For multiple results, each line is grouped. A blank line (or empty group) 
+%will be displayed if the information isn't available or is prohibited. 
+%A forward slash (\cs{fslh}) is always used as a directory divider, 
+%regardless of the operating system, so the result can be used, for example, 
+%in \cs{input} or \cs{includegraphics}.
+%
+%For example, I have a 64-bit Linux operating system installed on my
+%computer, so I could use \app{uname} in a bash terminal:
+%\begin{verbatim}
+%uname -o -r
+%\end{verbatim}
+%which (for me) produces:
+%\begin{verbatim}
+%4.1.13-100.fc21.x86_64 GNU/Linux
+%\end{verbatim}
+%I could also run \app{texosquery} directly from the bash terminal:
+%\begin{verbatim}
+%texosquery -o -r
+%\end{verbatim}
+%which produces the rather more cryptic:
+%\begin{verbatim}
+%{Linux}
+%{4\fdot 1\fdot 13\fhyn 100\fdot fc21\fdot x86\fusc 64}
+%\end{verbatim}
+%However \app{texosquery} isn't intended for this direct use. It's
+%intended for use with \cs{TeXOSQuery} provided by
+%\file{texosquery.tex}. Here's a plain \TeX\ document:
+%\begin{verbatim}
+%\input texosquery
+%\TeXOSQuery{\result}{-o -r}
+%\def\parseresult#1#2{OS Name: {\tt #1}. OS Version: {\tt #2}.}
+%\ifx\result\empty
+% Query failed!
+%\else
+% \expandafter\parseresult\result
+%\fi
+%\bye
+%\end{verbatim}
+%The markup commands, such as \cs{fusc}, are now converted to
+%literal characters with category code 12 (\qt{other}), so the
+%underscore isn't a problem. It's also platform independent as long
+%as \app{texosquery} and a recent version of the \gls{JRE} are installed.
+%Unlike \app{uname}, \app{texosquery} also obeys the order of the
+%command line switches, which makes it easier to define the helper
+%command (\cs{parseresult} in the above) that processes the result.
 %
 %\subsection{Installation and Setup}
 %\label{sec:setup}
+%
+%Installation is best done through your \TeX\ package manager.
+%However if for some reason you need to install this package
+%manually the instructions are below. If you install through your
+%package manager, Windows users will probably find that the
+%\file{.jar} files have been converted to \file{.exe} (with the
+%\file{.bat} files omitted) and Unix-like users may find that the 
+%bash scripts are missing the \file{.sh} extension (these are actually 
+%symbolic links to the \file{.sh} files). See
+%section~\ref{sec:setuptest} to test that the package has been
+%successfully installed.
+%
+%Even if you use your \TeX\ distribution's package manager to
+%install this package, you may still need to edit the
+%\file{texosquery.cfg} file (see step~\ref{itm:cfg} below). If you don't have write permission for
+%this file you can copy it to \meta{TEXMFHOME}\file{/tex/generic/texosquery/}
+%(that directory may need to be created if it doesn't already
+%exist). You can find the correct value of \meta{TEXMFHOME} using
+%\begin{verbatim}
+%kpsewhich -var-value=TEXMFHOME
+%\end{verbatim}
+%You can find where the package manager has put
+%\file{texosquery.cfg} using
+%\begin{verbatim}
+%kpsewhich texosquery.cfg
+%\end{verbatim}
 %
 %This bundle contains the following files:
 %\begin{itemize}
 %\item \file{texosquery.dtx}
 %
-%This contains the source code for this
-%document, and the files:
+%The DTX file contains the source code for this
+%document, and also the files:
 %\begin{itemize}
 %\item\file{texosquery.tex} (generic \TeX\ code),
 %\item\file{texosquery.sty} (\LaTeX\ package wrapper),
@@ -336,59 +408,96 @@ Organization for Standardization}
 %\item \file{CHANGES} Lists major changes for each version.
 %\end{itemize}
 %
-%To install (\meta{TEXMF} indicates the TEXMF directory):
+%To install manually (\meta{TEXMF} indicates the TEXMF directory):
 %\begin{enumerate}
 %\item Run
 %\begin{verbatim}
 %tex texosquery.ins
 %\end{verbatim}
 %to extract the \file{.tex}, \file{.sty}, \file{.cfg}, \file{.sh}
-%and \file{.bat} files. Unix-like users may delete the \file{.bat}
-%files and Windows users may delete the \file{.sh} files.
+%and \file{.bat} files.
+%
+%\begin{description}
+%\item[Windows] Move the \file{.bat} files to somewhere on
+%your system's path. (You may omit the \file{.bat} files you don't
+%need.) The \file{.sh} files may be deleted.
+%
+%\item[Unix-like] Make the \file{.sh} files executable:
+%\begin{verbatim}
+%chmod u+x texosquery*.sh
+%\end{verbatim}
+%Move the \file{.sh} files to somewhere on your path without the
+%\file{.sh} extension. (If the \file{.sh} extension is retained, you
+%will have to edit the \file{texosquery.cfg} file to include it.)
+%For example:
+%\begin{verbatim}
+%mv texosquery-jre8.sh ~/bin/texosquery-jre8
+%\end{verbatim}
+%(You may omit the \file{.sh} files you don't need.)
+%The \file{.bat} files may be deleted.
+%\end{description}
 %
 %\item Move \file{texosquery.tex} to
 %\meta{TEXMF}\file{/tex/generic/texosquery/}
-%\item Edit \file{texosquery.cfg} so that \cs{TeXOSInvokerName} is
-%defined to the application of your choice. For example, Unix users
-%with Java 8 installed:
-%\begin{verbatim}
-%\def\TeXOSInvokerName{texosquery-jre8.sh}
-%\end{verbatim}
-%or Windows users with Java 8 installed:
+%
+%\item\label{itm:cfg} Edit \file{texosquery.cfg} so that \cs{TeXOSInvokerName} is
+%defined to the application of your choice. For example, if you have 
+%Java 8 installed:
 %\begin{verbatim}
 %\def\TeXOSInvokerName{texosquery-jre8}
 %\end{verbatim}
+%Or if you only have Java 5 or 6 installed:
+%\begin{verbatim}
+%\def\TeXOSInvokerName{texosquery-jre5}
+%\end{verbatim}
+%You can find out your Java version by running the following in your
+%command prompt or terminal:
+%\begin{verbatim}
+%java -version
+%\end{verbatim}
+%If the version number starts with \texttt{1.8} then you have Java 8
+%installed, if it starts with \texttt{1.7} then you have Java 7,
+%etc.
+%
 %\item Move \file{texosquery.cfg} to
 %\meta{TEXMF}\file{/tex/generic/texosquery/}
 %\item Move \file{texosquery.sty} to
 %\meta{TEXMF}\file{/tex/latex/texosquery/}
 %\item Move the \file{.jar} files to
 %\meta{TEXMF}\file{/scripts/texosquery/}
-%\item Windows users: move the \file{.bat} files to somewhere on
-%your system's path. (Your \TeX\ distribution may provide
-%\file{.exe} files instead.) Unix-like users: move the \file{.sh} files to
-%somewhere on your system's path and make them executable.
 %\end{enumerate}
-%Now test the installation:
+%
+%\subsection{Installation Test}
+%\label{sec:setuptest}
+%
+%To test the installation:
 %\begin{enumerate}
 %\item In the
 %\href{http://www.dickimaw-books.com/latex/novices/html/terminal.html}{command
-%prompt or terminal}:
+%prompt or terminal} do:
 %\begin{verbatim}
 %texosquery -b
 %\end{verbatim}
 %(Replace \texttt{texosquery} with the command that matches the value
 %of \cs{TeXOSInvokerName} in the \file{texosquery.cfg} file
-%described above.) This should display the system's default locale.
-%For me, this simply displays the line:
+%described in section~\ref{sec:setup}.)
+%The above command should display the system's 
+%default locale. For me, this simply displays the line:
 %\begin{verbatim}
 %en-GB
 %\end{verbatim}
 %If you get an \texttt{Unknown option
-%\textquotesingle-b\textquotesingle} error, then it's
+%\textquotesingle-b\textquotesingle} error, then your \gls{OS} is
 %picking up an old version of \app{texosquery}. Check the version
-%number with the \shortarg{v} switch. If you get a \texttt{command not
-%found error}, then recheck the installation steps above.
+%number with the \shortarg{v} switch.
+%\begin{verbatim}
+%texosquery -v
+%\end{verbatim}
+%If you get a \qt{command not found} or \qt{bad command or file name} error, 
+%then recheck the installation steps in section~\ref{sec:setup} and
+%make sure that the executable file has been placed on your system's
+%path.
+%
 %If this test is successful, try the next step.
 %\item Create the plain \TeX\ document called \file{test.tex}:
 %\begin{verbatim}
@@ -401,7 +510,7 @@ Organization for Standardization}
 %pdftex --shell-escape test
 %\end{verbatim}
 %
-%Alternatively, create the \LaTeX\ document called \file{test.tex}
+%Alternatively, create a \LaTeX\ document called \file{test.tex}
 %\begin{verbatim}
 %\documentclass{article}
 %\usepackage{texosquery}
@@ -416,7 +525,7 @@ Organization for Standardization}
 %
 %In both cases, the resulting PDF file \file{test.pdf} should show the default
 %locale. If not check the transcript \file{test.log} which should
-%include \verb"(|texosquery -b)" or  \verb"(|texosquery-jre8.sh -b)"
+%include \verb"(|texosquery -b)" or  \verb"(|texosquery-jre8 -b)"
 %etc. If it simply has the line:
 %\begin{verbatim}
 %TeXOSQuery: texosquery -b
@@ -424,25 +533,38 @@ Organization for Standardization}
 %Then the dry run mode was on, which means the shell escape wasn't
 %used. Check that the \longarg{shell-escape} switch was used when
 %calling \app{pdftex} or \app{pdflatex}.
+%
+%If you are using \app{texosquery} or \app{texosquery-jre8} and it has been
+%added to the restricted list, make sure that the line
+%\begin{verbatim}
+%\TeXOSQueryAllowRestricted
+%\end{verbatim}
+%hasn't been commented out in the \file{texosquery.cfg} file and try
+%the above example documents in restricted mode. (Note that
+%\app{texosquery-jre5} should not be added to the restricted list as
+%Java 5 and 6 are now deprecated and considered security risks, so
+%the above command should be commented out in the
+%\file{texosquery.cfg} file if \cs{TeXOSInvokerName} has been set to
+%\app{texosquery-jre5}.)
 %\end{enumerate}
 %
 %\subsection{Accessing file information}
+%\label{sec:fileaccess}
 %If an input file name is required (for example, with the
 %\longargfmt{pdfdate} argument described below) then the file may be in
 %the current working directory, relative to the current directory
 %(with forward slash \texttt{/} as the directory divider), an absolute path 
 %(again with forward slash) or on \TeX's path (in
 %which case, \app{kpsewhich} is used to locate it). As from version
-%1.2, \app{texosquery}
-%honours the \texttt{openin\_any} attribute set in the
+%1.2, \app{texosquery} honours the \texttt{openin\_any} attribute set in the
 %\file{texmf.cnf} configuration file. This value is fetched using
 %\begin{verbatim}
 %kpsewhich -var-value=openin_any
 %\end{verbatim}
 %(You can find the configuration files using \texttt{kpsewhich -a
 %texmf.cnf}) For example, suppose the file \file{/tmp/.test}
-%exists. If the \texttt{openin\_any} attribute is set to
-%\qt{\texttt{a}} (any file), then (assuming the operating system allows read-access
+%exists. If the \texttt{openin\_any} attribute is set to \qt{\texttt{a}} 
+%(any file), then (assuming the operating system allows read-access
 %to that file) the \app{texosquery} file-reading operations will
 %be permitted. For example
 %\begin{verbatim}
@@ -458,6 +580,7 @@ Organization for Standardization}
 %that environment variable hasn't been set to \file{/tmp}).
 %
 %\subsection{Return Values}
+%\label{sec:returnvalues}
 %The return values may include literal text where special characters
 %need to have their category code changed to 12 (for example, file names)
 %but the return values may also include \TeX\ code that needs to be
@@ -483,11 +606,12 @@ Organization for Standardization}
 %encoding.  (For example, \gls{UTF}-8.) You will need to ensure that your \TeX\
 %document uses the same encoding if you want to typeset any of the
 %results that may contain non-ASCII characters. You can determine
-%the default codeset with \texttt{texosquery \shortarg{C}}, which is
+%the default encoding with \texttt{texosquery \shortarg{C}}, which is
 %formatted to match the options used by the \sty{inputenc} package.
 %(For example, \texttt{uft8} for \gls*{UTF}-8.)
 %
-%To test the file encoding rerun the above \TeX\ or \LaTeX\ test file with
+%To test the file encoding rerun the plain \TeX\ or \LaTeX\ test
+%file in section~\ref{sec:setuptest} with
 %\shortarg{N} instead of \shortarg{b}. Most currency symbols are
 %outside the ASCII set, so this should return a non-ASCII character.
 %If you happen to have \$ as your currency,
@@ -498,8 +622,8 @@ Organization for Standardization}
 %
 %You can change the default encoding by invoking the Java Virtual
 %Machine with the option \texttt{-Dfile.encoding=}\meta{codeset}.
-%For example, bash users can modify the \file{texosquery.sh} 
-%script to set the encoding to \gls*{UTF}-8 as follows:
+%For example, bash users can modify the \file{texosquery} (or
+%\file{texosquery.sh}) script to set the encoding to \gls*{UTF}-8 as follows:
 %\begin{verbatim}
 %#!/bin/sh
 %
@@ -508,19 +632,20 @@ Organization for Standardization}
 %\end{verbatim}
 %Similarly for the corresponding \file{.bat} file for Windows users.
 %
-%If the script file can't be modified you can set the
+%If the script file can't be modified or you have only \file{.exe}
+%instead of \file{.jar} files then you can set the
 %\href{https://docs.oracle.com/javase/8/docs/platform/jvmti/jvmti.html#tooloptions}{\texttt{JAVA\_TOOL\_OPTIONS} environment variable}.
 %For example:
 %\begin{verbatim}
 %declare -x JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 %\end{verbatim}
-%Note that, unlike the edit to the \file{.sh} or \file{.bat} file, this will 
+%Note that, unlike the edit to the bash or \file{.bat} file, this will 
 %affect all your Java applications.
 %
 %\subsection{Locales}
 %\label{sec:locales}
 %The options that have a locale identifier as an argument need the
-%identifier formatted as a regular
+%identifier formatted as a \emph{regular}
 %\href{https://tools.ietf.org/html/bcp47}{IETF BCP 47 language tag} that uses
 %hyphens as separators. \gls{POSIX} style locales (with underscores
 %replaced by hyphens, for example \texttt{fr-BE.utf8@euro}) 
@@ -529,10 +654,8 @@ Organization for Standardization}
 %
 %\href{http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html}{\textbf{Not
 %all locales are supported by Java.}}
-%For example, Irish is supported but Scottish and Welsh 
-%aren't supported by the \gls{JRE}.
-%The \gls{CLDR} can
-%be accessed with Java~8, but
+%For example, Irish is supported but Scottish and Welsh aren't supported by 
+%the \gls{JRE}. The \gls{CLDR} can be accessed with Java~8, but
 %\href{http://openjdk.java.net/jeps/252}{the CLDR isn't
 %enabled by default}. It can be turned on using the system property
 %\texttt{java.locale.providers}, which may provide additional
@@ -541,10 +664,10 @@ Organization for Standardization}
 %locale provider are required for that language. The proposed
 %Java~9 should have the CLDR enabled by default.
 %
-%The bash script \file{texosquery-jre8.sh} automatically sets 
-%\texttt{java.locale.providers} to \texttt{CLDR,JRE}.
-%Alternatively, the environment variable
-%\texttt{JAVA\_TOOL\_OPTIONS} can be set to
+%The bash script \file{texosquery-jre8} (or \file{texosquery-jre8.sh}) 
+%automatically sets \texttt{java.locale.providers} to \texttt{CLDR,JRE}.
+%Alternatively, the \texttt{JAVA\_TOOL\_OPTIONS} environment variable 
+%can be set to
 %\begin{verbatim}
 %-Djava.locale.providers=CLDR,JRE
 %\end{verbatim}
@@ -564,7 +687,7 @@ Organization for Standardization}
 %\end{verbatim}
 %displays the long date in the form \qt{06 November 2016} and the
 %medium date in the form \qt{06-Nov-2016}, but with the ordering
-%reversed to \texttt{CLDR,JRE} (so that the CLDR is queried first)
+%reversed to \texttt{CLDR,JRE} (so that the \gls{CLDR} is queried first)
 %then the long date is now in the form \qt{6 November 2016} and the 
 %medium date is in the form \qt{6 Nov 2016}.
 %
@@ -578,20 +701,14 @@ Organization for Standardization}
 %\begin{definition}
 %texosquery \oarg{options} \meta{action} ...
 %\end{definition}
-%or
-%\begin{definition}
-%texosquery.sh \oarg{options} \meta{action} ...
-%\end{definition}
 %The syntax for \app{texosquery-jre8} is exactly the same except
 %for the application name:
 %\begin{definition}
 %texosquery-jre8 \oarg{options} \meta{action} ...
 %\end{definition}
-%or
-%\begin{definition}
-%texosquery-jre8.sh \oarg{options} \meta{action} ...
-%\end{definition}
-%Similarly for \app{texosquery-jre5}. Available actions are
+%Similarly for \app{texosquery-jre5}. (Bash users may need the
+%\file{.sh} extension if it wasn't removed from the script name
+%during the \hyperref[sec:setup]{installation setup}.) Available actions are
 %described below. At least one action is required.
 %
 %Available options (must come before actions):
@@ -632,18 +749,21 @@ Organization for Standardization}
 %\end{verbatim}
 %This just produces (for me):
 %\begin{verbatim}
-%en-GB.utf8
+%en\fhyn GB\fdot utf8
 %\end{verbatim}
-%whereas
+%(which expands to \texttt{en-GB.utf8} when used with \cs{TeXOSQuery}) whereas
 %\begin{verbatim}
 %texosquery -l -o
 %\end{verbatim}
 %produces:
 %\begin{verbatim}
-%{en-GB.utf8}
+%{en\fhyn GB\fdot utf8}
 %{Linux}
 %\end{verbatim}
 %To reproduce the v1.0 display use \longarg{compatible}\texttt{ 0}.
+%(This will also explicitly use the punctuation characters rather
+%than replacing them with the control sequence markup, such as
+%\cs{fhyn} or \cs{fdot}.)
 %
 %Note that unavailable information will produce an empty group.
 %For example (assuming \file{nofile} doesn't exist):
@@ -652,7 +772,7 @@ Organization for Standardization}
 %\end{verbatim}
 %produces:
 %\begin{verbatim}
-%{en-GB.utf8}
+%{en\fhyn GB\fdot utf8}
 %{}
 %\end{verbatim}
 %whereas 
@@ -674,13 +794,15 @@ Organization for Standardization}
 %\end{verbatim}
 %Simply returns:
 %\begin{verbatim}
-%en-GB
+%en\fhyn GB
 %\end{verbatim}
+%(which expands to \texttt{en-GB} with \cs{TeXOSQuery})
 %whereas a user whose default locale is set to Swiss German with the
 %new orthography would get:
 %\begin{verbatim}
-%de-CH-1996
+%de\fhyn CH\fhyn 1996
 %\end{verbatim}
+%(which expands to \texttt{de-CH-1996} with \cs{TeXOSQuery}).
 %
 %\subsubsection{Action \shortarg{L} or \longarg{locale}}
 %
@@ -695,14 +817,18 @@ Organization for Standardization}
 % and \meta{modifier} is the modifier. Elements may be omitted
 % if unavailable. For example, \texttt{en-GB.UTF-8} has the
 % \meta{modifier} omitted, and \texttt{en} has all but the language
-% omitted.
+% omitted. As above, the punctuation characters will actually be
+% returned using the control sequences \cs{fhyn} (hyphen), \cs{fdot}
+% (dot) and \cs{fatc} (at).
 %
 %\subsubsection{Action \shortarg{l} or \longarg{locale-lcs}}
 %
 %This action is similar to \longarg{locale}, but the codeset is converted to 
 %lower case and any hyphens are stripped. For example, if \longargfmt{locale} 
 %returns \texttt{en-GB.UTF-8}, then \longargfmt{locale-lcs} would return
-%\texttt{en-GB.utf8}.
+%\texttt{en-GB.utf8}. As above, the punctuation characters will actually be
+% returned using the control sequences \cs{fhyn} (hyphen), \cs{fdot}
+% (dot) and \cs{fatc} (at).
 %
 %\subsubsection{Action \shortarg{C} or \longarg{codeset-lcs}}
 %
@@ -733,10 +859,10 @@ Organization for Standardization}
 %This action displays the operating system version. For example, for me this
 %produces:
 %\begin{verbatim}
-%4.1.13-100.fc21.x86_64
+%4\fdot 1\fdot 13\fhyn 100\fdot fc21\fdot x86\fusc 64
 %\end{verbatim}
-%Note that \cs{TeXOSQuery} locally changes the category code of the
-%underscore character \verb|_| to 12.
+%(which expands to \texttt{4.1.13-100.fc21.x86\_64} when used with
+%\cs{TeXOSQuery}).
 %
 %\subsubsection{Action \shortarg{a} or \longarg{osarch}}
 %
@@ -777,8 +903,9 @@ Organization for Standardization}
 %\cs{fapo} that 
 %are locally redefined by
 %\cs{TeXOSQuery} to produce a \texttt{D}, a colon (\texttt{:}), a
-%plus sign (\texttt{+}) and an apostrophe (\verb|'|) with the category code set
-%to 12 to make it consistent with \cs{pdfcreationdate}. This also allows
+%plus sign (\texttt{+}) and an apostrophe (\texttt{\textquotesingle}) 
+%with the category code set to 12 to make it consistent with 
+%\cs{pdfcreationdate}. This also allows
 %for situations where the punctuation characters have been made
 %active (for example, through \sty{babel}).
 %
@@ -852,7 +979,12 @@ Organization for Standardization}
 %As from v1.2, \meta{dir} must have a parent. That is, \meta{dir}
 %can't be a root directory. This is a security feature to prevent
 %any malicious code that might try to recursively list the contents
-%of the entire filing system, which would hog resources.
+%of the entire filing system, which would hog resources. An
+%exception is made for \app{texosquery-jre5} since that application
+%is already considered insecure (due to Java 5 and 6 being
+%deprecated), so you really need \meta{dir} as root you can use 
+%\app{texosquery-jre5} although this isn't recommended. (It will
+%still obey the \texttt{openin\_any} setting.)
 %\end{important}
 %
 %As from version 1.2, there is now an optional argument \meta{sort},
@@ -906,6 +1038,31 @@ Organization for Standardization}
 %to \verb|[^\.].*|. (Remember that you'll need to use \cs{string}
 %when using the shell escape, as noted below.)
 %
+%\begin{important}
+%Unlike most of the return values the \meta{sep} part here isn't
+%escaped, so take care if \meta{sep} contains any commands. For
+%example, if you want to use \verb|\\| as the separator, you'll need
+%to use \verb|\string\noexpand\string\\| in the \meta{sep} part
+%within \cs{TeXOSQuery}.
+%\end{important}
+%
+%For example:
+%\begin{verbatim}
+%\TeXOSQueryFileList{\result}{\string\noexpand\string\\}{.}
+%\end{verbatim}
+%calls:
+%\begin{verbatim}
+%texosquery -i '\noexpand\\' '.'
+%\end{verbatim}
+%(the two \cs{string} commands have detokenized their arguments)
+%so \app{texosquery} uses \verb|\noexpand\\| as the separator in the
+%returned list, but this list is expanded as it's read in. However
+%\cs{noexpand} prevents the \verb|\\| from being expanded, so the
+%separator becomes just \verb|\\| without expanding it.
+%Note that \cs{TeXOSQueryFileList} automatically adds the single
+%quotes around the arguments. If \cs{TeXOSQuery} is used explicitly,
+%these quotes would need to be added as appropriate.
+%
 %\subsubsection{Action \shortarg{id} \meta{sep} \meta{dir}
 %\oarg{sort} or \longarg{list-dir}
 %\meta{sep} \meta{dir} \oarg{sort}}
@@ -948,15 +1105,7 @@ Organization for Standardization}
 %This action obeys the \texttt{openin\_any} setting, so if access to
 %a file in the directory is forbidden, the file will be omitted from the
 %list. As with \longarg{list}, \meta{dir} can't be a root directory
-%for security reasons.
-%
-%\begin{important}
-%Unlike most of the return values the \meta{sep} part here isn't
-%escaped, so take care if \meta{sep} contains any commands. For
-%example, if you want to use \verb|\\| as the separator, you'll need
-%to use \verb|\string\noexpand\string\\| in the \meta{sep} part
-%within \cs{TeXOSQuery}.
-%\end{important}
+%for security reasons (except with \app{texosquery-jre5}).
 %
 %\subsubsection{Action \shortarg{fd} \meta{sep} \meta{regex} \meta{dir} 
 %\oarg{sort} or \longarg{filterlist-dir} \meta{sep} \meta{regex} \meta{dir} 
@@ -997,9 +1146,6 @@ Organization for Standardization}
 %This action displays the URI of the given file or an empty string if the file
 %doesn't exist or if the file permissions or the
 %\texttt{openin\_any} setting prohibit read access.
-%Note that this may include in a percent character in the result. The \TeX\ 
-%command \cs{TeXOSQuery} protects against this by changing the
-%category code of \verb|%| to 12.
 %
 %\subsubsection{Action \shortarg{p} \meta{file} or \longarg{path}
 %\meta{file}}
@@ -1019,7 +1165,6 @@ Organization for Standardization}
 %action. Note that this is different to the Unix-like 
 %\app{dirname} command, which will return a relative path if
 %\meta{file} isn't an absolute path.
-%
 %
 %\subsubsection{Action \shortarg{N} \oarg{language tag} or \longarg{numeric}
 %\oarg{language tag}}
@@ -1234,18 +1379,22 @@ Organization for Standardization}
 %\begin{verbatim}
 %Tuesday,\tspc 8\tspc November\tspc 2016
 %\end{verbatim}
+%(Tuesday, 8 November 2016).
 %The \meta{long date} is 
 %\begin{verbatim}
 %08\tspc November\tspc 2016
 %\end{verbatim}
+%(08 November 2016).
 %The \meta{medium date} is
 %\begin{verbatim}
-%08-Nov-2016
+%08\thyn Nov\thyn 2016
 %\end{verbatim}
+%(08-Nov-2016).
 %The \meta{short date} is
 %\begin{verbatim}
-%08/11/16
+%08\tslh 11\tslh 16
 %\end{verbatim}
+%(08/11/2016).
 %Note that there's a difference between using the \gls{CLDR} locale data
 %and the JRE data. If I'm using the Java~7 compatible
 %\app{texosquery.jar} which only uses JRE locale data, then I get
@@ -1255,10 +1404,12 @@ Organization for Standardization}
 %\begin{verbatim}
 %8\tspc November\tspc 2016
 %\end{verbatim}
+%(8 November 2016)
 %and the \meta{medium date} is
 %\begin{verbatim}
 %8\tspc Nov\tspc 2016
 %\end{verbatim}
+%(8 Nov 2016).
 %The \meta{medium date} may be numeric or may be an abbreviated
 %form of \meta{long date}, depending on the language and the locale
 %provider. Some languages aren't supported by \gls{JRE} but are supported
@@ -1296,7 +1447,7 @@ Organization for Standardization}
 %For example, with \texttt{-D en-GB} I get the following 
 %pattern for the short date:
 %\begin{verbatim}
-%\patdtf{2}{d}/\patdtf{2}{M}/\patdtf{2}{y}
+%\patdtf{2}{d}\tslh \patdtf{2}{M}\tslh \patdtf{2}{y}
 %\end{verbatim}
 %When parsed by \cs{TeXOSQuery}, this is internally converted to
 %\begin{verbatim}
