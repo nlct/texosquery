@@ -185,7 +185,8 @@ public class FileWalkVisitor extends SimpleFileVisitor<Path>
       if (!cwd.equals(directory) && !invoker.isFileInTree(directory, cwd))
       {
          throw new IOException(
-          "Walk must start in current working directory path");
+          String.format("Walk must start in current working directory path: %s",
+           cwd.toString()));
       }
 
       Path start = directory.toPath();

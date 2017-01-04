@@ -49,7 +49,7 @@ public class TeXOSQueryJRE7 extends TeXOSQuery
       if (dir.getParentFile() == null)
       {
          throw new IOException(String.format(
-           "Listing on root directory not permitted: ", dir));
+           "Listing on root directory not permitted: %s", dir));
       }
 
       return dir;
