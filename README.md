@@ -59,7 +59,7 @@ pdflatex texosquery.dtx
 
 ### Extracting the Files
 
-Aside from the `.jar` files, the `texosquery` files are all
+Except for the `.jar` files, the `texosquery` files are all
 bundled inside `texosquery.dtx` with the extraction commands
 provided in `texosquery.ins`. To extract all the files do:
 ```bash
@@ -68,46 +68,57 @@ tex texosquery.ins
 
 The `.sh` files are bash scripts for Unix-like users. These will
 need to be set to executable using `chmod`. I recommend
-that you remove the `.sh` extension. Windows users can
+that you also remove the `.sh` extension. Windows users can
 deleted these files.
 
-The `.bat` files are batch scripts for Windows users. Unix-like
-users can deleted these files.
+The `.batch` files are batch scripts for Windows users. Unix-like
+users can delete these files. These files are given the extension
+`.batch` as TeX on Windows doesn't allow the creation of `.bat`
+files. The extension will need to be changed to `.bat` after the
+files have been extracted.
 
 ### Installing the Application
 
 In the following, replace _TEXMF_ with the path to your TEXMF directory.
+You can find your home TEXMF directory using
+```bash
+kpsewhich -var-value=TEXMFHOME
+```
 
-There are now three Java applications:
+There are now three Java applications provided by this package:
 
  - `texosquery.jar` (requires at least Java 7)
  - `texosquery-jre8.jar` (requires at least Java 8)
  - `texosquery-jre5.jar` (requires at least Java 5)
 
-There are corresponding bash scripts for Unix-like users:
+There are corresponding bash scripts for Unix-like users (the `.sh`
+extension added by `texosquery.ins` should be removed and the files
+made executable):
 
- - `texosquery.sh`
- - `texosquery-jre8.sh`
- - `texosquery-jre5.sh`
+ - `texosquery`
+ - `texosquery-jre8`
+ - `texosquery-jre5`
 
-(which need to be set to executable and have the `.sh`
-extension removed).
-
-The corresponding batch scripts for Windows users:
+There are also corresponding batch scripts for Windows users (the `.batch`
+extension created by the `.ins` file should be changed to `.bat`):
 
  - `texosquery.bat`
  - `texosquery-jre8.bat`
  - `texosquery-jre5.bat`
 
 Each script uses `kpsewhich` to find the corresponding `.jar` file
-and run it.
+and runs it.
 
 Put the `.jar` files in _TEXMF_`/scripts/texosquery/` and the
-bash or `.bat` files somewhere on your path. To test the installation, run
+bash or `.bat` files somewhere on your path. You may or may not need
+to refresh the TeX database.
+
+To test the installation, run
 ```bash
 texosquery -v
 ```
-in the command prompt or terminal.
+in the command prompt or terminal. (Also try with `texosquery-jre8`
+and `texosquery-jre5`.)
 
 If successful, it should show the version number.
 

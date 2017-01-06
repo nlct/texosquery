@@ -53,7 +53,7 @@
 \renewcommand{\meta@font@select}{\rmfamily\itshape}
 \makeatother
 
-\CheckSum{3263}
+\CheckSum{3260}
 
 \RecordChanges
 \PageIndex
@@ -387,17 +387,22 @@ Organization for Standardization}
 %The DTX file contains the source code for this
 %document, and also the files:
 %\begin{itemize}
-%\item\file{texosquery.tex} (generic \TeX\ code),
-%\item\file{texosquery.sty} (\LaTeX\ package wrapper),
-%\item\file{texosquery.cfg} (configuration file), 
-%\item\file{texosquery-jre8.sh} (bash script that runs 
-%\file{texosquery-jre8.jar}), 
-%\item\file{texosquery.sh} (bash script that runs \file{texosquery.jar}), 
-%\item\file{texosquery-jre5.sh} (bash script that runs \file{texosquery-jre5.jar}),
-%\item\file{texosquery-jre8.bat} (Windows batch script that
-%runs \file{texosquery-jre8.jar}), 
-%\item\file{texosquery.bat} (Windows batch script thatruns \file{texosquery.jar}), 
-%\item\file{texosquery-jre5.bat} (Windows batch script thatruns \file{texosquery-jre5.jar}).
+%\item\file{texosquery.tex} (generic \TeX\ code)
+%\item\file{texosquery.sty} (\LaTeX\ package wrapper)
+%\item\file{texosquery.cfg} (configuration file)
+%\end{itemize}
+%The bash scripts (which will need the extensions removed):
+%\begin{itemize}
+%\item\file{texosquery-jre8.sh}
+%\item\file{texosquery.sh} 
+%\item\file{texosquery-jre5.sh}
+%\end{itemize}
+%Windows batch files (which will need the extensions changed to
+%\file{.bat})
+%\begin{itemize}
+%\item\file{texosquery-jre8.batch} 
+%\item\file{texosquery.batch} 
+%\item\file{texosquery-jre5.batch}
 %\end{itemize}
 %
 %\item \file{texosquery.ins} The driver file used to extract all the
@@ -420,10 +425,12 @@ Organization for Standardization}
 %tex texosquery.ins
 %\end{verbatim}
 %to extract the \file{.tex}, \file{.sty}, \file{.cfg}, \file{.sh}
-%and \file{.bat} files.
+%and \file{.batch} files.
 %
 %\begin{description}
-%\item[Windows] Move the \file{.bat} files to somewhere on
+%\item[Windows] Change the extension of the \file{.batch} files to
+%\file{.bat} (\TeX\ on Windows prohibits the creation of \file{.bat}
+%files). Move the \file{.bat} files to somewhere on
 %your system's path. (You may omit the \file{.bat} files you don't
 %need.) The \file{.sh} files may be deleted.
 %
@@ -439,7 +446,7 @@ Organization for Standardization}
 %mv texosquery-jre8.sh ~/bin/texosquery-jre8
 %\end{verbatim}
 %(You may omit the \file{.sh} files you don't need.)
-%The \file{.bat} files may be deleted.
+%The \file{.batch} files may be deleted.
 %\end{description}
 %
 %\item Move \file{texosquery.tex} to
@@ -7637,7 +7644,10 @@ java -jar "$jarpath" "$@"
 %\fi
 %
 %\subsection{Windows Batch Scripts}
-%These are the batch scripts for Windows.
+%These are the batch scripts for Windows. \TeX\ on Windows doesn't
+%allow the creation of \file{.bat} files, so \file{.ins} file
+%creates these with the extension \file{.batch} which will need to
+%be changed to \file{.bat} after extraction.
 %\iffalse
 %    \begin{macrocode}
 %<*texosquery.bat>
@@ -7647,7 +7657,7 @@ java -jar "$jarpath" "$@"
 %    \begin{macrocode}
 @ECHO OFF
 FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar') DO SET JARPATH=%%I
-START javaw -jar "%JARPATH%\texosquery.jar" %*
+java -jar "%JARPATH%" %*
 %    \end{macrocode}
 %\iffalse
 %    \begin{macrocode}
@@ -7664,7 +7674,7 @@ START javaw -jar "%JARPATH%\texosquery.jar" %*
 %    \begin{macrocode}
 @ECHO OFF
 FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar') DO SET JARPATH=%%I
-START javaw -Djava.locale.providers=CLDR,JRE -jar "%JARPATH%\texosquery-jre8.jar" %*
+java -Djava.locale.providers=CLDR,JRE -jar "%JARPATH%" %*
 %    \end{macrocode}
 %\iffalse
 %    \begin{macrocode}
@@ -7681,7 +7691,7 @@ START javaw -Djava.locale.providers=CLDR,JRE -jar "%JARPATH%\texosquery-jre8.jar
 %    \begin{macrocode}
 @ECHO OFF
 FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar') DO SET JARPATH=%%I
-START javaw -jar "%JARPATH%\texosquery-jre5.jar" %*
+java -jar "%JARPATH%" %*
 %    \end{macrocode}
 %\iffalse
 %    \begin{macrocode}

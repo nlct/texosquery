@@ -18,4 +18,5 @@
 *.gls-abr
 *.cfg
 *.bat
+*.batch
 *.sh
