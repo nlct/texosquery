@@ -40,7 +40,22 @@ which are internally converted within `\TeXOSQuery`.
 
 ## Installation
 
-In the following, replace _TEXMF_ with the path to your TEXMF directory.
+Installation is best done using your TeX package manager.
+Manual installation instructions are described below.
+For more detail, see the documentation.
+
+### Compiling the Documentation
+
+To compile the documentation:
+```bash
+pdflatex texosquery.dtx
+makeglossaries texosquery
+makeindex -s gglo.ist -t texosquery.glg -o texosquery.gls texosquery.glo
+pdflatex texosquery.dtx
+makeindex -s gind.ist texosquery.idx
+pdflatex texosquery.dtx
+pdflatex texosquery.dtx
+```
 
 ### Extracting the Files
 
@@ -50,14 +65,18 @@ provided in `texosquery.ins`. To extract all the files do:
 ```bash
 tex texosquery.ins
 ```
+
 The `.sh` files are bash scripts for Unix-like users. These will
-need to be set to executable using `chmod`. Windows users can
+need to be set to executable using `chmod`. I recommend
+that you remove the `.sh` extension. Windows users can
 deleted these files.
 
 The `.bat` files are batch scripts for Windows users. Unix-like
 users can deleted these files.
 
 ### Installing the Application
+
+In the following, replace _TEXMF_ with the path to your TEXMF directory.
 
 There are now three Java applications:
 
@@ -71,7 +90,10 @@ There are corresponding bash scripts for Unix-like users:
  - `texosquery-jre8.sh`
  - `texosquery-jre5.sh`
 
-and batch scripts for Windows users:
+(which need to be set to executable and have the `.sh`
+extension removed).
+
+The corresponding batch scripts for Windows users:
 
  - `texosquery.bat`
  - `texosquery-jre8.bat`
@@ -81,15 +103,11 @@ Each script uses `kpsewhich` to find the corresponding `.jar` file
 and run it.
 
 Put the `.jar` files in _TEXMF_`/scripts/texosquery/` and the
-`.sh` or `.bat` files somewhere on your path. To test the installation, run
-```bash
-texosquery.sh -v
-```
-in a terminal (Unix-like users) or
+bash or `.bat` files somewhere on your path. To test the installation, run
 ```bash
 texosquery -v
 ```
-in the command prompt (Windows users).
+in the command prompt or terminal.
 
 If successful, it should show the version number.
 
@@ -114,7 +132,7 @@ This should display the version information. (For example, `"1.8.0_92"`)
 If the version number starts with `1.8` (“Java 8”), then you can use `texosquery-jre8.jar`.
 This is the full application. You can use `texosquery` or 
 `texosquery-jre5` as well, but there's less locale support with them. 
-The `texosquery-jre8.sh` bash script and `texosquery-jre8.bat` batch script invokes Java with 
+The `texosquery-jre8` bash script and `texosquery-jre8.bat` batch script invokes Java with 
 `-Djava.locale.providers=CLDR,JRE`.
 
 If Windows users have simply been supplied with an executable versions
@@ -142,14 +160,16 @@ for language scripts. Note that these versions of Java are
 deprecated.
 
 Once you have determined which application you want to use, edit the
-`texosquery.cfg` so that `\TeXOSInvokerName` is defined to the appropriate invocation. For example, a Linux user with Java 8:
+`texosquery.cfg` so that `\TeXOSInvokerName` is defined to the appropriate invocation. For example, with Java 8:
 ```tex
-\def\TeXOSInvokerName{texosquery-jre8.sh}
+\def\TeXOSInvokerName{texosquery-jre8}
 ```
-or a Windows user with Java 5 or 6:
+or with Java 5 or 6:
 ```tex
 \def\TeXOSInvokerName{texosquery-jre5}
 ```
+(bash users will have to add the `.sh` extension if it hasn't
+been removed, as per the above instructions.)
 
 ## Examples:
 
@@ -222,15 +242,6 @@ For a full list of available commands, see the documentation
 (`texosquery.pdf`).
 
 ## Source code
-
-To compile the documentation:
-```bash
-pdflatex texosquery.dtx
-makeindex -s gglo.ist -t texosquery.glg -o texosquery.gls texosquery.glo
-makeindex -s gind.ist texosquery.idx
-pdflatex texosquery.dtx
-pdflatex texosquery.dtx
-```
 
 The Java source is in the `.java` files and the manifest for each 
 `.jar` file is `Manifest*.txt` (`Manifest-jre8.txt` for `texosquery-jre8` etc). 
