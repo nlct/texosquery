@@ -1,3 +1,8 @@
+BUILD=arara --verbose
+RM=\rm -f
+MV=mv
+DEP=texosquery.tex ../bin/texosquery.jar
+
 all	: test.pdf test-plain.pdf test-ltx.pdf test-xeltx.pdf \
 	  test-locale-data-ltx.pdf \
 	  test-locale-data-xe.pdf \
@@ -5,34 +10,35 @@ all	: test.pdf test-plain.pdf test-ltx.pdf test-xeltx.pdf \
 	  test-patterns.pdf
 
 texosquery.tex	: ../tex/texosquery.dtx ../tex/texosquery.ins
-		cd ../tex; latex -file-line-error texosquery.ins; mv texosquery.{tex,sty} ../tests
+		cd ../tex; latex -file-line-error texosquery.ins; \
+		$(MV) texosquery.tex ../tests; \
+		$(MV) texosquery.sty ../tests; 
 
-texosquery.sty	: ../tex/texosquery.dtx ../tex/texosquery.ins
-		cd ../tex; latex -file-line-error texosquery.ins; mv texosquery.{tex,sty} ../tests
+test.pdf	: test.tex $(DEP)
+		$(BUILD) test
 
-test.pdf	: test.tex ../bin/texosquery.jar
-		arara test
+test-plain.pdf	: test-plain.tex $(DEP)
+		$(BUILD) test-plain
 
-test-plain.pdf	: texosquery.tex test-plain.tex ../bin/texosquery.jar
-		arara test-plain
+test-ltx.pdf	: test-ltx.tex $(DEP)
+		$(BUILD) test-ltx
 
-test-ltx.pdf	: texosquery.sty test-ltx.tex ../bin/texosquery.jar
-		arara test-ltx
+test-xeltx.pdf	: test-xeltx.tex $(DEP)
+		$(BUILD) test-xeltx
 
-test-xeltx.pdf	: texosquery.sty test-xeltx.tex ../bin/texosquery.jar
-		arara test-xeltx
+test-locale-data-ltx.pdf	: test-locale-data-ltx.tex $(DEP)
+		$(BUILD) test-locale-data-ltx
 
-test-locale-data-ltx.pdf	: texosquery.sty test-locale-data-ltx.tex ../bin/texosquery.jar
-		arara test-locale-data-ltx
+test-locale-data-xe.pdf	: test-locale-data-xe.tex $(DEP)
+		$(BUILD) test-locale-data-xe
 
-test-locale-data-xe.pdf	: texosquery.sty test-locale-data-xe.tex ../bin/texosquery.jar
-		arara test-locale-data-xe
+test-locale-data-xeltx.pdf	: test-locale-data-xeltx.tex $(DEP)
+		$(BUILD) test-locale-data-xeltx
 
-test-locale-data-xeltx.pdf	: texosquery.sty test-locale-data-xeltx.tex ../bin/texosquery.jar
-		arara test-locale-data-xeltx
-
-test-patterns.pdf	: texosquery.tex test-patterns.tex ../bin/texosquery.jar
-		arara test-patterns
+test-patterns.pdf	: test-patterns.tex $(DEP)
+		$(BUILD) test-patterns
 
 clean	:
-	\rm -f *.{aux,log,pdf}
+	$(RM) *.aux
+	$(RM) *.log
+	$(RM) *.pdf
