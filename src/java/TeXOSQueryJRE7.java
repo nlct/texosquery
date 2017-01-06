@@ -39,7 +39,7 @@ public class TeXOSQueryJRE7 extends TeXOSQuery
     * @return the canonical path
     * @throws IOException if directory can't be converted to a
     * canonical path or if the canonical path doesn't have a parent
-    * directory
+    * directory or is outside the current working directory
     */ 
    @Override
    protected File checkDirectoryListing(File dir) throws IOException
@@ -50,6 +50,14 @@ public class TeXOSQueryJRE7 extends TeXOSQuery
       {
          throw new IOException(String.format(
            "Listing on root directory not permitted: %s", dir));
+      }
+
+      File cwd = new File(getSystemProperty("user.dir", "."));
+
+      if (!cwd.equals(dir) && !isFileInTree(dir, cwd))
+      {
+         throw new IOException(String.format(
+           "Listing outside cwd path not permitted: %s", dir));
       }
 
       return dir;

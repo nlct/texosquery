@@ -165,7 +165,7 @@ public class TeXOSQuery implements Serializable
      */
    public void debug(String message)
    {
-      debug(message, 1);
+      debug(message, DEBUG_ERROR_LEVEL);
    }
     
     /**
@@ -177,7 +177,7 @@ public class TeXOSQuery implements Serializable
      */
    public void info(String message)
    {
-      debug(message, 3);
+      debug(message, DEBUG_INFO_LEVEL);
    }
     
     /**
@@ -216,7 +216,7 @@ public class TeXOSQuery implements Serializable
      */
    public void debug(String message, Throwable excpt)
    {
-      debug(message, excpt, 1, 2);
+      debug(message, excpt, DEBUG_ERROR_LEVEL, DEBUG_STACK_TRACE_LEVEL);
    }
 
     /**
@@ -1303,7 +1303,8 @@ public class TeXOSQuery implements Serializable
     /**
      * Checks the directory used for file listings. The JRE5 version
      * just returns the argument. The other versions convert the
-     * directory to a canonical path and check it has a parent.
+     * directory to a canonical path and check it's permitted. (The
+     * JRE7 and 8 versions are more restrictive.)
      */ 
     protected File checkDirectoryListing(File dir) throws IOException
     {
@@ -1361,16 +1362,7 @@ public class TeXOSQuery implements Serializable
          return "";
       }
 
-      try
-      {
-         directory = checkDirectoryListing(directory);
-      }
-      catch (Exception e)
-      {
-         debug(String.format("Unable to list contents of: %s",
-                directory.toString()), e);
-         return "";
-      }
+      // Check for existence and that the given File is actually a directory.
 
       if (!directory.exists())
       {
@@ -1388,6 +1380,19 @@ public class TeXOSQuery implements Serializable
          return "";
       }
 
+      try
+      {
+         // security check (converts to full canonical path with JRE7 or 8)
+
+         directory = checkDirectoryListing(directory);
+      }
+      catch (Exception e)
+      {
+         debug(String.format("Unable to list contents of: %s",
+                directory.getAbsolutePath()), e);
+         return "";
+      }
+
       if (!isReadPermitted(directory))
       {
          debug(String.format("No read access for directory: %s", directory));
@@ -1396,7 +1401,10 @@ public class TeXOSQuery implements Serializable
 
       if ((regex == null) || ("".equals(regex)))
       {
-         // null or empty regular expression forbidden
+         // null or empty regular expression forbidden (use ".*" for
+         // all files, "" means only match a file with an empty
+         // filename, which doesn't make much sense).
+
          debug("Null or empty regular expression in getFilterFileList");
          return "";
       }
@@ -3674,12 +3682,13 @@ public class TeXOSQuery implements Serializable
       System.out.println("\tNo debugging messages (default)");
       System.out.println();
 
-      System.out.println("--debug <n> or -debug <n>");
+      System.out.println("--debug [<n>] or -debug [<n>]");
       System.out.println("\tDisplay debugging messages on STDOUT.");
       System.out.println("\t<n> should be an integer:");
       System.out.println("\t0: no debugging (same as --nodebug)");
       System.out.println("\t1: basic debugging messages");
       System.out.println("\t2: additionally display stack trace.");
+      System.out.println(String.format("\tIf omitted %d is assumed", DEFAULT_DEBUG_LEVEL));
       System.out.println();
 
       System.out.println("--compatible <n> or -compat <n>");
@@ -3856,13 +3865,13 @@ public class TeXOSQuery implements Serializable
 
             if (i == args.length-1)
             {
-               debugLevel = 1;
+               debugLevel = DEFAULT_DEBUG_LEVEL;
             }
             else if (args[i+1].startsWith("-"))
             {
                // Negative debug value not permitted, so next argument
                // must be a switch.
-               debugLevel = 1;
+               debugLevel = DEFAULT_DEBUG_LEVEL;
             }
             else
             {
@@ -3947,7 +3956,14 @@ public class TeXOSQuery implements Serializable
             // to be reported.
 
             System.err.println("Fatal error: "+e.getMessage());
-            System.err.println("Use --debug 2 to obtain stack trace");
+
+            if (debugLevel < DEBUG_STACK_TRACE_LEVEL)
+            {
+               System.err.println(String.format(
+                 "Use --debug %d to obtain stack trace", 
+                 DEBUG_STACK_TRACE_LEVEL));
+            }
+
             debug(String.format("Action failed: %s", action.getInvocation()),
               e);
             System.exit(1);
@@ -4186,7 +4202,7 @@ public class TeXOSQuery implements Serializable
       new QueryAction("walk", "w", 1, 3, "<sep> <regex> <dir> [<sort>]",
          QueryActionType.FILE_ACTION, 
           String.format("Display list of regular non-hidden files in <dir> (descending sub-directories) that fully match <regex> separated by <sep>. The starting directory <dir> may not be outside the current working directory. This action is not available for texosquery-jre5. If <sort> is omitted, the default order is used otherwise <sort> may be one of the following: %s", 
-           FileSortType.getFileSortOptions()))
+           FileSortType.getFileSortOptions()), 2)
       {
          public String action()
          {
@@ -4232,7 +4248,7 @@ public class TeXOSQuery implements Serializable
    public static final int DEFAULT_COMPATIBLE=2;
 
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2016-12-20";
+   private static final String VERSION_DATE = "2017-01-06";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
@@ -4260,6 +4276,11 @@ public class TeXOSQuery implements Serializable
     * informational messages.)
     */
    private int debugLevel = 0;
+
+   public static final int DEFAULT_DEBUG_LEVEL=3;
+   public static final int DEBUG_ERROR_LEVEL=1;
+   public static final int DEBUG_STACK_TRACE_LEVEL=2;
+   public static final int DEBUG_INFO_LEVEL=3;
 
    /**
     * Compatibility mode. Version 1.2 replaces escapeHash with

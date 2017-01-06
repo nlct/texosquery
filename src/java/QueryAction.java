@@ -176,6 +176,8 @@ public abstract class QueryAction implements Serializable
       {
          for (String arg : optionalArgs)
          {
+            if (arg == null) continue;
+
             if (arg.contains(" "))
             {
                builder.append(String.format(" '%s'", 
