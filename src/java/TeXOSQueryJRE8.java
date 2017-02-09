@@ -364,6 +364,14 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
     */
    public static void main(String[] args)
    {
-      (new TeXOSQueryJRE8()).processArgs(args);
+      try
+      {
+         (new TeXOSQueryJRE8()).processArgs(args);
+      }
+      catch (IllegalArgumentException e)
+      {
+         System.err.println(e.getMessage());
+         System.exit(1);
+      }
    }
 }

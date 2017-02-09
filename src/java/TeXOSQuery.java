@@ -3801,6 +3801,70 @@ public class TeXOSQuery implements Serializable
       return null;
    }
 
+   public static int parseArgVal(String[] args, int i, Object[] argVal)
+   {
+      String[] sp;
+
+      if (args[i].startsWith("--"))
+      {
+         sp = args[i].split("=", 2);
+      }
+      else
+      {
+         sp = new String[]{args[i]};
+      }
+
+      argVal[0] = sp[0];
+
+      if (sp.length == 2)
+      {
+         argVal[1] = sp[1];
+         return i;
+      }
+
+      if (i == args.length-1 || args[i+1].startsWith("-"))
+      {
+         argVal[1] = null;
+         return i; 
+      }
+
+      argVal[1] = args[++i];
+
+      return i;
+   }
+
+   public static int parseArgInt(String[] args, int i, Object[] argVal)
+   {
+      i = parseArgVal(args, i, argVal);
+
+      if (argVal[1] != null)
+      {
+         try
+         {
+            argVal[1] = new Integer((String)argVal[1]);
+         }
+         catch (NumberFormatException e)
+         {
+            throw new IllegalArgumentException(String.format(
+              "Invalid '%s' value: %s", argVal[0], argVal[1]), e);
+         }
+      }
+
+      return i;
+   }
+
+   public static boolean isArg(String arg, String shortArg, String longArg)
+   {
+      return arg.equals("-"+shortArg) || arg.equals("--"+longArg) 
+        || arg.startsWith("--"+longArg+"=");
+   }
+
+
+   public static boolean isArg(String arg, String longArg)
+   {
+      return arg.equals("--"+longArg) || arg.startsWith("--"+longArg+"=");
+   }
+
     /**
      * Process command line arguments. Options must come before
      * actions. (The copied QueryAction objects retain the settings
@@ -3811,6 +3875,7 @@ public class TeXOSQuery implements Serializable
    public void processArgs(String[] args)
    {
       Vector<QueryAction> actions = new Vector<QueryAction>();
+      Object[] argVal = new Object[2];
 
       for (int i = 0; i < args.length; i++)
       {
@@ -3821,14 +3886,17 @@ public class TeXOSQuery implements Serializable
             try
             {
                i = action.parseArgs(args, i)-1;
-
                actions.add(action);
+            }
+            catch (IllegalArgumentException e)
+            {
+               debug(e.getMessage(), e);
+               throw e;
             }
             catch (Throwable e)
             {
-               System.err.println(e.getMessage());
                debug(e.getMessage(), e);
-               System.exit(1);
+               throw new IllegalArgumentException(e.getMessage(), e);
             }
          }
          else if (args[i].equals("-h") || args[i].equals("--help")
@@ -3847,45 +3915,34 @@ public class TeXOSQuery implements Serializable
          {
             if (actions.size() > 0)
             {
-               System.err.println(String.format(
-                 "Options must come before actions. Found option: %s", args[i]));
-               System.exit(0);
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
             }
 
             debugLevel = 0;
          }
-         else if (args[i].equals("--debug") || args[i].equals("-debug"))
+         else if (isArg(args[i], "debug", "debug"))
          {
             if (actions.size() > 0)
             {
-               System.err.println(String.format(
-                  "Options must come before actions. Found option: %s",args[i] ));
-               System.exit(0);
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
             }
 
-            if (i == args.length-1)
+            i = parseArgInt(args, i, argVal);
+
+            if (argVal[1] == null)
             {
-               debugLevel = DEFAULT_DEBUG_LEVEL;
-            }
-            else if (args[i+1].startsWith("-"))
-            {
-               // Negative debug value not permitted, so next argument
-               // must be a switch.
                debugLevel = DEFAULT_DEBUG_LEVEL;
             }
             else
             {
-               i++;
+               debugLevel = ((Integer)argVal[1]).intValue();
 
-               try
+               if (debugLevel < 0)
                {
-                  debugLevel = Integer.parseInt(args[i]);
-               }
-               catch (NumberFormatException e)
-               {
-                  System.err.println(String.format(
+                  throw new IllegalArgumentException(String.format(
                     "Invalid debug level: %s", args[i]));
-                  System.exit(1);
                }
             }
          }
@@ -3893,21 +3950,19 @@ public class TeXOSQuery implements Serializable
          {
             if (actions.size() > 0)
             {
-               System.err.println(String.format(
+               throw new IllegalArgumentException(String.format(
                 "Options must come before actions. Found option: %s", args[i]));
-               System.exit(0);
             }
 
-            if (i == args.length-1)
+            i = parseArgVal(args, i, argVal);
+
+            if (argVal[1] == null)
             {
-               System.err.println(String.format(
+               throw new IllegalArgumentException(String.format(
                  "<level> expected after: %s", args[i]));
-               System.exit(1);
             }
 
-            i++;
-
-            if (args[i].equals("latest"))
+            if (argVal[1].equals("latest"))
             {
                compatible = DEFAULT_COMPATIBLE;
             }
@@ -3915,22 +3970,20 @@ public class TeXOSQuery implements Serializable
             {
                try
                {
-                  compatible = Integer.parseInt(args[i]);
+                  compatible = Integer.parseInt((String)argVal[1]);
                }
                catch (NumberFormatException e)
                {
-                  System.err.println(String.format(
+                  throw new IllegalArgumentException(String.format(
                    "Invalid %s argument (\"latest\" or %d to %d required): %s",
-                   args[i-1], 0, DEFAULT_COMPATIBLE, args[i]));
-                  System.exit(1);
+                   argVal[0], 0, DEFAULT_COMPATIBLE, argVal[1]), e);
                }
             }
          }
          else
          {
-             System.err.println(String.format(
+             throw new IllegalArgumentException(String.format(
                "Unknown option: %s%nTry %s --help", args[i], name));
-             System.exit(1);
          }
       }
 
@@ -3938,9 +3991,8 @@ public class TeXOSQuery implements Serializable
 
       if (numActions == 0)
       {
-         System.err.println(String.format(
+         throw new IllegalArgumentException(String.format(
            "One or more actions required.%nTry %s --help", name));
-         System.exit(1);
       }
 
       for (QueryAction action : actions)
@@ -4248,7 +4300,7 @@ public class TeXOSQuery implements Serializable
    public static final int DEFAULT_COMPATIBLE=2;
 
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2017-01-06";
+   private static final String VERSION_DATE = "2017-02-09";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 

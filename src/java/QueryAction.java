@@ -91,47 +91,117 @@ public abstract class QueryAction implements Serializable
 
    public boolean isAction(String name)
    {
-      return (name.equals(longName) || name.equals(shortName));
+      return name.equals(shortName) || name.equals(longName)
+        || (longName != null && name.startsWith(longName+"="));
    }
 
    public int parseArgs(String[] args, int index)
    throws IllegalArgumentException
    {
-      invokedName = args[index++];
-
       if (required > 0)
       {
          requiredArgs = new String[required];
       }
 
-      for (int i = 0; i < required; i++)
+      if (args[index].startsWith(longName+"="))
       {
-         if (index >= args.length)
+         int idx = args[index].indexOf("=")+1;
+         invokedName = longName;
+
+         if (idx == args[index].length())
          {
-            throw new IllegalArgumentException(String.format(
-              "Invalid syntax for action '%s'.%nExpected: %s",
-              invokedName, getUsage(invokedName)));
+            if (required == 1)
+            {
+               requiredArgs[0] = "";
+            }
+            else
+            {
+               throw new IllegalArgumentException(String.format(
+                 "Invalid syntax for action '%s'.%nExpected: %s",
+                 invokedName, getUsage(invokedName)));
+            }
+
+            return index+1;
          }
 
-         requiredArgs[i] = args[index++];
-      }
+         String[] sp;
 
-      optionalProvided = 0;
-
-      if (optional > 0)
-      {
-         optionalArgs = new String[optional];
-      }
-
-      for (int i = 0; i < optional; i++)
-      {
-         if (index >= args.length || args[index].startsWith("-"))
+         if (required+optional > 1)
          {
-            // no optional arguments, skip
-            break;
+            sp = args[index].substring(idx).split(" ");
+         }
+         else
+         {
+            sp = new String[]{args[index].substring(idx)};
          }
 
-         optionalArgs[optionalProvided++] = args[index++];
+         idx = 0;
+
+         for (int i = 0; i < required; i++)
+         {
+            if (i >= sp.length)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "Invalid syntax for action '%s'.%nExpected: %s",
+                 invokedName, getUsage(invokedName)));
+            }
+
+            requiredArgs[i] = sp[idx++];
+         }
+
+         optionalProvided = 0;
+
+         if (optional > 0)
+         {
+            optionalArgs = new String[optional];
+         }
+
+         for (int i = 0; i < optional; i++)
+         {
+            if (idx >= sp.length)
+            {
+               // no optional arguments, skip
+               break;
+            }
+
+            optionalArgs[optionalProvided++] = sp[idx++];
+         }
+
+         return index+1;
+      }
+      else
+      {
+         invokedName = args[index++];
+
+         for (int i = 0; i < required; i++)
+         {
+            if (index >= args.length)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "Invalid syntax for action '%s'.%nExpected: %s",
+                 invokedName, getUsage(invokedName)));
+            }
+
+            requiredArgs[i] = args[index++];
+         }
+
+         optionalProvided = 0;
+
+         if (optional > 0)
+         {
+            optionalArgs = new String[optional];
+         }
+
+         for (int i = 0; i < optional; i++)
+         {
+            if (index >= args.length || args[index].startsWith("-"))
+            {
+               // no optional arguments, skip
+               break;
+            }
+
+            optionalArgs[optionalProvided++] = args[index++];
+         }
       }
 
       return index;
@@ -354,6 +424,11 @@ public abstract class QueryAction implements Serializable
             requiredArgs[i] = action.requiredArgs[i];
          }
       }
+   }
+
+   public String getLongName()
+   {
+      return longName;
    }
 
    private String longName=null;
