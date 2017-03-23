@@ -4300,7 +4300,7 @@ public class TeXOSQuery implements Serializable
    public static final int DEFAULT_COMPATIBLE=2;
 
    private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2017-02-09";
+   private static final String VERSION_DATE = "2017-03-23";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
