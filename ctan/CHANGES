@@ -1,4 +1,4 @@
-1.2 (2016/12/20):
+1.2 (2017/03/23):
 
  * Now has three .jar files depending on the Java installation:
 
@@ -7,7 +7,9 @@
      Full application. May be used with the CLDR locale provider
      (Unicode Consortium's Common Locale Data Repository).
      Requires at least Java 8 (use with
-     -Djava.locale.providers=CLDR,JRE to access the CLDR)
+     java -Djava.locale.providers=CLDR,JRE or
+     add "java.locale.providers=CLDR,JRE" to the 
+     JAVA_TOOLS_OPTIONS environment variable to access the CLDR)
 
    - texosquery.jar
 
@@ -35,7 +37,10 @@
 
       texosquery-jre5.sh : runs texosquery-jre5.jar
 
-    - Windows:
+     (I recommend the removal of the '.sh' extension
+      for more convenient invocation.)
+
+    - Windows (rename texosquery*.batch to texosquery*.bat):
 
       texosquery-jre8.bat : runs texosquery-jre8.jar with
       -Djava.locale.providers=CLDR,JRE
@@ -50,9 +55,9 @@
 
   * New texosquery.cfg configuration file. Edit the definition
     of \TeXOSInvokerName to indicate which application you
-    need to use. For example, bash user with Java 8 installed:
+    need to use. For example, if Java 8 is installed:
 
-    \def\TeXOSInvokerName{texosquery-jre8.sh}
+    \def\TeXOSInvokerName{texosquery-jre8}
 
   See the installation section of the manual.
 
