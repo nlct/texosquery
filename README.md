@@ -275,9 +275,9 @@ to diagnose the problem:
 texosquery-jre8 --debug --cwd
 ```
 
-     This should now display an error message explaining the
-     problem. (For example, read access forbidden or file not found
-     or a security exception.)
+This should now display an error message explaining the
+problem. (For example, read access forbidden or file not found
+or a security exception.)
 
 ## Security
 
