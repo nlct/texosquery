@@ -91,6 +91,8 @@ There are now three Java applications provided by this package:
  - `texosquery-jre8.jar` (requires at least Java 8)
  - `texosquery-jre5.jar` (requires at least Java 5)
 
+(See the "Security" section below.)
+
 There are corresponding bash scripts for Unix-like users (the `.sh`
 extension added by `texosquery.ins` should be removed and the files
 made executable):
@@ -140,7 +142,7 @@ java -version
 ```
 This should display the version information. (For example, `"1.8.0_92"`)
 
-If the version number starts with `1.8` (“Java 8”), then you can use `texosquery-jre8.jar`.
+If the version number starts with `1.8` ("Java 8"), then you can use `texosquery-jre8.jar`.
 This is the full application. You can use `texosquery` or 
 `texosquery-jre5` as well, but there's less locale support with them. 
 The `texosquery-jre8` bash script and `texosquery-jre8.bat` batch script invokes Java with 
@@ -156,19 +158,19 @@ information from the [Unicode Common Locale Data Repository
 pending Java 9 should include this by default, so this will only be
 relevant to Java 8. Earlier versions of Java (7 or below) don't have
 this option, which limits the locale support to that which is
-natively provided by the JRE.
+natively provided by the JRE. Note that Java 7 and earlier versions
+are [**deprecated** and unsupported by Oracle](http://www.oracle.com/technetwork/java/eol-135779.html).
 
-If the version information starts with `1.7` (“Java 7”), then you can use 
+If the version information starts with `1.7` ("Java 7"), then you can use 
 `texosquery.jar`. This is the default application and provides most
 of the functions of the full application, but there's less locale support.
 You can also use the even more limited `texosquery-jre5`, but you can't use
 `texosquery-jre8`, so you can't take advantage of the CLDR.
 
-If the version information starts with `1.5` (“Java 5”) or `1.6`
-(“Java 6”), then you can _only_ use `texosquery-jre5`.  The locale
+If the version information starts with `1.5` ("Java 5") or `1.6`
+("Java 6"), then you can _only_ use `texosquery-jre5`.  The locale
 support is significantly reduced in this case and there's no support
-for language scripts. Note that these versions of Java are
-deprecated.
+for language scripts.
 
 Once you have determined which application you want to use, edit the
 `texosquery.cfg` so that `\TeXOSInvokerName` is defined to the appropriate invocation. For example, with Java 8:
@@ -251,6 +253,90 @@ All jpg and png files in current directory:
 
 For a full list of available commands, see the documentation
 (`texosquery.pdf`).
+
+## Troubleshooting
+
+If something goes wrong with the call to `texosquery`, the control
+sequence will be set to empty. If this happens, here are the steps
+to diagnose the problem:
+
+  1. Check the log file for any lines starting with `TeXOSQuery:`
+     For example: `TeXOSQuery: texosquery-jre8 --pdfnow`
+     If found, this means that the dry run mode was on and the shell
+     escape wasn't used. Ensure that the shell escape is
+     enabled when you build the document.
+  2. If the log file contains `(|texosquery` _options_`)` then the
+     shell escape was used but `texosquery` returned an empty value.
+     In this case, copy the part between `(|` and `)` and paste it
+     into a command prompt or terminal but insert `--debug` at the
+     start of the options list. For example, if the log file
+     contains `(|texosquery-jre8 --cwd)` then run
+```sh
+texosquery-jre8 --debug --cwd
+```
+     This should now display an error message explaining the
+     problem. (For example, read access forbidden or file not found
+     or a security exception.)
+
+## Security
+
+As from version 1.2, all variants of `texosquery` (JRE5, 7 and 8)
+obey TeX's `openin_any` setting. Any of the actions that involve
+reading file information won't work if read access is forbidden by 
+`openin_any` or by the operating system.
+
+In addition to obeying `openin_any`, the file listing actions (such
+as `--list`) for the JRE7 and 8 variants also prohibit listing the
+contents outside of the current working directory's path. This means
+that you can't, for example, list the contents of `..` (the current
+working directory's parent) nor can you try walking the entire file
+system.  The `--walk` action additionally won't descend hidden
+directories. This extra restriction is designed to prevent malicious
+code from trying to use `texosquery` to look around your filing
+system.
+
+The Java 5 version `texosquery-jre5` is the least secure and doesn't
+have this additional restriction on the file listing actions. However,
+it still obeys `openin_any`. The `--walk` action is not available
+with `texosquery-jre5`.
+
+Examples:
+```bash
+texosquery-jre8 --debug --walk ',' '.*' /
+```
+This action is forbidden:
+```
+texosquery-jre8: Can't walk directory: /
+```
+Changing `/` to `.` is allowed, but not for `texosquery-jre5`:
+```bash
+texosquery-jre5 --debug --walk ',' '.*' .
+```
+returns:
+```
+texosquery-jre5: walk requires at least JRE 7 version
+```
+With `openin_any=a`, the `--userhome` action is usually allowed
+(depends on the operating system and Java's security manager).
+```bash
+texosquery-jre8 --debug --userhome
+```
+returns
+```
+\fslh home\fslh nlct
+```
+(which `\TeXOSQuery` converts to `/home/nlct`.)
+
+However, unless this also happens to be the current working
+directory, it's not possible to obtain a file listing:
+```bash
+texosquery-jre8 --debug --list ',' /home/nlct
+```
+returns
+```
+texosquery-jre8: Unable to list contents of: /home/nlct
+texosquery-jre8: Listing outside cwd path not permitted: /home/nlct
+```
 
 ## Source code
 
