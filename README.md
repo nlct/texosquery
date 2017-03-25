@@ -91,7 +91,7 @@ There are now three Java applications provided by this package:
  - `texosquery-jre8.jar` (requires at least Java 8)
  - `texosquery-jre5.jar` (requires at least Java 5)
 
-(See the "Security" section below.)
+(See the ["Security"](#security) section below.)
 
 There are corresponding bash scripts for Unix-like users (the `.sh`
 extension added by `texosquery.ins` should be removed and the files
@@ -274,6 +274,7 @@ to diagnose the problem:
 ```sh
 texosquery-jre8 --debug --cwd
 ```
+
      This should now display an error message explaining the
      problem. (For example, read access forbidden or file not found
      or a security exception.)
