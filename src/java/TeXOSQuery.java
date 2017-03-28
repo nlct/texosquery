@@ -53,7 +53,7 @@ import java.io.Serializable;
  * There's a debug mode to print error messages to STDERR to
  * investigate the reason for failure.
  * @author Nicola Talbot
- * @version 1.2
+ * @version 1.2.1
  * @since 1.0
  */
 public class TeXOSQuery implements Serializable
@@ -4299,8 +4299,8 @@ public class TeXOSQuery implements Serializable
     
    public static final int DEFAULT_COMPATIBLE=2;
 
-   private static final String VERSION_NUMBER = "1.2";
-   private static final String VERSION_DATE = "2017-03-23";
+   private static final String VERSION_NUMBER = "1.2.1";
+   private static final String VERSION_DATE = "2017-03-28";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 

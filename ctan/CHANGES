@@ -1,3 +1,8 @@
+1.2.1 :
+
+ * Minor bug fix in texosquery.tex (fixed decimal separator
+   for numeric patterns with all # in the fractional part)
+
 1.2 (2017/03/23):
 
  * Now has three .jar files depending on the Java installation:

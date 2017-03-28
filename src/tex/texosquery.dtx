@@ -123,7 +123,7 @@ Organization for Standardization}
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2017-03-23 (v1.2)}
+%\date{2017-03-28 (v1.2.1)}
 %\maketitle
 %
 %\begin{abstract}
@@ -2580,7 +2580,7 @@ Organization for Standardization}
 %    \end{macrocode}
 % Version info.
 %    \begin{macrocode}
-\expandafter\def\csname ver@texosquery.tex\endcsname{2017/03/23 v1.2 (NLCT)}
+\expandafter\def\csname ver@texosquery.tex\endcsname{2017/03/28 v1.2.1 (NLCT)}
 %    \end{macrocode}
 %
 %\begin{macro}{\@texosquery@warn}
@@ -6812,6 +6812,7 @@ Organization for Standardization}
      \let\@texosquery@currentsign\texosquerypatfmtplus
    \fi
    \@texosquery@digitindex=0\relax
+   \let\@texosquery@patfmt@dosep\empty
    \@texosquery@digitfoundfalse
    #1%
   \endgroup
@@ -6833,6 +6834,7 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
+%Macros to shift the decimal place.
 %\begin{macro}{\@texosquery@pos@shift}
 %\changes{1.2}{2017-03-23}{new}
 %    \begin{macrocode}
@@ -7031,6 +7033,7 @@ Organization for Standardization}
 \def\texosquerypatfmt@plusminus#1#2{%
  \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
  \@texosquery@digitindex=0\relax
+ \let\@texosquery@patfmt@dosep\empty
  \@texosquery@digitfoundfalse
  \expandafter\ifx\@texosquery@sgn-%
   #2%
@@ -7079,6 +7082,7 @@ Organization for Standardization}
  \fi
  \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@mantissa}%
  \@texosquery@digitindex=0\relax
+ \let\@texosquery@patfmt@dosep\empty
  \@texosquery@digitfoundfalse
  #2}}
 %    \end{macrocode}
@@ -7105,6 +7109,7 @@ Organization for Standardization}
 \def\texosquerypatfmt@dec#1#2{%
  \edef\@texosquery@current{\expandafter\@texosquery@gobble\@texosquery@int}%
  \@texosquery@digitindex=0\relax
+ \let\@texosquery@patfmt@dosep\empty
  \@texosquery@digitfoundfalse
  \let\@texosquery@zerodigit\@texosquery@zerodigit@leading
  #1%
@@ -7112,7 +7117,13 @@ Organization for Standardization}
  \else
   \@texosquery@invalidpattern{#1}%
  \fi
- \texosquerypatfmt@decsep
+%    \end{macrocode}
+%\changes{1.2.1}{2017-03-28}{moved decimal sep}
+%We can't display the decimal separator just yet as the pattern may
+%not show any digits for the fractional part. So only do the
+%separator just before the first digit.
+%    \begin{macrocode}
+ \let\@texosquery@patfmt@dosep\texosquerypatfmt@decsep
  \let\@texosquery@current\@texosquery@frac
  \@texosquery@digitindex=0\relax
  \@texosquery@digitfoundfalse
@@ -7256,6 +7267,9 @@ Organization for Standardization}
    \ifx\@texosquery@currentsign\texosquerypatfmtminus
     \texosquerypatfmtminus
     \let\@texosquery@currentsign\empty
+   \else
+    \@texosquery@patfmt@dosep
+    \let\@texosquery@patfmt@dosep\empty
    \fi
  \fi
  \@texosquery@digitfoundtrue
@@ -7324,6 +7338,9 @@ Organization for Standardization}
      \ifx\@texosquery@currentsign\texosquerypatfmtminus
       \texosquerypatfmtminus
       \let\@texosquery@currentsign\empty
+     \else
+       \@texosquery@patfmt@dosep
+       \let\@texosquery@patfmt@dosep\empty
      \fi
    \fi
    \@texosquery@digitfoundtrue
@@ -7369,6 +7386,9 @@ Organization for Standardization}
    \else
      \ifx\texosquerypatminus\texosquerypatfmtminus
       \texosquerypatfmtminus
+     \else
+       \@texosquery@patfmt@dosep
+       \let\@texosquery@patfmt@dosep\empty
      \fi
    \fi
    \@texosquery@digitfoundtrue
@@ -7414,6 +7434,9 @@ Organization for Standardization}
    \else
      \ifx\texosquerypatminus\texosquerypatfmtminus
       \texosquerypatfmtminus
+     \else
+       \@texosquery@patfmt@dosep
+       \let\@texosquery@patfmt@dosep\empty
      \fi
    \fi
    \@texosquery@digitfoundtrue
@@ -7540,7 +7563,7 @@ Organization for Standardization}
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2017/03/23 v1.2 (NLCT)]
+\ProvidesPackage{texosquery}[2017/03/28 v1.2.1 (NLCT)]
 %    \end{macrocode}
 %Load \file{texosquery.tex}:
 %    \begin{macrocode}

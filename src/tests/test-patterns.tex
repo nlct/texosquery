@@ -14,8 +14,11 @@ Pattern: {\tt \DTpattern}
  \expandafter\texosqueryfmtdatetime\expandafter\DTpattern\datetimedata
 \fi
 
+%\texosquerydefpattern{\numpattern}{%
+% \numfmt{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\#\#\#\#\#\#\#\#\#}}}
+
 \texosquerydefpattern{\numpattern}{%
- \numfmt{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\#\#\#\#\#\#\#\#\#}}}
+ \numfmt{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\#\#\#\#\#\#\#\#\#\#}}}
 
 \texosquerydefpattern{\sinumpattern}{%
  \sinumfmt
@@ -50,6 +53,8 @@ Numeric patterns.
 \testpattern{\numpattern}{-123}{4567}{-4}
 
 \testpattern{\numpattern}{+1}{234567}{-3}
+
+\testpattern{\numpattern}{1234567}{0}{0}
 
 {\tt \sinumpattern}
 
