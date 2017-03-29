@@ -159,7 +159,7 @@ pending Java 9 should include this by default, so this will only be
 relevant to Java 8. Earlier versions of Java (7 or below) don't have
 this option, which limits the locale support to that which is
 natively provided by the JRE. Note that Java 7 and earlier versions
-are [**deprecated** and unsupported by Oracle](http://www.oracle.com/technetwork/java/eol-135779.html).
+[have reached their end of life](http://www.oracle.com/technetwork/java/eol-135779.html) and are now **deprecated**.
 
 If the version information starts with `1.7` ("Java 7"), then you can use 
 `texosquery.jar`. This is the default application and provides most
