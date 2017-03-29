@@ -14,10 +14,10 @@ Pattern: {\tt \DTpattern}
  \expandafter\texosqueryfmtdatetime\expandafter\DTpattern\datetimedata
 \fi
 
-%\texosquerydefpattern{\numpattern}{%
-% \numfmt{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\#\#\#\#\#\#\#\#\#}}}
-
 \texosquerydefpattern{\numpattern}{%
+ \numfmt{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\0\#\#\#\#\#\#\#\#\#}}}
+
+\texosquerydefpattern{\numnzpattern}{%
  \numfmt{\decfmt{\#\,\#\#\#\,\#\#\#\,\#\#\0}{\#\#\#\#\#\#\#\#\#\#}}}
 
 \texosquerydefpattern{\sinumpattern}{%
@@ -56,6 +56,22 @@ Numeric patterns.
 
 \testpattern{\numpattern}{1234567}{0}{0}
 
+\testpattern{\numpattern}{0}{0}{0}
+
+{\tt \numnzpattern}
+
+\testpattern{\numnzpattern}{123}{4567}{2}
+
+\testpattern{\numnzpattern}{-123}{4567}{0}
+
+\testpattern{\numnzpattern}{-123}{4567}{-4}
+
+\testpattern{\numnzpattern}{+1}{234567}{-3}
+
+\testpattern{\numnzpattern}{1234567}{0}{0}
+
+\testpattern{\numnzpattern}{0}{0}{0}
+
 {\tt \sinumpattern}
 
 \testpattern{\sinumpattern}{1}{234567}{-3}
@@ -66,11 +82,15 @@ Numeric patterns.
 
 \testpattern{\sinumpattern}{1}{234567}{+890}
 
+\testpattern{\sinumpattern}{0}{0}{0}
+
 {\tt \intpattern}
 
 \testpattern{\intpattern}{123}{4567}{2}
 
 \testpattern{\intpattern}{-123}{4567}{0}
+
+\testpattern{\intpattern}{0}{0}{0}
 
 {\tt \curpattern}
 
@@ -80,10 +100,14 @@ Numeric patterns.
 
 \testpattern{\curpattern}{-12345678}{0}{0}
 
+\testpattern{\curpattern}{0}{0}{0}
+
 {\tt \pcpattern}
 
 \testpattern{\pcpattern}{1}{23}{0}
 
 \testpattern{\pcpattern}{-0}{56}{0}
+
+\testpattern{\pcpattern}{0}{0}{0}
 
 \bye
