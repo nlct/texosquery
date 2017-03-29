@@ -1,4 +1,4 @@
-1.2.1 :
+1.2.1 (2017/03/28):
 
  * Minor bug fix in texosquery.tex (fixed decimal separator
    for numeric patterns with all # in the fractional part)
