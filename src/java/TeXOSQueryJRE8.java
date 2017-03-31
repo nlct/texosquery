@@ -33,6 +33,16 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
       super("texosquery-jre8");
    }
 
+    /**
+     * Fallback for openin_any if not found.
+     * @since 1.2.2
+     * @Override
+     */
+   public char openinFallbackValue()
+   {
+      return OPENIN_P;
+   }
+
    /**
     * Converts the given directory to a canonical path
     * and checks to make sure it has a parent directory.

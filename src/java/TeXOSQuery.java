@@ -280,6 +280,15 @@ public class TeXOSQuery implements Serializable
    }
 
     /**
+     * Fallback for openin_any if not found.
+     * @since 1.2.2
+     */
+   public char openinFallbackValue()
+   {
+      return OPENIN_A;
+   }
+
+    /**
      * Queries if the given file may be read according to
      * openin_any. Since the user may not require any of the file
      * access functions, the openin variable is only set the first
@@ -287,7 +296,9 @@ public class TeXOSQuery implements Serializable
      * kpsewhich is used to lookup the value of openin_any, which
      * may have one of the following values: a (any), r (restricted,
      * no hidden files) or p (paranoid, as restricted and no parent
-     * directories and no absolute paths except under $TEXMFOUTPUT)
+     * directories and no absolute paths except under $TEXMFOUTPUT).
+     * Apparently with MikTeX, this variable isn't available, so we
+     * need a fallback for that case.
      * @param file The file to be checked
      * @return true if read-access allowed
      * @since 1.2
@@ -325,10 +336,12 @@ public class TeXOSQuery implements Serializable
                }
                else
                {
-                  // This shouldn't occur, but just in case...
-                  debug(String.format("Invalid openin_any value: %s",
-                     result));
-                  openin = OPENIN_P;
+                  // openin_any variable hasn't been set, use the
+                  // fallback value.
+                  openin = openinFallbackValue();
+                  debug(String.format(
+                     "Invalid openin_any value: %s%nUsing fallback value: %s",
+                     result, openin));
                }
             }
             catch (Exception e)
@@ -4299,8 +4312,8 @@ public class TeXOSQuery implements Serializable
     
    public static final int DEFAULT_COMPATIBLE=2;
 
-   private static final String VERSION_NUMBER = "1.2.1";
-   private static final String VERSION_DATE = "2017-03-28";
+   private static final String VERSION_NUMBER = "1.3";
+   private static final String VERSION_DATE = "2017-03-31";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
@@ -4313,10 +4326,10 @@ public class TeXOSQuery implements Serializable
    /**
     * openin_any settings
     */
-   private static final char OPENIN_UNSET=0; // unset
-   private static final char OPENIN_A='a'; // any
-   private static final char OPENIN_R='r'; // restricted
-   private static final char OPENIN_P='p'; // paranoid
+   protected static final char OPENIN_UNSET=0; // unset
+   protected static final char OPENIN_A='a'; // any
+   protected static final char OPENIN_R='r'; // restricted
+   protected static final char OPENIN_P='p'; // paranoid
 
    private char openin = OPENIN_UNSET;
 
