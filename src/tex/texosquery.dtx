@@ -123,7 +123,7 @@ Organization for Standardization}
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2017-03-28 (v1.2.1)}
+%\date{2017-03-31 (v1.3)}
 %\maketitle
 %
 %\begin{abstract}
@@ -594,6 +594,17 @@ Organization for Standardization}
 %because the file is hidden but also because the file has an
 %absolute path that isn't under \texttt{\$TEXMFOUTPUT} (assuming
 %that environment variable hasn't been set to \file{/tmp}).
+%
+%\subsection{MikTeX}
+%Apparently MikTeX doesn't support the \texttt{openin\_any}
+%variable, so if this is unset, \file{texosquery.jar} and
+%\file{texosquery-jre5.jar} will fallback on \qt{\texttt{a}}, but
+%the stricter \file{texosquery-jre8.jar} will fallback on
+%\qt{\texttt{p}}.
+%
+%Note that MiKTeX disables piped input by default for security
+%reasons. Since \cs{TeXOSQuery} relies on piped input, you'll need
+%to enable it with \texttt{-{}-enable-pipes} when you run \TeX.
 %
 %\subsection{Return Values}
 %\label{sec:returnvalues}
@@ -2582,7 +2593,7 @@ Organization for Standardization}
 %    \end{macrocode}
 % Version info.
 %    \begin{macrocode}
-\expandafter\def\csname ver@texosquery.tex\endcsname{2017/03/28 v1.2.1 (NLCT)}
+\expandafter\def\csname ver@texosquery.tex\endcsname{2017/03/31 v1.3 (NLCT)}
 %    \end{macrocode}
 %
 %\begin{macro}{\@texosquery@warn}
@@ -7565,7 +7576,7 @@ Organization for Standardization}
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2017/03/28 v1.2.1 (NLCT)]
+\ProvidesPackage{texosquery}[2017/03/31 v1.3 (NLCT)]
 %    \end{macrocode}
 %Load \file{texosquery.tex}:
 %    \begin{macrocode}
@@ -7677,7 +7688,7 @@ java -jar "$jarpath" "$@"
 %\subsubsection{\file{texosquery.bat}}
 %    \begin{macrocode}
 @ECHO OFF
-FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar') DO SET JARPATH=%%I
+FOR /F "tokens=*" %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar') DO SET JARPATH=%%I
 java -jar "%JARPATH%" %*
 %    \end{macrocode}
 %\iffalse
@@ -7694,7 +7705,7 @@ java -jar "%JARPATH%" %*
 %\subsubsection{\file{texosquery-jre8.bat}}
 %    \begin{macrocode}
 @ECHO OFF
-FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar') DO SET JARPATH=%%I
+FOR /F "tokens=*" %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar') DO SET JARPATH=%%I
 java -Djava.locale.providers=CLDR,JRE -jar "%JARPATH%" %*
 %    \end{macrocode}
 %\iffalse
@@ -7711,7 +7722,7 @@ java -Djava.locale.providers=CLDR,JRE -jar "%JARPATH%" %*
 %\subsubsection{\file{texosquery-jre5.bat}}
 %    \begin{macrocode}
 @ECHO OFF
-FOR /F %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar') DO SET JARPATH=%%I
+FOR /F "tokens=*" %%I IN ('kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar') DO SET JARPATH=%%I
 java -jar "%JARPATH%" %*
 %    \end{macrocode}
 %\iffalse
