@@ -33,15 +33,12 @@ public class TeXOSQueryJRE8 extends TeXOSQuery
       super("texosquery-jre8");
    }
 
-    /**
-     * Fallback for openin_any if not found.
-     * @since 1.2.2
-     * @Override
-     */
-   public char openinFallbackValue()
-   {
-      return OPENIN_P;
-   }
+  /*
+   * The fallback for openin_any is now the same for
+   * all variants to allow texosquery-jre8 to work with MiKTeX
+   * so openinFallbackValue method has been removed from this
+   * subclass in v1.3.1.
+   */ 
 
    /**
     * Converts the given directory to a canonical path

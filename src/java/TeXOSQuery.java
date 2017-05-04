@@ -4312,8 +4312,8 @@ public class TeXOSQuery implements Serializable
     
    public static final int DEFAULT_COMPATIBLE=2;
 
-   private static final String VERSION_NUMBER = "1.3";
-   private static final String VERSION_DATE = "2017-03-31";
+   private static final String VERSION_NUMBER = "1.3.1";
+   private static final String VERSION_DATE = "2017-05-04";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
