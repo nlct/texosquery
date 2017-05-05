@@ -1,0 +1,18 @@
+% This test uses \TeXOSQueryFromFile
+% which avoids the shell escape but requires that texosquery
+% is run before TeX and the messages to STDOUT redirected to a file.
+% For example:
+% texosquery -b -n > tmpresult.tex
+
+\input texosquery
+
+\TeXOSQueryFromFile{\result}{tmpresult}
+
+\ifx\result\empty
+ File doesn't exist
+\else
+ \def\parseresult#1#2{Value 1: #1. Value 2: #2}
+ \expandafter\parseresult\result
+\fi
+
+\bye
