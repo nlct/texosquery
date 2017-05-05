@@ -24,6 +24,11 @@
  the corresponding batch files.
 \endpreamble
 
+\declarepreamble\cfgpreamble
+
+Please follow the instructions below.
+\endpreamble
+
 %The following is to prevent a blank line from appearing
 %at the start of the bash scripts (which occurs when simply using
 %\nopreamble).
@@ -53,9 +58,9 @@
   }
   \file{texosquery.cfg}%
   {%
-    \usepreamble\defaultpreamble
+    \usepreamble\cfgpreamble
     \usepostamble\defaultpostamble
-    \from{texosquery.dtx}{texosquery.cfg,package}%
+    \from{texosquery.dtx}{texosquery.cfg}%
   }
   \file{texosquery.sh}%
   {%

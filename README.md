@@ -38,6 +38,36 @@ temporarily changed to 12 while reading the result. Some of the
 `texosquery` output contains short markup commands (such as `\wrp`)
 which are internally converted within `\TeXOSQuery`.
 
+## Important Notes
+
+The TeX code uses a piped shell escape to capture the result from
+`texosquery`. This means that you must have the piped shell escape
+enabled to make use of this feature. MiKTeX users need the
+`--enable-pipes` option on the TeX command line to enable this.
+The alternative is to run `texosquery` outside of TeX and
+capture the output in a temporary file, which can then be
+read using `\TeXOSQueryFromFile`.
+
+You need to correctly set up the configuration file `texosquery.cfg`
+to match your system. The TeX package managers can't do this for you
+automatically. Copy the file to either your `TEXMFHOME` or
+`TEXMFLOCAL` tree to prevent it from being overwritten by subsequent
+updates.
+
+`texosquery-jre8` is on the restricted list for TeX Live 2017. To 
+take advantage of this, you must have at least Java 8 installed and
+edit the `texosquery.cfg` file to:
+```tex
+\def\TeXOSInvokerName{texosquery-jre8}
+\TeXOSQueryAllowRestricted
+```
+(Note that the second line above has been uncommented.)
+
+Note that due to TeX's security measures, quotes can't be used in the
+restricted mode's shell escape. This means that if you need to pass
+a file name containing a space as an argument to `texosquery`,
+you'll have to use the unrestricted mode.
+
 ## Installation
 
 Installation is best done using your TeX package manager.
@@ -282,9 +312,11 @@ or a security exception.)
 ## Security
 
 As from version 1.2, all variants of `texosquery` (JRE5, 7 and 8)
-obey TeX's `openin_any` setting. Any of the actions that involve
+obey TeX Live's `openin_any` setting. Any of the actions that involve
 reading file information won't work if read access is forbidden by 
-`openin_any` or by the operating system.
+`openin_any` or by the operating system. MiKTeX doesn't use the
+`openin_any` setting, so if not set `texosquery` will assume `a`
+(any).
 
 In addition to obeying `openin_any`, the file listing actions (such
 as `--list`) for the JRE7 and 8 variants also prohibit listing the

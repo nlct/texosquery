@@ -7,7 +7,8 @@ all	: test.pdf test-plain.pdf test-ltx.pdf test-xeltx.pdf \
 	  test-locale-data-ltx.pdf \
 	  test-locale-data-xe.pdf \
 	  test-locale-data-xeltx.pdf \
-	  test-patterns.pdf test-imagefile.pdf
+	  test-patterns.pdf test-imagefile.pdf \
+	  test-fromfile.pdf
 
 texosquery.tex	: ../tex/texosquery.dtx ../tex/texosquery.ins
 		cd ../tex; latex -file-line-error texosquery.ins; \
@@ -40,6 +41,11 @@ test-patterns.pdf	: test-patterns.tex $(DEP)
 
 test-imagefile.pdf	: test-imagefile.tex $(DEP)
 		$(BUILD) test-imagefile
+
+test-fromfile.pdf	: test-fromfile.tex $(DEP) 
+		texosquery -b -n > tmpresult.tex
+		pdftex test-fromfile
+
 
 clean	:
 	$(RM) *.aux
