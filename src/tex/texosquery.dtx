@@ -65,6 +65,8 @@
 \renewcommand*{\usage}[1]{\hyperpage{#1}}
 \renewcommand*{\main}[1]{\hyperpage{#1}}
 
+\newcommand*{\ics}[1]{\cs{#1}\SpecialMainIndex{#1}}
+
 \newcommand*{\qt}[1]{``#1''}
 \newcommand*{\sty}[1]{\textsf{#1}}
 \newcommand*{\app}[1]{\texttt{#1}}
@@ -151,7 +153,8 @@ Organization for Standardization}
 %You will need \TeX's piped shell escape enabled
 %and you will also need the \gls{JRE} installed.
 %MiKTeX users will need to add \verb|--enable-pipes| to TeX's
-%command line options. (Alternatively, use \cs{TeXOSQueryFromFile}.)
+%command line options. (Alternatively, use \cs{TeXOSQueryFromFile}
+%if you can't use the piped shell escape.)
 %The configuration file \hyperref[itm:cfg]{\file{texosquery.cfg}}
 %should be edited to reflect your system set-up before use.
 %\end{important}
@@ -664,8 +667,7 @@ Organization for Standardization}
 %
 %You can change the default encoding by invoking the Java Virtual
 %Machine with the option \texttt{-Dfile.encoding=}\meta{codeset}.
-%For example, bash users can modify the \file{texosquery} (or
-%\file{texosquery.sh}) script to set the encoding to \gls*{UTF}-8 as follows:
+%For example, bash users can modify the \file{texosquery} script to set the encoding to \gls*{UTF}-8 as follows:
 %\begin{verbatim}
 %#!/bin/sh
 %
@@ -706,7 +708,7 @@ Organization for Standardization}
 %locale provider are required for that language. The proposed
 %Java~9 should have the CLDR enabled by default.
 %
-%The bash script \file{texosquery-jre8} (or \file{texosquery-jre8.sh}) 
+%The bash script \file{texosquery-jre8} 
 %automatically sets \texttt{java.locale.providers} to \texttt{CLDR,JRE}.
 %Alternatively, the \texttt{JAVA\_TOOL\_OPTIONS} environment variable 
 %can be set to
@@ -750,7 +752,8 @@ Organization for Standardization}
 %\end{definition}
 %Similarly for \app{texosquery-jre5}. (Bash users may need the
 %\file{.sh} extension if it wasn't removed from the script name
-%during the \hyperref[sec:setup]{installation setup}.) Available actions are
+%during the \hyperref[sec:setup]{installation setup}, but it's best
+%to remove it.) Available actions are
 %described below. At least one action is required.
 %
 %Available options (must come before actions):
@@ -1474,7 +1477,7 @@ Organization for Standardization}
 %Note that there's a difference between using the \gls{CLDR} locale data
 %and the JRE data. If I'm using the Java~7 compatible
 %\app{texosquery.jar} which only uses JRE locale data, then I get
-%the above results, but if I use \file{texosquery-jre8.sh} which
+%the above results, but if I use the bash script \file{texosquery-jre8} which
 %sets \texttt{java.locale.providers} to \texttt{CLDR,JRE} then I get
 %a slightly different result. The \meta{long date} is
 %\begin{verbatim}
@@ -1546,7 +1549,7 @@ Organization for Standardization}
 %\begin{verbatim}
 %{15:59:41\tspc o\csq clock\tspc GMT}{15:59:41\tspc GMT}{15:59:41}{15:59}
 %\end{verbatim}
-%with the \gls{JRE}. If I switch to \gls{CLDR} (\file{texosquery-jre8.sh}) I get:
+%with the \gls{JRE}. If I switch to \gls{CLDR} (in the bash script \file{texosquery-jre8}) I get:
 %\begin{verbatim}
 %{16:00:51\tspc Greenwich\tspc Mean\tspc Time}{16:00:51\tspc GMT}{16:00:51}{16:00}
 %\end{verbatim}
@@ -1770,9 +1773,8 @@ Organization for Standardization}
 %
 %The basic command to run \app{texosquery} and capture its output
 %in a control sequence is:
-%\DescribeMacro\TeXOSQuery
 %\begin{definition}
-%\cs{TeXOSQuery}\marg{cs}\marg{args}
+%\ics{TeXOSQuery}\marg{cs}\marg{args}
 %\end{definition}
 %where \meta{cs} is the control sequence in which to store the
 %result and \meta{args} are the command line arguments to pass to 
@@ -1805,8 +1807,8 @@ Organization for Standardization}
 %first run \app{texosquery} with the output redirected to a
 %temporary file and then build your document, but instead of using
 %\cs{TeXOSQuery}, use:
-%\begin{definition}[\DescribeMacro\TeXOSQueryFromFile]
-%\cs{TeXOSQueryFromFile}\marg{cs}\marg{file name}
+%\begin{definition}
+%\ics{TeXOSQueryFromFile}\marg{cs}\marg{file name}
 %\end{definition}
 %where \meta{file name} is the name of the temporary file. For
 %example, first run
@@ -1889,7 +1891,7 @@ Organization for Standardization}
 %\end{verbatim}
 %since bash will pass this as
 %\begin{verbatim}
-%texosquery.sh -p image
+%texosquery -p image
 %\end{verbatim}
 %(The \verb|#1.png| part is treated as a comment.) Nor can you do
 %\begin{verbatim}
@@ -1905,10 +1907,9 @@ Organization for Standardization}
 %\end{important}
 %
 %Dry run mode is determined by the conditional
-%\DescribeMacro\ifTeXOSQueryDryRun
-%\begin{verbatim}
-%\ifTeXOSQueryDryRun
-%\end{verbatim}
+%\begin{definition}
+%\ics{ifTeXOSQueryDryRun}
+%\end{definition}
 %If true, the shell escape won't be used and the requested command
 %invocation will be printed in the transcript file prefixed with
 %\begin{verbatim}
@@ -1965,12 +1966,11 @@ Organization for Standardization}
 %correctly.
 %\end{itemize}
 %
-%\DescribeMacro\TeXOSInvokerName
-%The \cs{TeXOSQuery} command uses \cs{TeXOSInvokerName} to reference the
+%The \cs{TeXOSQuery} command uses \ics{TeXOSInvokerName} to reference the
 %application name. This defaults to \app{texosquery} but needs to be
 %redefined to reflect the particular system call that's required.
-%For example, \texttt{texosquery.sh} (Unix-like with Java~7) or
-%\texttt{texosquery-jre8} (Windows with Java~8). This redefinition
+%For example, \texttt{texosquery} (Java~7) or
+%\texttt{texosquery-jre8} (Java~8). This redefinition
 %can be done in the configuration file \file{texosquery.cfg} for a
 %system-wide setting. See section~\ref{sec:setup} for further
 %details.
@@ -2000,9 +2000,8 @@ Organization for Standardization}
 %\subsection{Locale}
 %The locale (\shortarg{l} or \longarg{locale-lcs}) information can be
 %obtained using:
-%\DescribeMacro\TeXOSQueryLocale
 %\begin{definition}
-%\cs{TeXOSQueryLocale}\marg{cs}
+%\ics{TeXOSQueryLocale}\marg{cs}
 %\end{definition}
 %Note that this uses the lower case codeset form, which has a better
 %chance of matching the encoding names used by the \sty{inputenc}
@@ -2018,55 +2017,48 @@ Organization for Standardization}
 %
 %The \gls{IETF} \gls{BCP}~47 language tag (\shortarg{b} or \longarg{bcp47}) 
 %can be obtained using:
-%\DescribeMacro\TeXOSQueryLangTag
 %\begin{definition}
-%\cs{TeXOSQueryLangTag}\marg{cs}
+%\ics{TeXOSQueryLangTag}\marg{cs}
 %\end{definition}
 %
 %The numeric separators and currency symbols (\shortarg{N} or
 %\longarg{numeric}) can be obtained using
-%\DescribeMacro\TeXOSQueryNumeric
 %\begin{definition}
-%\cs{TeXOSQueryNumeric}\marg{cs}\marg{locale}
+%\ics{TeXOSQueryNumeric}\marg{cs}\marg{locale}
 %\end{definition}
 %The \meta{locale} should be a valid language tag or may be empty
 %for the system's default locale. Similarly for the command below.
 %
 %All the locale data (\shortarg{D} or \longarg{locale-data}) can be
 %obtained using
-%\DescribeMacro\TeXOSQueryLocaleData
 %\begin{definition}
-%\cs{TeXOSQueryLocaleData}\marg{cs}\marg{locale}
+%\ics{TeXOSQueryLocaleData}\marg{cs}\marg{locale}
 %\end{definition}
 %
 %\subsection{Operating System Information}
 %The OS name (\shortarg{o} or \longarg{osname}) can
 %be obtained using:
-%\DescribeMacro\TeXOSQueryName
 %\begin{definition}
-%\cs{TeXOSQueryName}\marg{cs}
+%\ics{TeXOSQueryName}\marg{cs}
 %\end{definition}
 %
 %The OS version (\shortarg{r} or \longarg{osversion}) can
 %be obtained using:
-%\DescribeMacro\TeXOSQueryVersion
 %\begin{definition}
-%\cs{TeXOSQueryVersion}\marg{cs}
+%\ics{TeXOSQueryVersion}\marg{cs}
 %\end{definition}
 %
 %The OS architecture (\shortarg{a} or \longarg{osarch}) can
 %be obtained using:
-%\DescribeMacro\TeXOSQueryArch
 %\begin{definition}
-%\cs{TeXOSQueryArch}\marg{cs}
+%\ics{TeXOSQueryArch}\marg{cs}
 %\end{definition}
 %
 %\subsection{Dates and Times}
 %The current date and time information (\shortarg{M} or
 %\longarg{date-time}) can be obtained using:
-%\DescribeMacro\TeXOSQueryDateTime
 %\begin{definition}
-%\cs{TeXOSQueryDateTime}\marg{cs}
+%\ics{TeXOSQueryDateTime}\marg{cs}
 %\end{definition}
 %Example usage:
 %\begin{verbatim}
@@ -2087,17 +2079,15 @@ Organization for Standardization}
 %
 %The time zone mappings (\shortarg{Z} or
 %\longarg{time-zones}) can be obtained using:
-%\DescribeMacro\TeXOSQueryTimeZones
 %\begin{definition}
-%\cs{TeXOSQueryTimeZones}\marg{cs}\marg{locale}
+%\ics{TeXOSQueryTimeZones}\marg{cs}\marg{locale}
 %\end{definition}
 %Leave \meta{locale} empty if the default locale is required.
 %
 %The current date-time stamp in PDF format (\shortarg{n} or
 %\longarg{pdfnow}) can be obtained using:
-%\DescribeMacro\TeXOSQueryNow
 %\begin{definition}
-%\cs{TeXOSQueryNow}\marg{cs}
+%\ics{TeXOSQueryNow}\marg{cs}
 %\end{definition}
 %This is provided for the benefit of users who don't have
 %\cs{pdfcreationdate} defined by their \TeX\ format (for example,
@@ -2105,9 +2095,8 @@ Organization for Standardization}
 %
 %The modification date-time stamp in PDF format for a file
 %(\shortarg{d} or \longarg{pdfdate}) can be obtained using:
-%\DescribeMacro\TeXOSQueryFileDate
 %\begin{definition}
-%\cs{TeXOSQueryFileDate}\marg{cs}\marg{filename}
+%\ics{TeXOSQueryFileDate}\marg{cs}\marg{filename}
 %\end{definition}
 %where \meta{filename} is the name of the file.
 %This is provided for the benefit of users who don't have
@@ -2116,30 +2105,26 @@ Organization for Standardization}
 %\subsection{File Operations}
 %The current working directory (\shortarg{c} or \longarg{cwd}) can
 %be obtained using:
-%\DescribeMacro\TeXOSQueryCwd
 %\begin{definition}
-%\cs{TeXOSQueryCwd}\marg{cs}
+%\ics{TeXOSQueryCwd}\marg{cs}
 %\end{definition}
 %
 %The home directory (\shortarg{m} or \longarg{userhome}) can
 %be obtained using:
-%\DescribeMacro\TeXOSQueryHome
 %\begin{definition}
-%\cs{TeXOSQueryHome}\marg{cs}
+%\ics{TeXOSQueryHome}\marg{cs}
 %\end{definition}
 %
 %The temporary directory (\shortarg{t} or \longarg{tmpdir}) can
 %be obtained using:
-%\DescribeMacro\TeXOSQueryTmpDir
 %\begin{definition}
-%\cs{TeXOSQueryTmpDir}\marg{cs}
+%\ics{TeXOSQueryTmpDir}\marg{cs}
 %\end{definition}
 %
 %The size in bytes of a file
 %(\shortarg{s} or \longarg{filesize}) can be obtained using:
-%\DescribeMacro\TeXOSQueryFileSize
 %\begin{definition}
-%\cs{TeXOSQueryFileSize}\marg{cs}\marg{filename}
+%\ics{TeXOSQueryFileSize}\marg{cs}\marg{filename}
 %\end{definition}
 %where \meta{filename} is the name of the file.
 %This is provided for the benefit of users who don't have
@@ -2147,9 +2132,8 @@ Organization for Standardization}
 %
 %The URI of a file
 %(\shortarg{u} or \longarg{uri}) can be obtained using:
-%\DescribeMacro\TeXOSQueryFileURI
 %\begin{definition}
-%\cs{TeXOSQueryFileURI}\marg{cs}\marg{filename}
+%\ics{TeXOSQueryFileURI}\marg{cs}\marg{filename}
 %\end{definition}
 %where \meta{filename} is the name of the file.
 %(Any percent symbols \verb|%| contained in the URI will have
@@ -2157,25 +2141,22 @@ Organization for Standardization}
 %
 %The canonical path of a file
 %(\shortarg{p} or \longarg{path}) can be obtained using:
-%\DescribeMacro\TeXOSQueryFilePath
 %\begin{definition}
-%\cs{TeXOSQueryFilePath}\marg{cs}\marg{filename}
+%\ics{TeXOSQueryFilePath}\marg{cs}\marg{filename}
 %\end{definition}
 %where \meta{filename} is the name of the file.
 %
 %The canonical path of a file's parent
 %(\shortarg{e} or \longarg{dirname}) can be obtained using:
-%\DescribeMacro\TeXOSQueryDirName
 %\begin{definition}
-%\cs{TeXOSQueryDirName}\marg{cs}\marg{filename}
+%\ics{TeXOSQueryDirName}\marg{cs}\marg{filename}
 %\end{definition}
 %where \meta{filename} is the name of the file.
 %
 %The list of files in a given directory
 %(\shortarg{i} or \longarg{list}) can be obtained using:
-%\DescribeMacro\TeXOSQueryFileList
 %\begin{definition}
-%\cs{TeXOSQueryFileList}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileList}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %where \meta{sep} is the separator and \meta{dir} is the directory name.
 %For example:
@@ -2186,21 +2167,18 @@ Organization for Standardization}
 %current directory in the control sequence \cs{result}.
 %
 %To omit directories (\shortarg{ir} or \longarg{list-regular}):
-%\DescribeMacro\TeXOSQueryRegularFileList
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileList}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileList}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %To omit regular files (\shortarg{id} or \longarg{list-dir}):
-%\DescribeMacro\TeXOSQuerySubDirFileList
 %\begin{definition}
-%\cs{TeXOSQuerySubDirList}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirList}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %
 %A filtered list of files in a given directory
 %(\shortarg{f} or \longarg{filterlist}) can be obtained using:
-%\DescribeMacro\TeXOSQueryFilterFileList
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileList}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileList}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %where \meta{regex} is a regular expression. \emph{Take care of any backslashes
 %in the regular expression!}
@@ -2229,379 +2207,308 @@ Organization for Standardization}
 %the optional \meta{sort} argument.
 %
 %Order by last modified date starting with the oldest (\texttt{date-ascending}):
-%\DescribeMacro\TeXOSQueryFileListDateAsc
 %\begin{definition}
-%\cs{TeXOSQueryFileListDateAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListDateAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListDateAsc
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListDateAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListDateAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListDateAsc
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListDateAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListDateAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListDateAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileListDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or for the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListDateAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or for the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListDateAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %Order by last modified date starting with the newest (\texttt{date-descending}):
-%\DescribeMacro\TeXOSQueryFileListDateDes
 %\begin{definition}
-%\cs{TeXOSQueryFileListDateDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListDateDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListDateDes
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListDateDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListDateDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListDateDes
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListDateDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListDateDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListDateDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileListDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListDateDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListDateDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %Order by file size starting with the smallest (\texttt{size-ascending}):
-%\DescribeMacro\TeXOSQueryFileListSizeAsc
 %\begin{definition}
-%\cs{TeXOSQueryFileListSizeAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListSizeAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListSizeAsc
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListSizeAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListSizeAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListSizeAsc
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListSizeAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListSizeAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListSizeAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileListSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListSizeAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListSizeAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %Order by file size starting with the largest (\texttt{size-descending}):
-%\DescribeMacro\TeXOSQueryFileListSizeDes
 %\begin{definition}
-%\cs{TeXOSQueryFileListSizeDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListSizeDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListSizeDes
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListSizeDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListSizeDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListSizeDes
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListSizeDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListSizeDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListSizeDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListSizeDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFilterFileListSizeDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListSizeDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListSizeDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListSizeDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListSizeDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListSizeDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListSizeDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %
 %Order by file name in alphabetical order (\texttt{name-ascending}):
-%\DescribeMacro\TeXOSQueryFileListNameAsc
 %\begin{definition}
-%\cs{TeXOSQueryFileListNameAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListNameAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListNameAsc
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListNameAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListNameAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListNameAsc
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListNameAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListNameAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListNameAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileListNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListNameAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListNameAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %Order by file name in reverse alphabetical order (\texttt{name-descending}):
-%\DescribeMacro\TeXOSQueryFileListNameDes
 %\begin{definition}
-%\cs{TeXOSQueryFileListNameDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListNameDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListNameDes
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListNameDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListNameDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListNameDes
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListNameDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListNameDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListNameDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListNameDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFilterFileListNameDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListNameDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListNameDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListNameDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListNameDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListNameDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListNameDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %
 %Order by file name in case-insensitive alphabetical order
 %(\texttt{iname-ascending}):
-%\DescribeMacro\TeXOSQueryFileListNameIgnoreCaseAsc
 %\begin{definition}
-%\cs{TeXOSQueryFileListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListNameIgnoreCaseAsc
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListNameIgnoreCaseAsc
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListNameIgnoreCaseAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListNameIgnoreCaseAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListNameIgnoreCaseAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %Order by file name in reverse case-insensitive alphabetical order 
 %(\texttt{iname-descending}):
-%\DescribeMacro\TeXOSQueryFileListNameIgnoreCaseDes
 %\begin{definition}
-%\cs{TeXOSQueryFileListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListNameIgnoreCaseDes
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListNameIgnoreCaseDes
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListNameIgnoreCaseDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListNameIgnoreCaseDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListNameIgnoreCaseDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %Order by file extension in alphabetical order (\texttt{ext-ascending}):
-%\DescribeMacro\TeXOSQueryFileListExtAsc
 %\begin{definition}
-%\cs{TeXOSQueryFileListExtAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListExtAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListExtAsc
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListExtAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListExtAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListExtAsc
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListExtAsc}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListExtAsc}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListExtAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileListExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListExtAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListExtAsc
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %Order by file extension in reverse alphabetical order (\texttt{ext-descending}):
-%\DescribeMacro\TeXOSQueryFileListExtDes
 %\begin{definition}
-%\cs{TeXOSQueryFileListExtDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryFileListExtDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the regular files only list:
-%\DescribeMacro\TeXOSQueryRegularFileListExtDes
 %\begin{definition}
-%\cs{TeXOSQueryRegularFileListExtDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQueryRegularFileListExtDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or the sub-directories only list:
-%\DescribeMacro\TeXOSQuerySubDirListExtDes
 %\begin{definition}
-%\cs{TeXOSQuerySubDirListExtDes}\marg{cs}\marg{sep}\marg{dir}
+%\ics{TeXOSQuerySubDirListExtDes}\marg{cs}\marg{sep}\marg{dir}
 %\end{definition}
 %or for the filtered list:
-%\DescribeMacro\TeXOSQueryFilterFileListExtDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterFileListExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterFileListExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered regular files only list:
-%\DescribeMacro\TeXOSQueryFilterRegularFileListExtDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterRegularFileListExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterRegularFileListExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or the filtered sub-directories only list:
-%\DescribeMacro\TeXOSQueryFilterSubDirListExtDes
 %\begin{definition}
-%\cs{TeXOSQueryFilterSubDirListExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryFilterSubDirListExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %A recursive filtered list of regular files starting from a given directory
 %on the current working path
 %(\shortarg{w} or \longarg{alk}) can be obtained using:
-%\DescribeMacro\TeXOSQueryWalk
 %\begin{definition}
-%\cs{TeXOSQueryWalk}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalk}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %where \meta{regex} is as for the filtered listings described above.
 %
 %To sort according to last modified date:
-%\DescribeMacro\TeXOSQueryWalkDateAsc
 %\begin{definition}
-%\cs{TeXOSQueryWalkDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkDateAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or in reverse order:
-%\DescribeMacro\TeXOSQueryWalkDateDes
 %\begin{definition}
-%\cs{TeXOSQueryWalkDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkDateDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %To sort according to file size:
-%\DescribeMacro\TeXOSQueryWalkSizeAsc
 %\begin{definition}
-%\cs{TeXOSQueryWalkSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkSizeAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or in reverse order:
-%\DescribeMacro\TeXOSQueryWalkSizeDes
 %\begin{definition}
-%\cs{TeXOSQueryWalkSizeDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkSizeDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %To sort according to path name (case-sensitive):
-%\DescribeMacro\TeXOSQueryWalkNameAsc
 %\begin{definition}
-%\cs{TeXOSQueryWalkNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkNameAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or in reverse order:
-%\DescribeMacro\TeXOSQueryWalkNameDes
 %\begin{definition}
-%\cs{TeXOSQueryWalkNameDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkNameDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %To sort according to path name (case-insensitive):
-%\DescribeMacro\TeXOSQueryWalkNameIgnoreCaseAsc
 %\begin{definition}
-%\cs{TeXOSQueryWalkNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkNameIgnoreCaseAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or in reverse order:
-%\DescribeMacro\TeXOSQueryWalkNameIgnoreCaseDes
 %\begin{definition}
-%\cs{TeXOSQueryWalkNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkNameIgnoreCaseDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %To sort according to file extension:
-%\DescribeMacro\TeXOSQueryWalkExtAsc
 %\begin{definition}
-%\cs{TeXOSQueryWalkExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkExtAsc}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %or in reverse order:
-%\DescribeMacro\TeXOSQueryWalkExtDes
 %\begin{definition}
-%\cs{TeXOSQueryWalkExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
+%\ics{TeXOSQueryWalkExtDes}\marg{cs}\marg{sep}\marg{regex}\marg{dir}
 %\end{definition}
 %
 %\setcounter{secnumdepth}{3}
@@ -2756,8 +2663,8 @@ Organization for Standardization}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryInvoker}
-%If we're using \LaTeX, we'll need to use \cs{@@input} rather
-%than \cs{input}.
+%Invoke the application in the piped shell escape with the given
+%arguments.
 %    \begin{macrocode}
 \def\TeXOSQueryInvoker#1{\texosquery@input|"\TeXOSInvokerName\space#1" }
 %    \end{macrocode}
@@ -2933,9 +2840,7 @@ Organization for Standardization}
 %    \begin{macrocode}
         \else
 %    \end{macrocode}
-%Use Lua to find the shell escape. This uses the same method as
-%\sty{pdftexcmds}. (Not loading that package, as this is the only
-%thing required from it.)
+%Use Lua to find the shell escape.
 %    \begin{macrocode}
          \edef\texosquery@shellescape{\directlua0{
            if os.execute then
@@ -3052,8 +2957,10 @@ Organization for Standardization}
   }
   {%
     \@texosquery@info{shell escape restricted, dry-run mode on.}
+%    \end{macrocode}
 %Enable the restricted warning message, but it only needs to be
 %written once, so disable it after use.
+%    \begin{macrocode}
     \def\@texosquery@dorestrictedmessage{%
       \ifx\TeXOSInvokerRestrictedMessage\empty
       \else
