@@ -53,7 +53,7 @@
 \renewcommand{\meta@font@select}{\rmfamily\itshape}
 \makeatother
 
-\CheckSum{3292}
+\CheckSum{3469}
 
 \RecordChanges
 \PageIndex
@@ -123,7 +123,7 @@ Organization for Standardization}
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2017-03-31 (v1.3)}
+%\date{2017-05-05 (v1.4)}
 %\maketitle
 %
 %\begin{abstract}
@@ -148,8 +148,12 @@ Organization for Standardization}
 %\end{abstract}
 %
 %\begin{important}
-%You will need \TeX's shell escape enabled,
+%You will need \TeX's piped shell escape enabled
 %and you will also need the \gls{JRE} installed.
+%MiKTeX users will need to add \verb|--enable-pipes| to TeX's
+%command line options. (Alternatively, use \cs{TeXOSQueryFromFile}.)
+%The configuration file \hyperref[itm:cfg]{\file{texosquery.cfg}}
+%should be edited to reflect your system set-up before use.
 %\end{important}
 %
 %There are three variations of the \app{texosquery} application provided:
@@ -370,13 +374,16 @@ Organization for Standardization}
 %
 %Even if you use your \TeX\ distribution's package manager to
 %install this package, you may still need to edit the
-%\file{texosquery.cfg} file (see step~\ref{itm:cfg} below). If you don't have write permission for
-%this file you can copy it to \meta{TEXMFHOME}\file{/tex/generic/texosquery/}
-%(that directory path may need to be created if it doesn't already
-%exist). You can find the correct value of \meta{TEXMFHOME} using
+%\file{texosquery.cfg} file (see step~\ref{itm:cfg} below). It's
+%best to copy this file to your \meta{TEXMFHOME} or \meta{TEXMFLOCAL}
+%tree to avoid losing your changes when the package is updated.
+
+%You can find the correct value of \meta{TEXMFHOME} using
 %\begin{verbatim}
 %kpsewhich -var-value=TEXMFHOME
 %\end{verbatim}
+%Similarly for \meta{TEXMFLOCAL}.
+%
 %You can find where the package manager has put \file{texosquery.cfg} using
 %\begin{verbatim}
 %kpsewhich texosquery.cfg
@@ -549,19 +556,15 @@ Organization for Standardization}
 %used. Check that the \longarg{shell-escape} switch was used when
 %calling \app{pdftex} or \app{pdflatex}.
 %
-%If you are using \app{texosquery} or \app{texosquery-jre8} and your
-%chosen application has been added to the restricted list, make sure 
+%\TeX\ Live 2017 has added \app{texosquery-jre8} to the restricted
+%list, but you need to modify the configuration file to take
+%advantage of this. Make sure 
 %that the line
 %\begin{verbatim}
 %\TeXOSQueryAllowRestricted
 %\end{verbatim}
 %hasn't been commented out in the \file{texosquery.cfg} file and try
-%the above example documents in restricted mode. (Note that
-%\app{texosquery-jre5} should not be added to the restricted list as
-%Java 5 and 6 are now deprecated and considered security risks, so
-%the above command should be commented out in the
-%\file{texosquery.cfg} file if \cs{TeXOSInvokerName} has been set to
-%\app{texosquery-jre5}.)
+%the above example documents in restricted mode.
 %\end{enumerate}
 %
 %\subsection{Accessing file information}
@@ -595,16 +598,28 @@ Organization for Standardization}
 %absolute path that isn't under \texttt{\$TEXMFOUTPUT} (assuming
 %that environment variable hasn't been set to \file{/tmp}).
 %
-%\subsection{MikTeX}
-%Apparently MikTeX doesn't support the \texttt{openin\_any}
-%variable, so if this is unset, \file{texosquery.jar} and
-%\file{texosquery-jre5.jar} will fallback on \qt{\texttt{a}}, but
-%the stricter \file{texosquery-jre8.jar} will fallback on
-%\qt{\texttt{p}}.
+%\subsection{MiKTeX}\label{sec:miktex}
+%MiKTeX doesn't support the \texttt{openin\_any}
+%variable so, if this is unset, \file{texosquery} will fallback on 
+%\qt{\texttt{a}}.
 %
 %Note that MiKTeX disables piped input by default for security
 %reasons. Since \cs{TeXOSQuery} relies on piped input, you'll need
 %to enable it with \texttt{-{}-enable-pipes} when you run \TeX.
+%
+%\subsection{Restricted Mode}\label{sec:restricted}
+%TeX Live 2017 now has \app{texosquery-jre8} on the list of trusted
+%applications that may be run in restricted mode. In order to make
+%use of this, you need to set up your
+%\hyperref[itm:cfg]{configuration file} to use both
+%\app{texosquery-jre8} and to automatically switch off the dry run
+%mode if the restricted shell escape is detected. However, note that
+%the restricted mode has limitations on the characters allowed in
+%the shell escape for security reasons. This means that arguments
+%(such as file names) can't be quoted in restricted mode and
+%therefore arguments that contain spaces can't be delimited and will
+%cause problems. Either avoid spaces in file names or use the
+%unrestricted mode.
 %
 %\subsection{Return Values}
 %\label{sec:returnvalues}
@@ -1006,7 +1021,7 @@ Organization for Standardization}
 %As from v1.2, new restrictions have been placed on the value of \meta{dir}
 %for security reasons. For all three applications,
 %\app{texosquery-jre8}, \app{texosquery} and \app{texosquery-jre5},
-%the \texttt{openin\_any} setting is checked. If read access to
+%the \hyperref[sec:fileaccess]{\texttt{openin\_any} setting} is checked. If read access to
 %\meta{dir} is forbidden by the \texttt{openin\_any} setting, then
 %this action returns an empty string. \emph{Additionally},
 %regardless of \texttt{openin\_any}, the more restrictive
@@ -1022,7 +1037,7 @@ Organization for Standardization}
 %of the entire filing system, which would hog resources, or that
 %might try to discover files outside the current working directory. An
 %exception is made for \app{texosquery-jre5} since that application
-%is already considered insecure (due to Java 5 and 6 being
+%is already considered insecure (due to Java 5 and 6 being long
 %deprecated), so if you really need \meta{dir} as, say \texttt{..} (the
 %parent directory) or \texttt{/} (the root directory), you can use 
 %\app{texosquery-jre5} (by redefining \cs{TeXOSInvokerName} before
@@ -1785,9 +1800,29 @@ Organization for Standardization}
 %where the characters \texttt{D} \text{:} \texttt{+} and
 %\texttt{\textquotesingle} all have category code 12 (other).
 %
-%If the command failed, \meta{cs} will be set to empty. It's best to
-%always test for success after using \cs{TeXOSQuery} (or one of the
-%shortcut commands described below). For example:
+%If you're not able to use \TeX's piped shell escape but you can
+%run \app{texosquery} outside of \TeX, then another approach is to
+%first run \app{texosquery} with the output redirected to a
+%temporary file and then build your document, but instead of using
+%\cs{TeXOSQuery}, use:
+%\begin{definition}[\DescribeMacro\TeXOSQueryFromFile]
+%\cs{TeXOSQueryFromFile}\marg{cs}\marg{file name}
+%\end{definition}
+%where \meta{file name} is the name of the temporary file. For
+%example, first run
+%\begin{verbatim}
+%texosquery -b -n > tmpresult.tex
+%\end{verbatim}
+%and then in the document:
+%\begin{verbatim}
+%\TeXOSQueryFromFile{\result}{tmpresult}
+%\end{verbatim}
+%Avoid spaces and other awkward characters in the file name.
+%
+%In the case of \cs{TeXOSQuery}, if the command failed, \meta{cs} will be set
+%to empty. This will also occur with \cs{TeXOSQueryFromFile} if the
+%file doesn't exist. It's best to always test for success after use. 
+%For example:
 %\begin{verbatim}
 %\TeXOSQuery{\result}{-b}
 %\ifx\result\empty
@@ -1797,9 +1832,14 @@ Organization for Standardization}
 %\fi
 %\end{verbatim}
 %
-%Failure can occur because the dry run mode was on, or it can occur
+%In the case of \cs{TeXOSQuery}, failure can occur because the dry run mode
+%was on, or it can occur
 %if the query was denied (for example, forbidden file access),
-%or if there's a syntax error in the system call. As from 
+%or if there's a syntax error in the system call. In the case of
+%\cs{TeXOSQueryFromFile}, the control sequence will be empty if the
+%file doesn't exist or if the file was empty.
+%
+%As from 
 %version 1.2, \app{texosquery} checks the \texttt{openin\_any}
 %setting, which may forbid read access. Java's security manager
 %or the filing system may also forbid read access.
@@ -1938,15 +1978,22 @@ Organization for Standardization}
 %\begin{important}
 %Some of the shortcut commands listed below require extra arguments after the
 %relevant switch. These are automatically enclosed in single-quotes
-%to protect any spaces. If the argument actually contains any single-quote
+%to protect any spaces, but only with the \emph{unrestricted} shell escape.
+%If the argument actually contains any single-quote
 %characters, make sure you use \verb|\string\'| to prevent
-%interference.
+%interference. The quote character is forbidden in the shell escape
+%in restricted mode (see section~\ref{sec:restricted}), so the
+%arguments won't be delimited in this case and the quote character
+%should be avoided.
 %
 %Since a file name reference may need to be obtained from \cs{jobname},
 %which sometimes includes double-quotes, the first double-quote pair
 %found is stripped in file name arguments. Any other double-quotes
 %will need to be protected in the same manner as single-quotes
-%(but this shouldn't be an issue if you use a safe file naming scheme). 
+%(but this shouldn't be an issue if you use a safe file naming scheme)
+%and again be aware of the limitations imposed by the restricted
+%shell escape. 
+%
 %All paths should use a forward slash for the directory divider.
 %\end{important}
 %
@@ -2593,7 +2640,7 @@ Organization for Standardization}
 %    \end{macrocode}
 % Version info.
 %    \begin{macrocode}
-\expandafter\def\csname ver@texosquery.tex\endcsname{2017/03/31 v1.3 (NLCT)}
+\expandafter\def\csname ver@texosquery.tex\endcsname{2017/05/05 v1.4 (NLCT)}
 %    \end{macrocode}
 %
 %\begin{macro}{\@texosquery@warn}
@@ -2619,6 +2666,25 @@ Organization for Standardization}
 \else
   \def\@texosquery@warn#1{%
     \@tracklang@pkgwarn{texosquery}{#1}%
+  }
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\@texosquery@info}
+%\changes{1.4}{??}{new}
+%    \begin{macrocode}
+\ifx\PackageInfo\undefined
+  \def\@texosquery@info#1{%
+    {%
+      \newlinechar=`\^^J
+      \def\MessageBreak{^^J}%
+      \message{^^Jtexosquery Info: #1^^J}%
+    }%
+  }
+\else
+  \def\@texosquery@info#1{%
+    \PackageInfo{texosquery}{#1}%
   }
 \fi
 %    \end{macrocode}
@@ -2676,15 +2742,24 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\TeXOSQueryInvoker}
+%\begin{macro}{\texosquery@input}
+%\changes{1.4}{2017-05-05}{new}
 %If we're using \LaTeX, we'll need to use \cs{@@input} rather
 %than \cs{input}.
 %    \begin{macrocode}
 \ifx\@@input\undefined
-  \def\TeXOSQueryInvoker#1{\input|"\TeXOSInvokerName\space#1" }
+  \let\texosquery@input\input
 \else
-  \def\TeXOSQueryInvoker#1{\@@input|"\TeXOSInvokerName\space#1" }
+  \let\texosquery@input\@@input
 \fi
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\TeXOSQueryInvoker}
+%If we're using \LaTeX, we'll need to use \cs{@@input} rather
+%than \cs{input}.
+%    \begin{macrocode}
+\def\TeXOSQueryInvoker#1{\texosquery@input|"\TeXOSInvokerName\space#1" }
 %    \end{macrocode}
 %\end{macro}
 %
@@ -2728,14 +2803,41 @@ Organization for Standardization}
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\TeXOSInvokerRestrictedMessage}
+%\changes{1.4}{2017-05-05}{new}
+%Message used if \TeX\ is run in restricted mode but the invoker
+%name hasn't been allowed. This may be redefined in the
+%configuration file to customise the message if the invoker name
+%isn't allowed. Set to empty or \cs{relax} if the message should be
+%omitted.
+%    \begin{macrocode}
+\def\TeXOSInvokerRestrictedMessage{%
+ \string\TeXOSQuery\space doesn't work in dry run mode.
+ \MessageBreak
+ If `\TeXOSInvokerName' has been added to the \MessageBreak 
+ restricted list, make sure that
+ \MessageBreak \string\TeXOSQueryAllowRestricted\space 
+ \MessageBreak has been uncommented in the configuration file
+ \MessageBreak (texosquery.cfg) otherwise you need to use the
+ \MessageBreak unrestricted shell escape}
+%    \end{macrocode}
+%\end{macro}
+%Only need to write this information to the transcript if
+%\cs{TeXOSQuery} is actually used and the dry run mode is on in
+%restricted mode.
+%\begin{macro}{\@texosquery@dorestrictedmessage}
+%    \begin{macrocode}
+\let\@texosquery@dorestrictedmessage\relax
+%    \end{macrocode}
+%\end{macro}
+%
 %Load the configuration file if it exists.
 %\changes{1.2}{2017-03-23}{added texosquery.cfg}
 %    \begin{macrocode}
 \openin0=texosquery.cfg \ifeof0\relax \else
   \closein0\relax
   \begingroup
-    \newlinechar=`\^^J
-    \message{^^JTeXOSQuery: reading configuration file^^J}%
+    \@texosquery@info{reading configuration file}%
   \endgroup
   \input texosquery.cfg
 \fi
@@ -2752,36 +2854,217 @@ Organization for Standardization}
 }
 %    \end{macrocode}
 %
-%If shell escape is unrestricted, automatically switch off dry-run
-%mode, unless the cfg file has allowed it.
+%\begin{macro}{\texosquery@shellescape}
+%\changes{1.4}{2017-05-05}{new}
+%We need to know the shell escape mode. This is provided by
+%PDF\TeX's \cs{pdfshellescape} primitive or \XeTeX's
+%\cs{shellescape} primitive. It's a little more complicated in
+%Lua\TeX. Initialise to 0:
+%    \begin{macrocode}
+\chardef\texosquery@shellescape=0
+%    \end{macrocode}
+% Test for the PDF\TeX\ and \XeTeX\ primitives.
 %    \begin{macrocode}
 \ifx\shellescape\undefined
   \ifx\pdfshellescape\undefined
-  \else
-    \ifnum\pdfshellescape=1\relax
-      \TeXOSQueryDryRunfalse
+%    \end{macrocode}
+%Neither primitive defined. Has \sty{pdftexcmds} been loaded? If so,
+%we can use \cs{pdf@shellescape}.
+%    \begin{macrocode}
+    \ifx\pdf@shellescape\undefined
+%    \end{macrocode}
+%\cs{pdf@shellescape} hasn't been defined. Is Lua\TeX\ in use?
+%    \begin{macrocode}
+      \ifx\directlua\undefined
+%    \end{macrocode}
+%Not Lua\TeX. Most likely an old \TeX\ format. Have to assume the
+%shell escape is unavailable.
+%    \begin{macrocode}
+      \else
+%    \end{macrocode}
+%Use Lua to find the shell escape. This uses the same method as
+%\sty{pdftexcmds}. (Not loading that package, as this is the only
+%thing required from it.)
+%    \begin{macrocode}
+       \edef\texosquery@shellescape{\directlua0{
+         if os.execute then
+           if status
+               and status.luatex_version
+               and status.luatex_version >= 68 then
+             tex.write(os.execute())
+           else
+             local result = os.execute()
+             if result == 0 then
+               tex.write("0")
+             else
+               if result == nil then
+                 tex.write("0")
+               else
+                 tex.write("1") 
+               end
+             end
+           end
+         else
+           tex.write("0")
+         end
+        }}
+      \fi
     \else
-      \@texosquery@allowrestricted
-      {%
-        \ifnum\pdfshellescape=2\relax
-          \TeXOSQueryDryRunfalse
+      \let\texosquery@shellescape\pdf@shellescape
+    \fi
+  \else
+%    \end{macrocode}
+%PDF\TeX's \cs{pdfshellescape} has been defined, so that can be
+%used, but first check it hasn't been set to \cs{relax}.
+%    \begin{macrocode}
+    \ifx\pdfshellescape\relax
+%    \end{macrocode}
+%Something's meddled with \cs{pdfshellescape}, so try
+%\cs{pdf@shellescape}.
+%    \begin{macrocode}
+      \ifx\pdf@shellescape\undefined
+%    \end{macrocode}
+%\cs{pdf@shellescape} hasn't been defined. Is Lua\TeX\ in use?
+%    \begin{macrocode}
+        \ifx\directlua\undefined
+%    \end{macrocode}
+%Not Lua\TeX. Most likely an old \TeX\ format. Have to assume the
+%shell escape is unavailable.
+%    \begin{macrocode}
+        \else
+%    \end{macrocode}
+%Use Lua to find the shell escape. This uses the same method as
+%\sty{pdftexcmds}. (Not loading that package, as this is the only
+%thing required from it.)
+%    \begin{macrocode}
+         \edef\texosquery@shellescape{\directlua0{
+           if os.execute then
+             if status
+                 and status.luatex_version
+                 and status.luatex_version >= 68 then
+               tex.write(os.execute())
+             else
+               local result = os.execute()
+               if result == 0 then
+                 tex.write("0")
+               else
+                 if result == nil then
+                   tex.write("0")
+                 else
+                   tex.write("1") 
+                 end
+               end
+             end
+           else
+             tex.write("0")
+           end
+          }}
         \fi
-      }
-      {}
+      \else
+        \let\texosquery@shellescape\pdf@shellescape
+      \fi
+    \else
+      \let\texosquery@shellescape\pdfshellescape
     \fi
   \fi
 \else
-  \ifnum\shellescape=1\relax
-    \TeXOSQueryDryRunfalse
-  \else
-    \@texosquery@allowrestricted
-    {%
-      \ifnum\shellescape=2\relax
-        \TeXOSQueryDryRunfalse
+%    \end{macrocode}
+%\XeTeX's \cs{shellescape} has been defined, so that can be used,
+%but first check it hasn't been set to \cs{relax}.
+%    \begin{macrocode}
+  \ifx\shellescape\relax
+%    \end{macrocode}
+%Something's meddled with \cs{shellescape}, so try
+%\cs{pdfshellescape}.
+%    \begin{macrocode}
+    \ifx\pdfshellescape\undefined
+    \else
+%    \end{macrocode}
+%\cs{pdfshellescape} has been defined, so that can be used, but
+%first check it hasn't been set to \cs{relax}.
+%    \begin{macrocode}
+      \ifx\pdfshellescape\relax
+%    \end{macrocode}
+%Something's meddled with \cs{pdfshellescape}, so try
+%\cs{pdf@shellescape}.
+%    \begin{macrocode}
+        \ifx\pdf@shellescape\undefined
+%    \end{macrocode}
+%Try Lua.
+%    \begin{macrocode}
+          \ifx\directlua\undefined
+%    \end{macrocode}
+%Not Lua\TeX. Most likely an old \TeX\ format. Have to assume the
+%shell escape is unavailable.
+%    \begin{macrocode}
+          \else
+%    \end{macrocode}
+%Use Lua to find the shell escape.
+%    \begin{macrocode}
+             \edef\texosquery@shellescape{\directlua0{
+               if os.execute then
+                 if status
+                     and status.luatex_version
+                     and status.luatex_version >= 68 then
+                   tex.write(os.execute())
+                 else
+                   local result = os.execute()
+                   if result == 0 then
+                     tex.write("0")
+                   else
+                     if result == nil then
+                       tex.write("0")
+                     else
+                       tex.write("1") 
+                     end
+                   end
+                 end
+               else
+                 tex.write("0")
+               end
+              }}
+          \fi
+        \else
+          \let\texosquery@shellescape\pdf@shellescape
+        \fi
+      \else
+        \let\texosquery@shellescape\pdfshellescape
       \fi
-    }
-    {}
+    \fi
+  \else
+    \let\texosquery@shellescape\shellescape
   \fi
+\fi
+%    \end{macrocode}
+%\end{macro}
+%
+%If shell escape is unrestricted, automatically switch off dry-run
+%mode, unless the cfg file has allowed it.
+%    \begin{macrocode}
+\ifcase\texosquery@shellescape
+  \@texosquery@info{shell escape disabled, dry-run mode on}
+\or
+  \TeXOSQueryDryRunfalse
+\or
+  \@texosquery@allowrestricted
+  {%
+    \TeXOSQueryDryRunfalse
+  }
+  {%
+    \@texosquery@info{shell escape restricted, dry-run mode on.}
+%Enable the restricted warning message, but it only needs to be
+%written once, so disable it after use.
+    \def\@texosquery@dorestrictedmessage{%
+      \ifx\TeXOSInvokerRestrictedMessage\empty
+      \else
+        \ifx\TeXOSInvokerRestrictedMessage\relax
+        \else
+          \@texosquery@warn{\TeXOSInvokerRestrictedMessage}%
+        \fi
+      \fi
+      \let\@texosquery@dorestrictedmessage\relax
+    }
+  }
 \fi
 %    \end{macrocode}
 %
@@ -3588,6 +3871,7 @@ Organization for Standardization}
 %    \begin{macrocode}
 \def\TeXOSQuery#1#2{%
   \ifTeXOSQueryDryRun
+    \@texosquery@dorestrictedmessage
     \begingroup
       \newlinechar=`\^^J
       \message{^^JTeXOSQuery: \TeXOSInvokerName\space#2^^J}%
@@ -3626,6 +3910,47 @@ Organization for Standardization}
 }
 %    \end{macrocode}
 %\end{macro}
+%
+%\begin{macro}{\TeXOSQueryFromFile}
+%\changes{1.4}{2017-05-05}{new}
+%This is like \cs{TeXOSQuery} but doesn't use the piped shell
+%escape. Instead, it's for cases where \app{texosquery} is run
+%before \TeX\ and the results have been captured in a file. For
+%example, \verb|texosquery -b > texosqueryresult.tex|
+%The second argument is the file name.
+%    \begin{macrocode}
+\def\TeXOSQueryFromFile#1#2{%
+%    \end{macrocode}
+%First check that the file exists.
+%    \begin{macrocode}
+  \openin0=#2 
+    \ifeof0\relax 
+      \def#1{}%
+    \else
+      \closein0\relax
+      \begingroup
+      \endlinechar=-1\relax
+      \@texosquery@enableshortcs
+      \catcode`\-=12\relax
+      \catcode`\_=12\relax
+      \catcode`\^=12\relax
+      \catcode`\~=12\relax
+      \catcode`\$=12\relax
+      \catcode`\&=12\relax
+      \catcode`\.=12\relax
+      \catcode`\/=12\relax
+      \catcode`\:=12\relax
+      \catcode`\"=12\relax
+      \catcode`\'=12\relax
+      \catcode`\;=12\relax
+      \catcode`\%=12\relax
+      \everyeof{\noexpand}\relax
+      \@texosquery@edef\x{\endgroup\def\noexpand#1{\texosquery@input #2 }}\x
+   \fi
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %
 %\subsubsection{Currency}
 %The \meta{\TeX\ currency} element of \longarg{numeric} and
@@ -4123,6 +4448,18 @@ Organization for Standardization}
 }
 %    \end{macrocode}
 %\end{macro}
+%The restricted mode doesn't permit quotes in the shell escape, so
+%arguments are only quoted in unrestricted mode.
+%\begin{macro}{\@texosquery@argquote}
+%\changes{1.4}{2017-05-05}{new}
+%    \begin{macrocode}
+\ifnum\texosquery@shellescape=2\relax
+  \def\@texosquery@argquote#1{#1}
+\else
+  \def\@texosquery@argquote#1{\string'#1\string'}
+\fi
+%    \end{macrocode}
+%\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFileDate}
 %\changes{1.1}{2016-07-14}{changed catcode of D to 12}
@@ -4137,7 +4474,8 @@ Organization for Standardization}
   \edef\@texosquery@restore@D{%
     \noexpand\catcode`\noexpand\D=\the\catcode`\D\relax}%
   \catcode`\D=12\relax
-  \TeXOSQuery{#1}{\string-d \string'\texosquerystripquotes{#2}\string'}%
+  \TeXOSQuery{#1}{\string-d 
+    \@texosquery@argquote{\texosquerystripquotes{#2}}}%
   \@texosquery@restore@D
 }
 %    \end{macrocode}
@@ -4147,7 +4485,7 @@ Organization for Standardization}
 %Query the size of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileSize#1#2{\TeXOSQuery{#1}{\string-s 
- \string'\texosquerystripquotes{#2}\string'}}
+ \@texosquery@argquote{\texosquerystripquotes{#2}}}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -4155,8 +4493,8 @@ Organization for Standardization}
 %\changes{1.2}{2017-03-23}{new}
 %    \begin{macrocode}
 \def\@texosquery@filelist#1#2#3#4#5{\TeXOSQuery{#1}{%
- \string#2 \string'#3\string' 
- \string'\texosquerystripquotes{#4}\string' #5}}
+ \string#2 \@texosquery@argquote{#3} 
+ \@texosquery@argquote{\texosquerystripquotes{#4}} #5}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -4495,8 +4833,10 @@ Organization for Standardization}
 \def\@texosquery@filterfilelist#1#2#3#4#5#6{%
  \TeXOSQuery{#1}%
  {%
-   \string#2 \string'#3\string' \string'#4\string'
-   \string'\texosquerystripquotes{#5}\string' #6%
+   \string#2
+   \@texosquery@argquote{#3} 
+   \@texosquery@argquote{#4}
+   \@texosquery@argquote{\texosquerystripquotes{#5}} #6%
  }%
 }
 %    \end{macrocode}
@@ -4843,8 +5183,10 @@ Organization for Standardization}
 \def\@texosquery@walk#1#2#3#4#5{%
  \TeXOSQuery{#1}%
  {%
-   \string-w \string'#2\string' \string'#3\string'
-   \string'\texosquerystripquotes{#4}\string' #5%
+   \string-w 
+   \@texosquery@argquote{#2}
+   \@texosquery@argquote{#3}
+   \@texosquery@argquote{\texosquerystripquotes{#4}} #5%
  }%
 }
 %    \end{macrocode}
@@ -4964,7 +5306,7 @@ Organization for Standardization}
 %Get the URI of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFileURI#1#2{\TeXOSQuery{#1}{\string-u 
- \string'\texosquerystripquotes{#2}\string'}}
+ \@texosquery@argquote{\texosquerystripquotes{#2}}}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -4972,7 +5314,7 @@ Organization for Standardization}
 %Get the canonical path of the file given in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryFilePath#1#2{\TeXOSQuery{#1}{\string-p 
- \string'\texosquerystripquotes{#2}\string'}}
+ \@texosquery@argquote{\texosquerystripquotes{#2}}}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -4982,7 +5324,7 @@ Organization for Standardization}
 %in the second argument.
 %    \begin{macrocode}
 \def\TeXOSQueryDirName#1#2{\TeXOSQuery{#1}{\string-e 
- \string'\texosquerystripquotes{#2}\string'}}
+ \@texosquery@argquote{\texosquerystripquotes{#2}}}}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -7008,10 +7350,10 @@ Organization for Standardization}
   \or
     \edef\@texosquery@frac{\@texosquery@int\@texosquery@frac}%
     \edef\@texosquery@int{0}%
-%   \end{macrocode}
+%    \end{macrocode}
 %Anything beyond this will require scientific notation. Hopefully the
 %pattern supports it.
-%   \begin{macrocode}
+%    \begin{macrocode}
   \fi
 }
 %    \end{macrocode}
@@ -7576,7 +7918,7 @@ Organization for Standardization}
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2017/03/31 v1.3 (NLCT)]
+\ProvidesPackage{texosquery}[2017/05/05 v1.4 (NLCT)]
 %    \end{macrocode}
 %Load \file{texosquery.tex}:
 %    \begin{macrocode}
@@ -7597,21 +7939,37 @@ Organization for Standardization}
 %    \end{macrocode}
 %\fi
 %    \begin{macrocode}
- %If this configuration file is added to TeX's path, it can
- %be used to set up the texosquery defaults for the installation.
+ % This configuration file must be edited to match your system.
+ % Copy the file to your TEXMFLOCAL or TEXMFHOME tree to prevent it
+ % from being overwritten by updates.
 
- %Default application (must be installed on the operating system's
- %path). Change as appropriate. Available options:
- % * texosquery-jre8 (at least Java 8 required)
- % * texosquery (at least Java 7 required)
- % * texosquery-jre5 (at least Java 5 required)
- %(bash users need to check that the .sh extension has been removed
- %from the bash scripts, or add the extension to the invoker name.)
-\def\TeXOSInvokerName{texosquery}
+ % 1. Check your version of Java. To do this run
+ %      java -version
+ % from your command line.
 
- % If the invoker name given above is on the restricted list,
- % allow it to be run in restricted mode:
+ %  * If the version number starts with "1.5" or "1.6" then
+ %  \TeXOSInvokerName must be texosquery-jre5
+ %
+ %  * If the version number starts with "1.7" then
+ %  \TeXOSInvokerName must be texosquery
+ %
+ %  * If the version number starts with "1.8" then
+ %  \TeXOSInvokerName must be texosquery-jre8
+
+ % (bash users need to check that the .sh extension has been removed
+ % from the bash scripts.)
+
+ \def\TeXOSInvokerName{texosquery}
+
+ % 2. If the invoker name given in the definition above is on the 
+ % restricted list, uncomment the line below to allow it to be run
+ % in restricted mode:
+
  %\TeXOSQueryAllowRestricted
+
+ % Leave it commented out if the invoker name is not on the
+ % restricted list.
+
 %    \end{macrocode}
 %\iffalse
 %    \begin{macrocode}
