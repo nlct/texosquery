@@ -790,6 +790,13 @@ public class TeXOSQuery implements Serializable
          filename = filename.replaceAll("\\\\", "/");
       }
 
+      // Does a prefix need stripping?
+
+      if (stripFilePrefix != null && filename.startsWith(stripFilePrefix))
+      {
+         filename = filename.substring(stripFilePrefix.length());
+      }
+
       return escapeFileName(filename);
    }
 
@@ -3714,6 +3721,17 @@ public class TeXOSQuery implements Serializable
       }
 
       System.out.println();
+
+      System.out.println("--strip-path-prefix <prefix> or -sp <prefix>");
+      System.out.println("\tStrip the given prefix from returned path names.");
+      System.out.println("\t(Use / for directory divider.)");
+      System.out.println();
+
+      System.out.println("--nostrip-path-prefix");
+      System.out.println("\tDon't strip a prefix from returned path names.");
+      System.out.println();
+
+      System.out.println();
       System.out.println("General actions:");
       System.out.println();
 
@@ -3959,7 +3977,7 @@ public class TeXOSQuery implements Serializable
                }
             }
          }
-         else if (args[i].equals("--compatible") || args[i].equals("-compat"))
+         else if (isArg(args[i], "compat", "compatible"))
          {
             if (actions.size() > 0)
             {
@@ -3992,6 +4010,34 @@ public class TeXOSQuery implements Serializable
                    argVal[0], 0, DEFAULT_COMPATIBLE, argVal[1]), e);
                }
             }
+         }
+         else if (isArg(args[i], "sp", "strip-path-prefix"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            i = parseArgVal(args, i, argVal);
+
+            if (argVal[1] == null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "<level> expected after: %s", args[i]));
+            }
+
+            stripFilePrefix = (String)argVal[1];
+         }
+         else if (isArg(args[i], "nostrip-path-prefix"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            stripFilePrefix = null;
          }
          else
          {
@@ -4312,8 +4358,8 @@ public class TeXOSQuery implements Serializable
     
    public static final int DEFAULT_COMPATIBLE=2;
 
-   private static final String VERSION_NUMBER = "1.4";
-   private static final String VERSION_DATE = "2017-05-05";
+   private static final String VERSION_NUMBER = "1.5";
+   private static final String VERSION_DATE = "2017-05-23";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
@@ -4334,6 +4380,11 @@ public class TeXOSQuery implements Serializable
    private char openin = OPENIN_UNSET;
 
    private File texmfoutput = null;
+
+   /**
+    * If not null, strip from the start of returned path names.
+    */ 
+   private String stripFilePrefix = null;
 
    /**
     * Debug level. (0 = no debugging, 1 or more print error messages to

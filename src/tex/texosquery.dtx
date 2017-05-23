@@ -81,6 +81,8 @@
 \newcommand*{\longarg}[1]{\longargfmt{#1}%
  \index{texosquery options=\app{texosquery} options>#1=\protect\longargfmt{#1}|hyperpage}}
 
+\newcommand*{\Index}[1]{#1\index{#1|hyperpage}}
+
 \newenvironment{important}
  {\begin{quote}\textbf{Important Note:}}
  {\end{quote}}
@@ -125,7 +127,7 @@ Organization for Standardization}
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2017-05-05 (v1.4)}
+%\date{2017-05-23 (v1.5)}
 %\maketitle
 %
 %\begin{abstract}
@@ -646,6 +648,21 @@ Organization for Standardization}
 %For the full list of shortcut commands, see the
 %definition of \hyperlink{enableshortcs}{\cs{@texosquery@enableshortcs}}.
 %
+%If the operating system uses a backslash \verb|\| as a directory
+%divider, returned path names will always replace this with a
+%forward slash \verb|/| (which is then converted to \cs{fslh}, as
+%described above). This is designed to make the result as compatible
+%as possible with \TeX\ file commands (such as \cs{input}) which
+%require a forward slash. However, for some systems,
+%further modification may need to be done. For example, with \TeX\
+%on \Index{Cygwin}, the Windows path name
+%\verb|c:\cygwin64\usr\local\texlive| may correspond to the \TeX\ path
+%name \file{/usr/local/texlive}. This path is returned by
+%\app{texosquery} as \file{c:/cygwin64/usr/local/texlive} (\cs{fcln} and 
+%\cs{fslh} replaced for clarity). You can use
+%\longargfmt{strip-path-prefix} to strip the leading
+%\file{c:/cygwin64} for convenience (see section~\ref{sec:invocation}).
+%
 %The output produced by the \app{texosquery} application 
 %will be returned using the system's default input
 %encoding.  (For example, \gls{UTF}-8.) You will need to ensure that your \TeX\
@@ -739,7 +756,7 @@ Organization for Standardization}
 %provided by Java. For example, Java currently doesn't
 %provide any methods to access telephone codes.
 %
-%\subsection{Command line invocation}
+%\subsection{Command line invocation}\label{sec:invocation}
 %The syntax for the command line invocation of \app{texosquery}
 %is:
 %\begin{definition}
@@ -781,6 +798,22 @@ Organization for Standardization}
 %result, and does not change security features. For example, the check for the 
 %\texttt{openin\_any} setting was only introduced to version 1.2, but this 
 %is still checked even if the compatibility mode is set to 0 or 1.
+%\item[\longarg{strip-path-prefix} \meta{prefix} or \shortarg{sp}
+%\meta{prefix}]
+%(New to v1.5.) Strip \meta{prefix} from the start of returned path names (but
+%not URIs). This is performed after any backslash directory dividers
+%\verb|\| are changed to forward slashes \texttt{/} but before 
+%non-alphanumerics are changed to control sequences (such as 
+%\cs{fcln} or \cs{fslh}). For example:
+%\begin{verbatim}
+%texosquery --strip-path-prefix c:/cygwin64 -p article.cls
+%\end{verbatim}
+%This will strip the \texttt{c:/cygwin64} mount point.
+%Note that this option only affects \emph{returned} path names, not
+%path names provided in the command line. This option is ignored
+%if the returned path doesn't start with the given prefix.
+%\item[\longarg{nostrip-path-prefix}]
+%(Default. New to v1.5.) Don't strip a prefix from returned path names.
 %\end{description}
 %
 %If multiple actions are given, they will be processed in the
@@ -7846,37 +7879,38 @@ Organization for Standardization}
 %    \end{macrocode}
 %\fi
 %    \begin{macrocode}
- % This configuration file must be edited to match your system.
- % Copy the file to your TEXMFLOCAL or TEXMFHOME tree to prevent it
- % from being overwritten by updates.
+%<<COMMENT
+% This configuration file must be edited to match your system.
+% Copy the file to your TEXMFLOCAL or TEXMFHOME tree to prevent it
+% from being overwritten by updates.
 
- % 1. Check your version of Java. To do this run
- %      java -version
- % from your command line.
+% 1. Check your version of Java. To do this run
+%      java -version
+% from your command line.
 
- %  * If the version number starts with "1.5" or "1.6" then
- %  \TeXOSInvokerName must be texosquery-jre5
- %
- %  * If the version number starts with "1.7" then
- %  \TeXOSInvokerName must be texosquery
- %
- %  * If the version number starts with "1.8" then
- %  \TeXOSInvokerName must be texosquery-jre8
+%  * If the version number starts with "1.5" or "1.6" then
+%  \TeXOSInvokerName must be texosquery-jre5
+%
+%  * If the version number starts with "1.7" then
+%  \TeXOSInvokerName must be texosquery
+%
+%  * If the version number starts with "1.8" then
+%  \TeXOSInvokerName must be texosquery-jre8
 
- % (bash users need to check that the .sh extension has been removed
- % from the bash scripts.)
+% (bash users need to check that the .sh extension has been removed
+% from the bash scripts.)
 
- \def\TeXOSInvokerName{texosquery}
+\def\TeXOSInvokerName{texosquery}
 
- % 2. If the invoker name given in the definition above is on the 
- % restricted list, uncomment the line below to allow it to be run
- % in restricted mode:
+% 2. If the invoker name given in the definition above is on the 
+% restricted list, uncomment the line below to allow it to be run
+% in restricted mode:
 
- %\TeXOSQueryAllowRestricted
+%\TeXOSQueryAllowRestricted
 
- % Leave it commented out if the invoker name is not on the
- % restricted list.
-
+% Leave it commented out if the invoker name is not on the
+% restricted list.
+%COMMENT
 %    \end{macrocode}
 %\iffalse
 %    \begin{macrocode}
