@@ -777,10 +777,13 @@ Organization for Standardization}
 %\begin{description}
 %\item[\shortarg{h} or \longarg{help} or \shortarg{help}] Displays help message and
 %exits.
+%
 %\item[\shortarg{v} or \longarg{version} or \shortarg{version}] Displays version
 %information and exits.
+%
 %\item[\longarg{nodebug}] No debugging information. Only command
 %line syntax errors are written to STDERR. (Default.)
+%
 %\item[\longarg{debug} \oarg{n} or \shortarg{debug} \oarg{n}] Set the debugging level, where
 %\meta{n} is a non-negative integer.
 %If \meta{n} is omitted, 3 is assumed. If \meta{n} is 0, then
@@ -789,31 +792,75 @@ Organization for Standardization}
 %written to STDERR. If \meta{n} $\geq 2$, any exceptions encountered
 %will additionally write the stack trace to STDERR. If \meta{n}
 %$\geq 3$ non-error informational messages are included.
+%
 %\item[\longarg{compatible} \meta{n} or \shortarg{compat} \meta{n}]
 %Set the compatibility mode.
 %The argument should be either a non-negative integer (0 for version
-%1.0, 1 for version 1.1, etc) or the keyword \texttt{latest} to
+%1.0, 1 for version 1.1, 2 for version 1.2 onwards) or the keyword \texttt{latest} to
 %indicate the latest version (default). Note that the compatibility
 %mode only affects the available actions and the display style of the
 %result, and does not change security features. For example, the check for the 
 %\texttt{openin\_any} setting was only introduced to version 1.2, but this 
 %is still checked even if the compatibility mode is set to 0 or 1.
+%\end{description}
+%
+%The following options (introduced in v1.5) allow returned paths or URIs 
+%to be altered (for example, if a mount point needs to be removed).
+%Note that these options only affect \emph{returned} paths, not
+%path names provided in the command line. The substitution is
+%performed after any backslash directory dividers
+%\verb|\| are changed to forward slashes \texttt{/} (if applicable) but before 
+%non-alphanumerics are changed to control sequences (such as 
+%\cs{fcln} or \cs{fslh}). If there's no match, the path is returned
+%without alteration.
+%
+%\begin{description}
 %\item[\longarg{strip-path-prefix} \meta{prefix} or \shortarg{sp}
 %\meta{prefix}]
-%(New to v1.5.) Strip \meta{prefix} from the start of returned path names (but
-%not URIs). This is performed after any backslash directory dividers
-%\verb|\| are changed to forward slashes \texttt{/} but before 
-%non-alphanumerics are changed to control sequences (such as 
-%\cs{fcln} or \cs{fslh}). For example:
+%Strip \meta{prefix} from the start of returned path names (but
+%not URIs, see below). For example:
 %\begin{verbatim}
 %texosquery --strip-path-prefix c:/cygwin64 -p article.cls
 %\end{verbatim}
-%This will strip the \texttt{c:/cygwin64} mount point.
-%Note that this option only affects \emph{returned} path names, not
-%path names provided in the command line. This option is ignored
-%if the returned path doesn't start with the given prefix.
+%This will strip the \texttt{c:/cygwin64} mount point. Note that 
+%\meta{prefix} isn't an expression. For a regular expression, use
+%\longarg{replace-path}. (This option can't be
+%used with \longarg{replace-path}.)
+%
 %\item[\longarg{nostrip-path-prefix}]
-%(Default. New to v1.5.) Don't strip a prefix from returned path names.
+%Cancels the effect of \longarg{strip-path-prefix}.
+%
+%\item[\longarg{replace-path} \meta{regex} \meta{replacement}
+%or \shortarg{rp} \meta{regex} \meta{replacement}]
+%This replaces the \emph{first} occurrence of the regular
+%expression \meta{regex} in any returned path (but not URI) and replaces it with
+%\meta{replacement}.
+%
+%\item[\longarg{noreplace-path}]
+%Cancels the effect of the \longarg{replace-path}.
+%
+%\item[\longarg{strip-uri-prefix} \meta{prefix} or \shortarg{su}
+%\meta{prefix}]
+%Replace initial \texttt{file:/}\meta{prefix} with just
+%\texttt{file:/} from returned URIs. Note that 
+%\meta{prefix} isn't an expression. For a regular expression, use
+%\longarg{replace-uri}. (This option can't be
+%used with \longarg{replace-uri}.)
+%
+%\item[\longarg{nostrip-uri-prefix}]
+%Cancels the effect of \longarg{strip-uri-prefix}.
+%
+%\item[\longarg{replace-uri} \meta{regex} \meta{replacement}
+%or \shortarg{ru} \meta{regex} \meta{replacement}]
+%This replaces the \emph{first} occurrence of the regular
+%expression \meta{regex} in any returned URI and replaces it with
+%\meta{replacement}. For example:
+%\begin{verbatim}
+%texosquery -ru file:/C: file://cgwin64/c -u filename
+%\end{verbatim}
+%
+%\item[\longarg{noreplace-uri}]
+%Cancels the effect of the \longarg{replace-uri}.
 %\end{description}
 %
 %If multiple actions are given, they will be processed in the
@@ -2580,7 +2627,7 @@ Organization for Standardization}
 %    \end{macrocode}
 % Version info.
 %    \begin{macrocode}
-\expandafter\def\csname ver@texosquery.tex\endcsname{2017/05/05 v1.4 (NLCT)}
+\expandafter\def\csname ver@texosquery.tex\endcsname{2017/05/23 v1.5 (NLCT)}
 %    \end{macrocode}
 %
 %\begin{macro}{\@texosquery@warn}
@@ -7858,7 +7905,7 @@ Organization for Standardization}
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2017/05/05 v1.4 (NLCT)]
+\ProvidesPackage{texosquery}[2017/05/23 v1.5 (NLCT)]
 %    \end{macrocode}
 %Load \file{texosquery.tex}:
 %    \begin{macrocode}
@@ -7932,9 +7979,16 @@ Organization for Standardization}
 %    \end{macrocode}
 %\fi
 %\subsubsection{\file{texosquery.sh}}
+%This now has a check for cygwin.
 %    \begin{macrocode}
-jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar`
-java -jar "$jarpath" "$@"
+kernel=`uname -s`
+if test "${kernel#*CYGWIN}" != "$kernel"
+then
+ jarpath=`cygpath -w $(kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar)`
+else
+ jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar`
+fi
+java -jar "$jarpath" "$@" 
 %    \end{macrocode}
 %\iffalse
 %    \begin{macrocode}
@@ -7949,7 +8003,13 @@ java -jar "$jarpath" "$@"
 %\fi
 %\subsubsection{\file{texosquery-jre8.sh}}
 %    \begin{macrocode}
-jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar`
+kernel=`uname -s`
+if test "${kernel#*CYGWIN}" != "$kernel"
+then
+ jarpath=`cygpath -w $(kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar)`
+else
+ jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar`
+fi
 java -Djava.locale.providers=CLDR,JRE -jar "$jarpath" "$@"
 %    \end{macrocode}
 %\iffalse
@@ -7965,7 +8025,13 @@ java -Djava.locale.providers=CLDR,JRE -jar "$jarpath" "$@"
 %\fi
 %\subsubsection{\file{texosquery-jre5.sh}}
 %    \begin{macrocode}
-jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar`
+kernel=`uname -s`
+if test "${kernel#*CYGWIN}" != "$kernel"
+then
+ jarpath=`cygpath -w $(kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar)`
+else
+ jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar`
+fi
 java -jar "$jarpath" "$@"
 %    \end{macrocode}
 %\iffalse

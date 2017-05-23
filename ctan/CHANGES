@@ -1,6 +1,16 @@
-1.5:
+1.5 (2017/05/23):
 
- * Added --strip-path-prefix (-sp)
+ * Added new command line options:
+    --strip-path-prefix (-sp)
+    --nostrip-path-prefix
+    --strip-uri-prefix (-su)
+    --nostrip-uri-prefix
+    --replace-path (-rp)
+    --noreplace-path
+    --replace-uri (-ru)
+    --noreplace-uri
+
+ * Bash scripts now check for cygwin
 
 1.4 (2017/05/05):
 

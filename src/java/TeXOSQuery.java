@@ -796,6 +796,10 @@ public class TeXOSQuery implements Serializable
       {
          filename = filename.substring(stripFilePrefix.length());
       }
+      else if (pathRegExp != null && pathReplacement != null)
+      {
+         filename = filename.replaceFirst(pathRegExp, pathReplacement);
+      }
 
       return escapeFileName(filename);
    }
@@ -1560,7 +1564,18 @@ public class TeXOSQuery implements Serializable
         
       try
       {
-         return escapeFileName(file.getCanonicalFile().toURI().toString());
+         String uri = file.getCanonicalFile().toURI().toString();
+
+         if (stripURIPrefix != null && uri.startsWith("file:/"+stripURIPrefix))
+         {
+            uri = "file:/"+uri.substring(6+stripURIPrefix.length());
+         }
+         else if (uriRegExp != null && uriReplacement != null)
+         {
+            uri = uri.replaceFirst(uriRegExp, uriReplacement);
+         }
+
+         return escapeFileName(uri);
       }
       catch (Exception exception)
       {
@@ -3724,11 +3739,41 @@ public class TeXOSQuery implements Serializable
 
       System.out.println("--strip-path-prefix <prefix> or -sp <prefix>");
       System.out.println("\tStrip the given prefix from returned path names.");
-      System.out.println("\t(Use / for directory divider.)");
+      System.out.println("\tCan't be used with --replace-path.");
       System.out.println();
 
       System.out.println("--nostrip-path-prefix");
-      System.out.println("\tDon't strip a prefix from returned path names.");
+      System.out.println("\tCancel the effect of --strip-path-prefix.");
+      System.out.println();
+
+      System.out.println("--replace-path <regex> <replacement> or -rp <regex> <replacement>");
+      System.out.println("\tSubstitutes the first occurrence of <regex> with");
+      System.out.println("\t<replacement> in any returned path names.");
+      System.out.println("\tCan't be used with --strip-path-prefix.");
+      System.out.println();
+
+      System.out.println("--noreplace-path");
+      System.out.println("\tCancel the effect of --replace-path.");
+      System.out.println();
+
+      System.out.println("--strip-uri-prefix <prefix> or -su <prefix>");
+      System.out.println("\tReplace 'file:/<prefix>' with 'file:/'");
+      System.out.println("\tfrom returned URIs.");
+      System.out.println("\tCan't be used with --replace-uri.");
+      System.out.println();
+
+      System.out.println("--nostrip-uri-prefix");
+      System.out.println("\tCancel the effect of --strip-uri-prefix.");
+      System.out.println();
+
+      System.out.println("--replace-uri <regex> <replacement> or -ru <regex> <replacement>");
+      System.out.println("\tSubstitutes the first occurrence of <regex> with");
+      System.out.println("\t<replacement> in any returned URIs.");
+      System.out.println("\tCan't be used with --strip-uri-prefix.");
+      System.out.println();
+
+      System.out.println("--noreplace-uri");
+      System.out.println("\tCancel the effect of --replace-uri.");
       System.out.println();
 
       System.out.println();
@@ -4019,12 +4064,18 @@ public class TeXOSQuery implements Serializable
                 "Options must come before actions. Found option: %s", args[i]));
             }
 
+            if (pathRegExp != null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "Option clash: %s and --replace-path", args[i]));
+            }
+
             i = parseArgVal(args, i, argVal);
 
             if (argVal[1] == null)
             {
                throw new IllegalArgumentException(String.format(
-                 "<level> expected after: %s", args[i]));
+                 "<prefix> expected after: %s", args[i]));
             }
 
             stripFilePrefix = (String)argVal[1];
@@ -4038,6 +4089,132 @@ public class TeXOSQuery implements Serializable
             }
 
             stripFilePrefix = null;
+         }
+         else if (isArg(args[i], "rp", "replace-path"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            if (stripFilePrefix != null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "Option clash: --strip-path-prefix and %s", args[i]));
+            }
+
+            i = parseArgVal(args, i, argVal);
+
+            pathRegExp = (String)argVal[1];
+
+            if (pathRegExp == null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "<regex> <replacement> expected after: %s", args[i]));
+            }
+
+            i = parseArgVal(args, i, argVal);
+
+            pathReplacement = (String)argVal[1];
+
+            if (pathReplacement == null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "<replacement> expected after: %s %s", args[i], pathRegExp));
+            }
+
+         }
+         else if (isArg(args[i], "noreplace-path"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            pathRegExp = null;
+            pathReplacement = null;
+         }
+         else if (isArg(args[i], "su", "strip-uri-prefix"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            if (uriRegExp != null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "Option clash: %s and --replace-uri", args[i]));
+            }
+
+            i = parseArgVal(args, i, argVal);
+
+            if (argVal[1] == null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "<prefix> expected after: %s", args[i]));
+            }
+
+            stripURIPrefix = (String)argVal[1];
+         }
+         else if (isArg(args[i], "nostrip-uri-prefix"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            stripURIPrefix = null;
+         }
+         else if (isArg(args[i], "ru", "replace-uri"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            if (stripURIPrefix != null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "Option clash: --strip-uri-prefix and %s", args[i]));
+            }
+
+            i = parseArgVal(args, i, argVal);
+
+            uriRegExp = (String)argVal[1];
+
+            if (uriRegExp == null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "<regex> <replacement> expected after: %s", args[i]));
+            }
+
+            i = parseArgVal(args, i, argVal);
+
+            uriReplacement = (String)argVal[1];
+
+            if (uriReplacement == null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "<replacement> expected after: %s %s", args[i], uriRegExp));
+            }
+
+         }
+         else if (isArg(args[i], "noreplace-uri"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            uriRegExp = null;
+            uriReplacement = null;
          }
          else
          {
@@ -4383,8 +4560,28 @@ public class TeXOSQuery implements Serializable
 
    /**
     * If not null, strip from the start of returned path names.
+    * @since 1.5
     */ 
    private String stripFilePrefix = null;
+
+   /**
+    *Instead of using the above, provide a regular expression and replacement. 
+    * @since 1.5
+    */ 
+   private String pathRegExp=null, pathReplacement=null;
+
+   /**
+    * If not null, strip from the start of returned URI path names
+    * (after file:/).
+    * @since 1.5
+    */ 
+   private String stripURIPrefix = null;
+
+   /**
+    *Instead of using the above, provide a regular expression and replacement. 
+    * @since 1.5
+    */ 
+   private String uriRegExp=null, uriReplacement=null;
 
    /**
     * Debug level. (0 = no debugging, 1 or more print error messages to
