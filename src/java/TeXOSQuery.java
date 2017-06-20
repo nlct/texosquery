@@ -3742,12 +3742,12 @@ public class TeXOSQuery implements Serializable
       System.out.println();
 
       System.out.println("--encoding <charset> or -enc <charset>");
-      System.out.println("\tSet the file encoding to <charset>");
+      System.out.println("\tSet the file encoding to <charset>.");
 
       System.out.println();
 
       System.out.println("--default-encoding or -defenc");
-      System.out.println("\tUse the default file encoding");
+      System.out.println("\tUse the default file encoding.");
 
       System.out.println();
 
