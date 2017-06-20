@@ -4,6 +4,9 @@
     --encoding (-enc)
     --default-encoding (-defenc)
 
+ * Added new command line action:
+    --codeset (-cs)
+
 1.5 (2017/05/23):
 
  * Added new command line options:
