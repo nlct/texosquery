@@ -127,7 +127,7 @@ Organization for Standardization}
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2017-05-23 (v1.5)}
+%\date{2017-06-20 (v1.6)}
 %\maketitle
 %
 %\begin{abstract}
@@ -664,7 +664,7 @@ Organization for Standardization}
 %\file{c:/cygwin64} for convenience (see section~\ref{sec:invocation}).
 %
 %The output produced by the \app{texosquery} application 
-%will be returned using the system's default input
+%will be returned using the system's default file
 %encoding.  (For example, \gls{UTF}-8.) You will need to ensure that your \TeX\
 %document uses the same encoding if you want to typeset any of the
 %results that may contain non-ASCII characters. You can determine
@@ -682,26 +682,15 @@ Organization for Standardization}
 %\sty{inputenc} and \sty{fontenc}. \XeLaTeX\ and \LuaLaTeX\ users may need to load
 %\sty{fontspec}.
 %
-%You can change the default encoding by invoking the Java Virtual
-%Machine with the option \texttt{-Dfile.encoding=}\meta{codeset}.
-%For example, bash users can modify the \file{texosquery} script to set the encoding to \gls*{UTF}-8 as follows:
+%As from version 1.6, you can now override the default encoding
+%using the \longarg{encoding} option. This can be set on a document basis,
+%for example:
 %\begin{verbatim}
-%#!/bin/sh
-%
-%jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar`
-%java -Dfile.encoding=UTF-8 -jar "$jarpath" "$@"
+%\usepackage[utf8]{inputenc}
+%\TeXOSQuery{\result}{--encoding UTF-8 -N}
 %\end{verbatim}
-%Similarly for the corresponding \file{.bat} file for Windows users.
-%
-%If the script file can't be modified or you have only \file{.exe}
-%instead of \file{.jar} files then you can set the
-%\href{https://docs.oracle.com/javase/8/docs/platform/jvmti/jvmti.html#tooloptions}{\texttt{JAVA\_TOOL\_OPTIONS} environment variable}.
-%For example:
-%\begin{verbatim}
-%declare -x JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
-%\end{verbatim}
-%Note that, unlike the edit to the bash or \file{.bat} file, this will 
-%affect all your Java applications.
+%or for all documents by editing the \file{texosquery.cfg} file to
+%include the option in the invoker command.
 %
 %\subsection{Locales}
 %\label{sec:locales}
@@ -802,6 +791,20 @@ Organization for Standardization}
 %result, and does not change security features. For example, the check for the 
 %\texttt{openin\_any} setting was only introduced to version 1.2, but this 
 %is still checked even if the compatibility mode is set to 0 or 1.
+%
+%\item[\longarg{encoding} \meta{charset} or \shortarg{enc}
+%\meta{charset}]
+%(New to version 1.6.) This option may be used to override the
+%default file encoding. For example, if your native file encoding is
+%CP1250, but your document uses UTF-8 then you'll need to use
+%\longarg{encoding}\texttt{ UTF-8}.
+%
+%\item[\longarg{default-encoding} or \shortarg{defenc}]
+%(New to version 1.6.) This option is the default, but may
+%be used to cancel the effect of \longarg{encoding}. (For example, if
+%you have added \longarg{encoding} to the invoker command in the
+%\file{texosquery.cfg} file, but you want to cancel it in a
+%particular document.)
 %\end{description}
 %
 %The following options (introduced in v1.5) allow returned paths or URIs 
@@ -946,6 +949,9 @@ Organization for Standardization}
 % returned using the control sequences \cs{fhyn} (hyphen), \cs{fdot}
 % (dot) and \cs{fatc} (at).
 %
+%If the \longarg{encoding} option is used, the codeset will reflect
+%that value.
+%
 %\subsubsection{Action \shortarg{l} or \longarg{locale-lcs}}
 %
 %This action is similar to \longarg{locale}, but the codeset is converted to 
@@ -954,6 +960,30 @@ Organization for Standardization}
 %\texttt{en-GB.utf8}. As above, the punctuation characters will actually be
 % returned using the control sequences \cs{fhyn} (hyphen), \cs{fdot}
 % (dot) and \cs{fatc} (at).
+%Again, if the \longarg{encoding} option is used, the codeset will reflect
+%that value.
+%
+%\subsubsection{Action \shortarg{cs} or \longarg{codeset}}
+%
+%(New to version 1.6.) This action returns just the codeset.
+%For example, my default file encoding is \gls{UTF}-8, so 
+%\begin{verbatim}
+%texosquery --codeset
+%\end{verbatim}
+%returns
+%\begin{verbatim}
+%UTF-8
+%\end{verbatim}
+%whereas
+%\begin{verbatim}
+%texosquery --encoding ISO-8859-1 --codeset
+%\end{verbatim}
+%returns
+%\begin{verbatim}
+%ISO-8859-1
+%\end{verbatim}
+%(In both the above examples, the hyphen character is actually
+%returned as the control sequence \cs{fhyn}.)
 %
 %\subsubsection{Action \shortarg{C} or \longarg{codeset-lcs}}
 %
@@ -967,9 +997,14 @@ Organization for Standardization}
 %\begin{verbatim}
 %utf8
 %\end{verbatim}
-%This action is used by the \sty{locale} package to determine the
-%option to use when it needs to automatically load the
-%\sty{inputenc} package.
+%whereas
+%\begin{verbatim}
+%texosquery --encoding ISO-8859-1 -C
+%\end{verbatim}
+%returns
+%\begin{verbatim}
+%iso88591
+%\end{verbatim}
 %
 %\subsubsection{Action \shortarg{o} or \longarg{osname}}
 %
@@ -2094,6 +2129,7 @@ Organization for Standardization}
 %\begin{definition}
 %\cs{TeXOSQuery}\marg{cs}\{\shortarg{C}\}
 %\end{definition}
+%Similarly for the unprocessed codeset (\longarg{encoding}).
 %
 %The \gls{IETF} \gls{BCP}~47 language tag (\shortarg{b} or \longarg{bcp47}) 
 %can be obtained using:
@@ -2627,7 +2663,7 @@ Organization for Standardization}
 %    \end{macrocode}
 % Version info.
 %    \begin{macrocode}
-\expandafter\def\csname ver@texosquery.tex\endcsname{2017/05/23 v1.5 (NLCT)}
+\expandafter\def\csname ver@texosquery.tex\endcsname{2017/06/20 v1.6 (NLCT)}
 %    \end{macrocode}
 %
 %\begin{macro}{\@texosquery@warn}
@@ -7905,7 +7941,7 @@ Organization for Standardization}
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2017/05/23 v1.5 (NLCT)]
+\ProvidesPackage{texosquery}[2017/06/20 v1.6 (NLCT)]
 %    \end{macrocode}
 %Load \file{texosquery.tex}:
 %    \begin{macrocode}

@@ -1,0 +1,20 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{texosquery}
+
+\TeXOSQuery{\result}{--encoding ISO-8859-1 -N}
+
+\makeatletter
+\newcommand{\parseresult}[9]{Currency: #8\@gobble}
+\makeatother
+
+\begin{document}
+\ifx\result\empty
+ Query failed!
+\else
+ \expandafter\parseresult\result
+\fi
+
+\end{document}

@@ -12,7 +12,7 @@
 */
 package com.dickimawbooks.texosquery;
 
-import java.io.BufferedReader;
+import java.io.*;
 import java.util.Locale;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,12 +28,7 @@ import java.text.SimpleDateFormat;
 import java.text.DateFormatSymbols;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
+import java.nio.charset.*;
 
 /**
  * Application functions. These methods need to be Java version 1.5
@@ -1848,12 +1843,21 @@ public class TeXOSQuery implements Serializable
     */ 
    public String getCodeSet(boolean convertCodeset)
    {
-      // Get the OS default file encoding or "UTF-8" if not set.
+      String codeset;
 
-      String codeset = getSystemProperty("file.encoding", "UTF-8");
+      if (fileEncoding != null)
+      {
+         codeset = fileEncoding;
+      }
+      else
+      {
+         // Get the OS default file encoding or "UTF-8" if not set.
 
-      // The codeset should not be null here as a default has
-      // been provided if the property is missing.
+         codeset = getSystemProperty("file.encoding", "UTF-8");
+
+         // The codeset should not be null here as a default has
+         // been provided if the property is missing.
+      }
 
       if (convertCodeset)
       {
@@ -3737,6 +3741,16 @@ public class TeXOSQuery implements Serializable
 
       System.out.println();
 
+      System.out.println("--encoding <charset> or -enc <charset>");
+      System.out.println("\tSet the file encoding to <charset>");
+
+      System.out.println();
+
+      System.out.println("--default-encoding or -defenc");
+      System.out.println("\tUse the default file encoding");
+
+      System.out.println();
+
       System.out.println("--strip-path-prefix <prefix> or -sp <prefix>");
       System.out.println("\tStrip the given prefix from returned path names.");
       System.out.println("\tCan't be used with --replace-path.");
@@ -4216,6 +4230,34 @@ public class TeXOSQuery implements Serializable
             uriRegExp = null;
             uriReplacement = null;
          }
+         else if (isArg(args[i], "enc", "encoding"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            i = parseArgVal(args, i, argVal);
+
+            if (argVal[1] == null)
+            {
+               throw new IllegalArgumentException(String.format(
+                 "<charset> expected after: %s", args[i]));
+            }
+
+            fileEncoding = (String)argVal[1];
+         }
+         else if (isArg(args[i], "defenc", "default-encoding"))
+         {
+            if (actions.size() > 0)
+            {
+               throw new IllegalArgumentException(String.format(
+                "Options must come before actions. Found option: %s", args[i]));
+            }
+
+            fileEncoding = null;
+         }
          else
          {
              throw new IllegalArgumentException(String.format(
@@ -4229,6 +4271,35 @@ public class TeXOSQuery implements Serializable
       {
          throw new IllegalArgumentException(String.format(
            "One or more actions required.%nTry %s --help", name));
+      }
+
+      if (fileEncoding != null)
+      {
+         // new to v1.6
+         try
+         {
+            // Change the encoding of STDOUT.
+            // This is done by setting STDOUT to the original system
+            // STDOUT (FileDescription.out) within a print stream that 
+            // has the appropriate file encoding.
+
+            // (This is more useful that setting file.encoding when
+            // the Java virtual machine starts up as this can be done on
+            // a per-document basis. Otherwise it requires editing
+            // the script that invokes the JVM.)
+
+            PrintStream stream = new PrintStream(
+                new FileOutputStream(FileDescriptor.out),
+                true, // auto flush
+                fileEncoding);
+
+            System.setOut(stream);
+         }
+         catch (UnsupportedEncodingException e)
+         {
+            throw new IllegalArgumentException("VM does not support encoding "
+             +fileEncoding, e);
+         }
       }
 
       for (QueryAction action : actions)
@@ -4331,6 +4402,14 @@ public class TeXOSQuery implements Serializable
          public String action()
          {
             return getLocale(Locale.getDefault(), true);
+         }
+      },
+      new QueryAction("codeset", "cs", QueryActionType.GENERAL_ACTION, 
+         "Display the codeset", 2)
+      {// new to v1.6
+         public String action()
+         {
+            return escapeFileName(getCodeSet(false));
          }
       },
       new QueryAction("codeset-lcs", "C", QueryActionType.GENERAL_ACTION, 
@@ -4535,8 +4614,8 @@ public class TeXOSQuery implements Serializable
     
    public static final int DEFAULT_COMPATIBLE=2;
 
-   private static final String VERSION_NUMBER = "1.5";
-   private static final String VERSION_DATE = "2017-05-23";
+   private static final String VERSION_NUMBER = "1.6";
+   private static final String VERSION_DATE = "2017-06-20";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 
@@ -4582,6 +4661,12 @@ public class TeXOSQuery implements Serializable
     * @since 1.5
     */ 
    private String uriRegExp=null, uriReplacement=null;
+
+   /**
+    *Charset for stdout (allows user to override default) 
+    * @since 1.6
+    */ 
+   private String fileEncoding=null;
 
    /**
     * Debug level. (0 = no debugging, 1 or more print error messages to
