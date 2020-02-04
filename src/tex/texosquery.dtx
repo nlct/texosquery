@@ -19,7 +19,7 @@
 %\fi
 % \iffalse
 % Doc-Source file
-% Copyright (C) 2017 Nicola Talbot, all rights reserved.
+% Copyright (C) 2016-2020 Nicola Talbot, all rights reserved.
 % \fi
 % \iffalse
 %<*driver>
@@ -53,7 +53,7 @@
 \renewcommand{\meta@font@select}{\rmfamily\itshape}
 \makeatother
 
-\CheckSum{3469}
+\CheckSum{3472}
 
 \RecordChanges
 \PageIndex
@@ -127,7 +127,7 @@ Organization for Standardization}
 %\author{Nicola L. C. Talbot\\
 %\href{http://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}
 %\and Paulo Cereda}
-%\date{2017-06-20 (v1.6)}
+%\date{2020-02-04 (v1.7)}
 %\maketitle
 %
 %\begin{abstract}
@@ -170,9 +170,9 @@ Organization for Standardization}
 %\href{http://www.oracle.com/technetwork/java/eol-135779.html}{end
 %of life and is now deprecated}.
 %\item \file{texosquery-jre8.jar}: requires at least Java~8, has best locale
-%support, obeys \texttt{openin\_any} but has additional
+%support, is on \TeX\ Live's restricted list, obeys \texttt{openin\_any} but has additional
 %restrictions imposed for security reasons (no listings outside the
-%current working directory path);
+%current working directory path); 
 %\item \file{texosquery-jre5.jar}: requires at least Java~5, has poor locale
 %support (language scripts not recognised), doesn't have the walk
 %action, obeys \texttt{openin\_any} but doesn't have the extra restrictions of the
@@ -180,7 +180,10 @@ Organization for Standardization}
 %are deprecated. Old deprecated versions are considered a security
 %risk.
 %\end{itemize}
-%The default is \file{texosquery.jar}. Throughout this document
+%The default is now \file{texosquery-jre8.jar}. If you have an older
+%version of Java you will need to edit the \file{texosquery.cfg}
+%file (although, if possible, you should consider upgrading your Java version for
+%security reasons). Throughout this document
 %\app{texosquery} is used to reference the application, regardless
 %which of these three jar files you've chosen to use. See
 %section~\ref{sec:setup} for further details.
@@ -208,20 +211,18 @@ Organization for Standardization}
 %function to support this.  The \sty{tracklang} package has similarly added
 %\cs{TrackLanguageTag}\marg{IETF tag}.
 %
-%The \sty{locale} package occasionally referenced in this document
-%is still under development at the time of writing. The
-%\longarg{numeric}, \longarg{locale-data}, \longarg{date-time} and 
+%The \longarg{numeric}, \longarg{locale-data}, \longarg{date-time} and 
 %\longarg{time-zones} options are designed to
-%interface with the \sty{locale} package, so although
-%\sty{texosquery} and \sty{locale} will be distributed separately, 
-%version 1.2 of \app{texosquery} is being
-%developed alongside version 1.0 of the \sty{locale} package.
-%The aim of the \sty{locale} package is to use both \sty{tracklang}
+%interface with the \sty{tex-locale} package, so although
+%\sty{texosquery} and \sty{tex-locale} are distributed separately, 
+%version 1.2 of \app{texosquery} was
+%developed alongside version 1.0 of the \sty{tex-locale} package.
+%The aim of the \sty{tex-locale} package is to use both \sty{tracklang}
 %and \sty{texosquery} to automatically set up the document language.
 %For example, in the following \LaTeX\ document
 %\begin{verbatim}
 %\documentclass{article}
-%\usepackage{locale}
+%\usepackage{tex-locale}
 %\begin{document}
 %Language: \CurrentLocaleLanguageNativeName.
 %Region: \CurrentLocaleRegionNativeName.
@@ -238,7 +239,7 @@ Organization for Standardization}
 %\texosqueryfmtnumber{\CurrentLocaleCurrencyPattern}{1234567}{0}{0}
 %\end{document}
 %\end{verbatim}
-%the \sty{locale} package will automatically:
+%the \sty{tex-locale} package will automatically:
 %\begin{itemize}
 %\item load the \sty{textcomp} package for currency symbols (package
 %option \texttt{symbols=fontawesome} will use \sty{fontawesome}
@@ -286,9 +287,7 @@ Organization for Standardization}
 %\bye
 %\end{verbatim}
 %
-%So that's the reasoning behind the new v1.2 actions. Hopefully the
-%new \sty{locale} package will be uploaded to \gls{CTAN} shortly after the
-%new version of \sty{texosquery}.
+%So that's the reasoning behind the new v1.2 actions.
 %
 %\clearpage
 %\tableofcontents
@@ -1491,7 +1490,7 @@ Organization for Standardization}
 %the non-standalone names.
 %
 %The information supplied with this option is quite complex,
-%but it's used by the \sty{locale} package to set up all the 
+%but it's used by the \sty{tex-locale} package to set up all the 
 %required information for each locale used in the document. 
 %Any non-\gls{ASCII} characters are marked up with \cs{twrp},
 %which is locally defined by \cs{TeXOSQuery} to expand to
@@ -1621,7 +1620,7 @@ Organization for Standardization}
 %This is done in order to be compatible with \sty{pgfcalendar}. For
 %example, with \texttt{-D en-GB} \meta{first day} is 0 (Monday), but
 %with \texttt{pt-BR} \meta{first day} is 6 (Sunday). The
-%\sty{locale} package provides a way of converting the index to
+%\sty{tex-locale} package provides a way of converting the index to
 %Monday=1 or Sunday=1 indexing.
 %
 %\item \meta{date pattern block}
@@ -2047,7 +2046,7 @@ Organization for Standardization}
 %\TeXOSQueryInvoker ...TeXOSInvokerName \space #1" 
 %                                                  
 %\TeXOSQuery ...noexpand #1{\TeXOSQueryInvoker {#2}
-%                                                  }}\x \fi 
+%                                                  }}\@texosquery@tmp \fi 
 %l.5 \TeXOSQuery{\result}{-b}
 %                              ^^M
 %(Press Enter to retry, or Control-D to exit)
@@ -2082,10 +2081,11 @@ Organization for Standardization}
 %\end{itemize}
 %
 %The \cs{TeXOSQuery} command uses \ics{TeXOSInvokerName} to reference the
-%application name. This defaults to \app{texosquery} but needs to be
+%application name. This now defaults to \app{texosquery-jre8} (as
+%from \app{texosquery} version 1.7) but needs to be
 %redefined to reflect the particular system call that's required.
 %For example, \texttt{texosquery} (Java~7) or
-%\texttt{texosquery-jre8} (Java~8). This redefinition
+%\texttt{texosquery-jre5} (Java~5). This redefinition
 %can be done in the configuration file \file{texosquery.cfg} for a
 %system-wide setting. See section~\ref{sec:setup} for further
 %details.
@@ -2663,7 +2663,7 @@ Organization for Standardization}
 %    \end{macrocode}
 % Version info.
 %    \begin{macrocode}
-\expandafter\def\csname ver@texosquery.tex\endcsname{2017/06/20 v1.6 (NLCT)}
+\expandafter\def\csname ver@texosquery.tex\endcsname{2020/02/04 v1.7 (NLCT)}
 %    \end{macrocode}
 %
 %\begin{macro}{\@texosquery@warn}
@@ -3928,10 +3928,11 @@ Organization for Standardization}
     \catcode`\;=12\relax
     \catcode`\%=12\relax
     \everyeof{\noexpand}\relax
-    \@texosquery@edef\x{\endgroup\def\noexpand#1{\TeXOSQueryInvoker{#2}}}\x
+    \@texosquery@edef\@texosquery@tmp{\endgroup\def\noexpand#1{\TeXOSQueryInvoker{#2}}}\@texosquery@tmp
   \fi
 }
 %    \end{macrocode}
+%\changes{1.7}{2020-02-04}{renamed scratch variable}
 %\end{macro}
 %
 %\begin{macro}{\TeXOSQueryFromFile}
@@ -3968,10 +3969,11 @@ Organization for Standardization}
       \catcode`\;=12\relax
       \catcode`\%=12\relax
       \everyeof{\noexpand}\relax
-      \@texosquery@edef\x{\endgroup\def\noexpand#1{\texosquery@input #2 }}\x
+      \@texosquery@edef\@texosquery@tmp{\endgroup\def\noexpand#1{\texosquery@input #2 }}\@texosquery@tmp
    \fi
 }
 %    \end{macrocode}
+%\changes{1.7}{2020-02-04}{renamed scratch variable}
 %\end{macro}
 %
 %
@@ -5797,9 +5799,10 @@ Organization for Standardization}
 \def\texosquerydefpattern#1#2{%
  \begingroup
   \@texosquery@pattern@shortcuts
-  \@texosquery@edef\x{\endgroup\def\noexpand#1{#2}}\x
+  \@texosquery@edef\@texosquery@tmp{\endgroup\def\noexpand#1{#2}}\@texosquery@tmp
 }
 %    \end{macrocode}
+%\changes{1.7}{2020-02-04}{renamed scratch variable}
 %\end{macro}
 %
 %
@@ -6663,7 +6666,7 @@ Organization for Standardization}
 %For example, \verb|{2}{M}| indicates the format \texttt{MM}. This
 %command tests for \cs{texosqueryfmtpat}\meta{format}, which should
 %take a single argument. If defined, that's used, otherwise use one
-%of the numeric commands defined above. The \sty{locale} package
+%of the numeric commands defined above. The \sty{tex-locale} package
 %defines \cs{texosqueryfmtpatMMM} and so on to use the locale's month names
 %etc.
 %\changes{1.2}{2017-03-23}{new}
@@ -7941,7 +7944,7 @@ Organization for Standardization}
 %Identify package:
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{texosquery}[2017/06/20 v1.6 (NLCT)]
+\ProvidesPackage{texosquery}[2020/02/04 v1.7 (NLCT)]
 %    \end{macrocode}
 %Load \file{texosquery.tex}:
 %    \begin{macrocode}
@@ -7955,7 +7958,9 @@ Organization for Standardization}
 %
 %\subsection{Configuration File (\file{texosquery.cfg})}
 %The configuration file. This will need to be edited as appropriate
-%to the system.
+%to the system. Since Java 7 end of life has long passed, this
+%now defaults to Java 8.
+%\changes{1.7}{2020-02-04}{changed the default version to texosquery-jre8}
 %\iffalse
 %    \begin{macrocode}
 %<*texosquery.cfg>
@@ -7972,27 +7977,30 @@ Organization for Standardization}
 % from your command line.
 
 %  * If the version number starts with "1.5" or "1.6" then
-%  \TeXOSInvokerName must be texosquery-jre5
+%    \TeXOSInvokerName must be texosquery-jre5
+%    and \TeXOSQueryAllowRestricted must be commented out
 %
 %  * If the version number starts with "1.7" then
-%  \TeXOSInvokerName must be texosquery
+%    \TeXOSInvokerName must be texosquery
+%    and \TeXOSQueryAllowRestricted must be commented out
 %
-%  * If the version number starts with "1.8" then
-%  \TeXOSInvokerName must be texosquery-jre8
+%  * If the version number starts with "1.8" or above then
+%    \TeXOSInvokerName must be texosquery-jre8
+%    and \TeXOSQueryAllowRestricted should be uncommented if
+%    texosquery-jre8 is on the restricted list. (This has been the
+%    case since TeX Live 2017.)
 
 % (bash users need to check that the .sh extension has been removed
 % from the bash scripts.)
 
-\def\TeXOSInvokerName{texosquery}
+\def\TeXOSInvokerName{texosquery-jre8}
 
 % 2. If the invoker name given in the definition above is on the 
-% restricted list, uncomment the line below to allow it to be run
-% in restricted mode:
+% restricted list, the line below should be uncommented to allow it to be run
+% in restricted mode. Otherwise comment it out.
 
-%\TeXOSQueryAllowRestricted
+\TeXOSQueryAllowRestricted
 
-% Leave it commented out if the invoker name is not on the
-% restricted list.
 %COMMENT
 %    \end{macrocode}
 %\iffalse
@@ -8015,15 +8023,20 @@ Organization for Standardization}
 %    \end{macrocode}
 %\fi
 %\subsubsection{\file{texosquery.sh}}
-%This now has a check for cygwin.
+%\changes{1.7}{2020-02-04}{changed bash scripts for improved cygwin support}
+%Adapted from tlcockpit.sh to ensure the script works with cygwin.
 %    \begin{macrocode}
-kernel=`uname -s`
-if test "${kernel#*CYGWIN}" != "$kernel"
-then
- jarpath=`cygpath -w $(kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar)`
-else
- jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery.jar`
+scriptname=`basename "$0" .sh`
+jar="$scriptname.jar"
+jarpath=`kpsewhich --progname="$scriptname" --format=texmfscripts "$jar"`
+
+kernel=`uname -s 2>/dev/null`
+if echo "$kernel" | grep CYGWIN >/dev/null; then
+  CYGWIN_ROOT=`cygpath -w /`
+  export CYGWIN_ROOT
+  jarpath=`cygpath -w "$jarpath"`
 fi
+
 java -jar "$jarpath" "$@" 
 %    \end{macrocode}
 %\iffalse
@@ -8039,13 +8052,17 @@ java -jar "$jarpath" "$@"
 %\fi
 %\subsubsection{\file{texosquery-jre8.sh}}
 %    \begin{macrocode}
-kernel=`uname -s`
-if test "${kernel#*CYGWIN}" != "$kernel"
-then
- jarpath=`cygpath -w $(kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar)`
-else
- jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre8.jar`
+scriptname=`basename "$0" .sh`
+jar="$scriptname.jar"
+jarpath=`kpsewhich --progname="$scriptname" --format=texmfscripts "$jar"`
+
+kernel=`uname -s 2>/dev/null`
+if echo "$kernel" | grep CYGWIN >/dev/null; then
+  CYGWIN_ROOT=`cygpath -w /`
+  export CYGWIN_ROOT
+  jarpath=`cygpath -w "$jarpath"`
 fi
+
 java -Djava.locale.providers=CLDR,JRE -jar "$jarpath" "$@"
 %    \end{macrocode}
 %\iffalse
@@ -8061,13 +8078,17 @@ java -Djava.locale.providers=CLDR,JRE -jar "$jarpath" "$@"
 %\fi
 %\subsubsection{\file{texosquery-jre5.sh}}
 %    \begin{macrocode}
-kernel=`uname -s`
-if test "${kernel#*CYGWIN}" != "$kernel"
-then
- jarpath=`cygpath -w $(kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar)`
-else
- jarpath=`kpsewhich --progname=texosquery --format=texmfscripts texosquery-jre5.jar`
+scriptname=`basename "$0" .sh`
+jar="$scriptname.jar"
+jarpath=`kpsewhich --progname="$scriptname" --format=texmfscripts "$jar"`
+
+kernel=`uname -s 2>/dev/null`
+if echo "$kernel" | grep CYGWIN >/dev/null; then
+  CYGWIN_ROOT=`cygpath -w /`
+  export CYGWIN_ROOT
+  jarpath=`cygpath -w "$jarpath"`
 fi
+
 java -jar "$jarpath" "$@"
 %    \end{macrocode}
 %\iffalse

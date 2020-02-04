@@ -1,3 +1,12 @@
+1.7 (2020/02/04):
+
+ * Renamed scratch variable to avoid conflict.
+
+ * The default version is now texosquery-jre8 since Java 7 has long
+   passed its end of life.
+
+ * Modified bash scripts to improve cygwin support.
+
 1.6 (2017/06/20):
 
  * Added new command line options:

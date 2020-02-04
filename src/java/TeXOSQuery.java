@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Nicola L.C. Talbot
+    Copyright (C) 2016-2020 Nicola L.C. Talbot
     www.dickimaw-books.com
 
     This work may be distributed and/or modified under the
@@ -3836,9 +3836,10 @@ public class TeXOSQuery implements Serializable
      */
    protected void version()
    {
-       System.out.println(String.format("%s %s %s", name, VERSION_NUMBER,
+       System.out.println(String.format("%s %s (%s)", name, VERSION_NUMBER,
                 VERSION_DATE));
-       System.out.println("Copyright 2016 Nicola Talbot");
+       System.out.println(String.format("Copyright 2016-%s Nicola Talbot",
+         VERSION_DATE.substring(0,4)));
        System.out.println("License LPPL 1.3+ (http://ctan.org/license/lppl1.3)");
    }
 
@@ -4614,8 +4615,8 @@ public class TeXOSQuery implements Serializable
     
    public static final int DEFAULT_COMPATIBLE=2;
 
-   private static final String VERSION_NUMBER = "1.6";
-   private static final String VERSION_DATE = "2017-06-20";
+   private static final String VERSION_NUMBER = "1.7";
+   private static final String VERSION_DATE = "2020-02-04";
    private static final char BACKSLASH = '\\';
    private static final long ZERO = 0L;
 

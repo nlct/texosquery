@@ -2,6 +2,16 @@
 Cross-platform Java application to query OS information designed for use in 
 TeX's shell escape mechanism.
 
+## Licence
+
+This material is subject to the LaTeX Project Public License.
+See http://www.ctan.org/license/lppl1.3
+for the details of that license.
+
+Copyright 2016-2020 Nicola Talbot
+
+## Description
+
 The application can query the following:
 
  - locale information
@@ -320,8 +330,8 @@ reading file information won't work if read access is forbidden by
 
 In addition to obeying `openin_any`, the file listing actions (such
 as `--list`) for the JRE7 and 8 variants also prohibit listing the
-contents outside of the current working directory's path. This means
-that you can't, for example, list the contents of `..` (the current
+contents outside of the current working directory's path even if `openin_any=a`.
+This means that you can't, for example, list the contents of `..` (the current
 working directory's parent) nor can you try walking the entire file
 system.  The `--walk` action additionally won't descend hidden
 directories. This extra restriction is designed to prevent malicious
@@ -410,4 +420,3 @@ Source on GitHub: https://github.com/nlct/texosquery
 
 Author Home Page: http://www.dickimaw-books.com/
 
-License: LPPL 1.3+
